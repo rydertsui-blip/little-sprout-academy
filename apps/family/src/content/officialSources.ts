@@ -30,6 +30,7 @@ export interface OfficialOutcome {
 
 export interface OfficialActivityMapping {
   id: string;
+  kind: "activity" | "program";
   subject: Subject;
   title: string;
   contentIds: string[];

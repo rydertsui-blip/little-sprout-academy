@@ -62,7 +62,7 @@ export const UI_COPY = {
     sessionLength: "每轮题数",
     resetSubject: (subject: string) => `重做${subject}起点`,
     resetConfirm: (subject: string) => `重做${subject}起点会清除这一科当前的掌握记录和未完成练习，历史作答仍会保留。确定继续吗？`,
-    contentSummary: (version: string) => `内容版本 ${version}：30 个知识点、210 道题。覆盖小学一、二年级的部分内容，不是完整课程。`,
+    contentSummary: (version: string, skillCount: number, questionCount: number) => `内容版本 ${version}：${skillCount} 个知识点、${questionCount} 道题。覆盖小学一、二年级的部分内容，不是完整课程。`,
     officialSourceSummary: (sources: number, outcomes: number, uncovered: number, supplementary: number) => `官方来源已机器核对：${sources} 份 MOE PDF、${outcomes} 条目标；${uncovered} 条尚未有内容；${supplementary} 个技能为课外补充。`,
     reviewStatus: "人工课纲复核：未进行",
     practiced: (count: number) => `已练 ${count} 个知识点`,

@@ -58,8 +58,10 @@ describe("official MOE source provenance", () => {
     expect(OFFICIAL_ACTIVITIES.map((activity) => activity.id)).toEqual([
       "activity-handwriting-12-characters",
       "activity-speaking-mandarin-basic-words",
-      "activity-speaking-english-basic-words"
+      "activity-speaking-english-basic-words",
+      "activity-mandarin-lower-primary-program"
     ]);
+    expect(OFFICIAL_ACTIVITIES.find((activity) => activity.id === "activity-mandarin-lower-primary-program")?.kind).toBe("program");
     for (const activity of OFFICIAL_ACTIVITIES) {
       expect(activity.contentIds.length).toBeGreaterThan(0);
       for (const mapping of activity.outcomeMappings) expect(OFFICIAL_OUTCOMES_BY_ID.get(mapping.outcomeId)?.subject).toBe(activity.subject);

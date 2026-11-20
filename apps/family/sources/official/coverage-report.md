@@ -16,9 +16,9 @@
 
 - 官方来源：3 份 MOE PDF
 - 官方 P1/P2 outcome：44 条
-- 当前技能：30 个
-- 非测验活动：3 组
-- 至少有一个 exact 映射的技能：23 个
+- 当前技能：33 个
+- 非测验活动：4 组
+- 至少有一个 exact 映射的技能：26 个
 - 只有 broad 映射的技能：5 个
 - 不纳入官方覆盖的课外补充技能：2 个
 
@@ -30,7 +30,7 @@
 | MOE-MATH-P1-WN-AS | P1 | 31 | Add and subtract within 100, including algorithms and mental calculation. | math-add-sub-100(exact)<br>math-add-sub-regroup(exact) |
 | MOE-MATH-P1-WN-MD | P1 | 31 | Develop the concepts of multiplication and division and multiply within 40 or divide within 20. | math-multiply-tables(exact)<br>math-divide-tables(exact) |
 | MOE-MATH-P1-MONEY | P1 | 31 | Count money in cents and dollars. | math-money(exact) |
-| MOE-MATH-P1-LENGTH | P1 | 32 | Measure, compare and draw lengths in centimetres. | **尚未映射** |
+| MOE-MATH-P1-LENGTH | P1 | 32 | Measure, compare and draw lengths in centimetres. | math-length-measure(exact) |
 | MOE-MATH-P1-TIME | P1 | 32 | Tell time to five minutes and understand one-hour and half-hour duration. | math-time(exact) |
 | MOE-MATH-P1-2D | P1 | 32 | Identify, name, describe and classify rectangles, squares, triangles, circles, half circles and quarter circles. | math-shapes(exact) |
 | MOE-MATH-P1-PICGRAPH | P1 | 32 | Read and interpret data from picture graphs. | math-picture-graph(exact) |
@@ -38,9 +38,9 @@
 | MOE-MATH-P2-WN-AS | P2 | 33 | Add and subtract up to three-digit numbers and use mental calculation. | math-add-sub-regroup(exact)<br>math-add-sub-1000(exact) |
 | MOE-MATH-P2-WN-MD | P2 | 33 | Use multiplication and division tables of 2, 3, 4, 5 and 10 and their relationship. | math-multiply-tables(exact)<br>math-divide-tables(exact) |
 | MOE-MATH-P2-FRAC-WHOLE | P2 | 33 | Represent, compare and order unit and like fractions with denominators up to 12. | math-fractions(exact) |
-| MOE-MATH-P2-FRAC-AS | P2 | 33 | Add and subtract like fractions within one whole. | **尚未映射** |
+| MOE-MATH-P2-FRAC-AS | P2 | 33 | Add and subtract like fractions within one whole. | math-fractions-add-sub(exact) |
 | MOE-MATH-P2-MONEY | P2 | 33 | Count, compare, read and convert dollars and cents. | math-money(exact) |
-| MOE-MATH-P2-MEASURE | P2 | 34 | Measure and compare length, mass and liquid volume using standard units. | **尚未映射** |
+| MOE-MATH-P2-MEASURE | P2 | 34 | Measure and compare length, mass and liquid volume using standard units. | math-measurement-units(exact) |
 | MOE-MATH-P2-TIME | P2 | 34 | Tell time to the minute and convert between hours/minutes and minutes. | math-time(exact) |
 | MOE-MATH-P2-2D-PATTERN | P2 | 34 | Make or complete 2D-shape patterns using attributes such as size, shape, colour and orientation. | math-shapes(exact) |
 | MOE-MATH-P2-3D | P2 | 34 | Identify, name, describe and classify cubes, cuboids, cones, cylinders and spheres. | math-shapes(exact) |
@@ -50,7 +50,7 @@
 
 | Outcome | 年級 | PDF 頁 | 官方摘要 | 當前技能／活動映射 |
 |---|---|---:|---|---|
-| MOE-CN-P1P2-EMPHASIS | P1/P2 | 21 | The lower-primary foundation stage emphasises listening, speaking, oral interaction, character recognition and handwriting. | **尚未映射** |
+| MOE-CN-P1P2-EMPHASIS | P1/P2 | 21 | The lower-primary foundation stage emphasises listening, speaking, oral interaction, character recognition and handwriting. | activity-mandarin-lower-primary-program(exact) |
 | MOE-CN-P1P2-RECOGNITION | P1/P2 | 23 | The regular Chinese course targets recognition of 700 to 750 characters by the end of the P1-P2 period. | mandarin-characters(exact) |
 | MOE-CN-P1P2-RADICALS | P1/P2 | 23 | Recognise radicals and components. | mandarin-characters(exact) |
 | MOE-CN-P1P2-SOUND | P1/P2 | 25 | Distinguish syllables, initials, finals and tones in spoken Mandarin. | mandarin-initials(exact)<br>mandarin-finals(exact)<br>mandarin-tones(exact)<br>mandarin-syllables(exact) |

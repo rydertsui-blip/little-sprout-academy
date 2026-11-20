@@ -22,12 +22,14 @@ describe("role-specific interface copy", () => {
   });
 
   it("describes the pilot scope honestly for parents", () => {
-    const summary = UI_COPY.parent.contentSummary(CONTENT_VERSION);
+    const summary = UI_COPY.parent.contentSummary(CONTENT_VERSION, 33, 228);
+    expect(summary).toContain("33 个知识点");
+    expect(summary).toContain("228 道题");
     expect(summary).toContain("小学一、二年级");
     expect(summary).toContain("不是完整课程");
-    const sourceSummary = UI_COPY.parent.officialSourceSummary(3, 44, 11, 2);
+    const sourceSummary = UI_COPY.parent.officialSourceSummary(3, 44, 7, 2);
     expect(sourceSummary).toContain("官方来源已机器核对");
-    expect(sourceSummary).toContain("11 条尚未有内容");
+    expect(sourceSummary).toContain("7 条尚未有内容");
     expect(sourceSummary).toContain("2 个技能为课外补充");
     expect(UI_COPY.parent.reviewStatus).toContain("未进行");
   });

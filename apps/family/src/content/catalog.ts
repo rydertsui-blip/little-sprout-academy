@@ -149,7 +149,7 @@ export function validateContentCatalog(): ContentIssue[] {
     if (CONTENT_PACK.releaseStatus === "approved" && (question.audit.humanLanguageReview !== "approved" || question.audit.humanPedagogyReview !== "approved")) {
       issues.push({ code: "human-review-required", message: `${question.id} lacks required human review`, questionId: question.id, skillId: question.skillId });
     }
-    if (question.kind === "choice" && question.subject === "math" && !["unit-fraction", "shape-property"].includes(question.template)) {
+    if (question.kind === "choice" && question.subject === "math" && !["unit-fraction", "shape-property", "fraction-add-sub", "length-measure", "length-compare", "length-change", "measurement-unit", "unit-conversion", "measurement-compare", "measurement-change"].includes(question.template)) {
       const numeric = Number(question.correctAnswer);
       if (!Number.isFinite(numeric) || numeric < 0) {
         issues.push({ code: "math-range", message: `${question.id} has an invalid numeric answer`, questionId: question.id, skillId: question.skillId });

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Check, Download, Headphones, Lock, Mic, Pencil, Plus, ShieldCheck, Star, Trash2, Upload, X } from "lucide-react";
-import { CONTENT_VERSION, SKILLS } from "./content/catalog";
+import { CONTENT_VERSION, QUESTIONS, SKILLS } from "./content/catalog";
 import { SUBJECT_NAMES, UI_COPY } from "./content/copy";
 import { VOICE_LINES } from "./content/audioAssets";
 import { OFFICIAL_ACTIVITIES, OFFICIAL_OUTCOMES, OFFICIAL_SOURCES } from "./content/officialSources";
@@ -804,7 +804,7 @@ function ParentDashboard({ household, onBack, onAddChild, onDeleteChild, onUpdat
                 <label><input type="checkbox" checked={child.settings.highContrast} onChange={(event) => changeAccessibility(child, "highContrast", event.target.checked)} />{UI_COPY.parent.highContrast}</label>
                 <label><input type="checkbox" checked={child.settings.largeText} onChange={(event) => changeAccessibility(child, "largeText", event.target.checked)} />{UI_COPY.parent.largeText}</label>
               </div>
-              <small>{UI_COPY.parent.contentSummary(CONTENT_VERSION)}<br />{UI_COPY.parent.officialSourceSummary(OFFICIAL_SOURCES.length, OFFICIAL_OUTCOMES.length, uncoveredOfficialOutcomeCount, supplementarySkillCount)}<br />{UI_COPY.parent.reviewStatus}</small>
+              <small>{UI_COPY.parent.contentSummary(CONTENT_VERSION, SKILLS.length, QUESTIONS.length)}<br />{UI_COPY.parent.officialSourceSummary(OFFICIAL_SOURCES.length, OFFICIAL_OUTCOMES.length, uncoveredOfficialOutcomeCount, supplementarySkillCount)}<br />{UI_COPY.parent.reviewStatus}</small>
             </div>
             <div className="next-actions" aria-label={`${child.name}的下一步建议`}>
               {buildChildInsights(child).map((insight) => (

@@ -119,6 +119,42 @@ export function buildMathQuestions(skill: Skill): ChoiceQuestion[] {
       });
       break;
     }
+    case "math-length-measure": {
+      const data = [
+        ["A ribbon starts at 0 cm and ends at 7 cm. How long is the ribbon?", "7 cm", ["6 cm", "8 cm"], "The ribbon is 7 cm long.", "length-measure"],
+        ["Which length is the longest?", "8 cm", ["3 cm", "5 cm"], "8 cm is longer than 3 cm and 5 cm.", "length-compare"],
+        ["A 6 cm line is extended by 2 cm. How long is the line now?", "8 cm", ["4 cm", "9 cm"], "6 cm + 2 cm = 8 cm.", "length-change"],
+        ["A 12 cm strip has 4 cm cut off. How much remains?", "8 cm", ["7 cm", "9 cm"], "12 cm − 4 cm = 8 cm.", "length-change"],
+        ["A line is 9 cm long. Another line is 3 cm shorter. How long is the shorter line?", "6 cm", ["7 cm", "12 cm"], "9 cm − 3 cm = 6 cm.", "length-compare"],
+        ["A book edge is 18 cm and a pencil is 15 cm. Which is shorter?", "the pencil", ["the book edge", "both are equal"], "15 cm is shorter than 18 cm, so the pencil is shorter.", "length-compare"]
+      ] as const;
+      data.forEach(([prompt, answer, distractors, explanation, template], index) => q.push(makeMathQuestion(skill, index, prompt, answer, [...distractors], explanation, template)));
+      break;
+    }
+    case "math-fractions-add-sub": {
+      const data = [
+        ["1/5 + 2/5 = ?", "3/5", ["2/5", "3/10"], "Add the numerators and keep the denominator: 1 + 2 = 3, so 1/5 + 2/5 = 3/5.", "fraction-add-sub"],
+        ["3/7 + 2/7 = ?", "5/7", ["1/7", "5/14"], "Keep the denominator: 3 + 2 = 5, so 3/7 + 2/7 = 5/7.", "fraction-add-sub"],
+        ["4/9 − 1/9 = ?", "3/9", ["5/9", "3/0"], "Subtract the numerators and keep the denominator: 4 − 1 = 3, so 4/9 − 1/9 = 3/9.", "fraction-add-sub"],
+        ["5/8 − 2/8 = ?", "3/8", ["7/8", "3/16"], "Keep the denominator: 5 − 2 = 3, so 5/8 − 2/8 = 3/8.", "fraction-add-sub"],
+        ["2/6 + 3/6 = ?", "5/6", ["1/6", "5/12"], "Keep the denominator: 2 + 3 = 5, so 2/6 + 3/6 = 5/6.", "fraction-add-sub"],
+        ["6/10 − 4/10 = ?", "2/10", ["10/10", "2/20"], "Keep the denominator: 6 − 4 = 2, so 6/10 − 4/10 = 2/10.", "fraction-add-sub"]
+      ] as const;
+      data.forEach(([prompt, answer, distractors, explanation, template], index) => q.push(makeMathQuestion(skill, index, prompt, answer, [...distractors], explanation, template)));
+      break;
+    }
+    case "math-measurement-units": {
+      const data = [
+        ["Which unit is best for the mass of an apple?", "grams", ["litres", "metres"], "Mass is measured in grams or kilograms, so an apple can be measured in grams.", "measurement-unit"],
+        ["1 kilogram is equal to how many grams?", "1000 grams", ["100 grams", "10 grams"], "1 kilogram = 1000 grams.", "unit-conversion"],
+        ["Which unit is best for the volume of water in a bottle?", "litres", ["kilograms", "centimetres"], "Liquid volume is measured in litres.", "measurement-unit"],
+        ["A bag of rice is 5 kg and a bag of flour is 3 kg. Which bag is heavier?", "the rice", ["the flour", "both are equal"], "5 kg is heavier than 3 kg, so the rice is heavier.", "measurement-compare"],
+        ["A pail holds 8 litres and a bottle holds 2 litres. How many more litres does the pail hold?", "6 litres", ["4 litres", "10 litres"], "8 litres − 2 litres = 6 litres.", "measurement-change"],
+        ["3 kg plus 2 kg is how many kilograms?", "5 kg", ["1 kg", "6 kg"], "3 kg + 2 kg = 5 kg.", "measurement-change"]
+      ] as const;
+      data.forEach(([prompt, answer, distractors, explanation, template], index) => q.push(makeMathQuestion(skill, index, prompt, answer, [...distractors], explanation, template)));
+      break;
+    }
   }
   return q;
 }

@@ -10,8 +10,8 @@ if (issues.length > 0) {
   console.error("Content validation failed:", issues);
   process.exit(1);
 }
-if (QUESTIONS.length !== 210) {
-  console.error(`Expected 210 questions, found ${QUESTIONS.length}`);
+if (QUESTIONS.length !== 228) {
+  console.error(`Expected 228 questions, found ${QUESTIONS.length}`);
   process.exit(1);
 }
 

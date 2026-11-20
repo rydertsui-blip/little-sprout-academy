@@ -3,6 +3,7 @@
   "activities": [
     {
       "id": "activity-handwriting-12-characters",
+      "kind": "activity",
       "subject": "mandarin",
       "title": "12-character handwriting and tracing",
       "contentIds": ["人", "口", "山", "手", "日", "月", "木", "水", "火", "田", "目", "足"],
@@ -13,6 +14,7 @@
     },
     {
       "id": "activity-speaking-mandarin-basic-words",
+      "kind": "activity",
       "subject": "mandarin",
       "title": "Listen and repeat: 12 basic Mandarin words",
       "contentIds": ["zh-ren", "zh-kou", "zh-shan", "zh-shou", "zh-ri", "zh-yue", "zh-mu", "zh-shui", "zh-huo", "zh-tian", "zh-mu-eye", "zh-zu"],
@@ -22,11 +24,22 @@
     },
     {
       "id": "activity-speaking-english-basic-words",
+      "kind": "activity",
       "subject": "english",
       "title": "Listen and repeat: 10 basic English words",
       "contentIds": ["en-apple", "en-bear", "en-cat", "en-dog", "en-fish", "en-flower", "en-moon", "en-star", "en-sun", "en-tree"],
       "outcomeMappings": [
         { "outcomeId": "MOE-EL-P1P2-SPEAK-FLUENCY", "mapping": "broad" }
+      ]
+    },
+    {
+      "id": "activity-mandarin-lower-primary-program",
+      "kind": "program",
+      "subject": "mandarin",
+      "title": "Mandarin lower-primary foundation programme",
+      "contentIds": ["mandarin-initials", "mandarin-finals", "mandarin-tones", "mandarin-syllables", "mandarin-characters", "mandarin-vocabulary", "mandarin-reading", "mandarin-classifiers", "mandarin-word-order", "activity-handwriting-12-characters", "activity-speaking-mandarin-basic-words"],
+      "outcomeMappings": [
+        { "outcomeId": "MOE-CN-P1P2-EMPHASIS", "mapping": "exact" }
       ]
     }
   ]

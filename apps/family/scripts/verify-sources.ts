@@ -3,6 +3,8 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { SKILLS } from "../src/content/skills";
+import { HANDWRITING_CHARACTERS } from "../src/content/handwriting";
+import { SPEAKING_PROMPTS } from "../src/content/speaking";
 import {
   OFFICIAL_ACTIVITIES,
   OFFICIAL_ACTIVITY_DATA,
@@ -195,10 +197,19 @@ async function verify() {
   }
 
   const activityIds = new Set<string>();
+  const allowedActivityContentIds = new Set([
+    ...SKILLS.map((skill) => skill.id),
+    ...HANDWRITING_CHARACTERS.map((entry) => entry.character),
+    ...SPEAKING_PROMPTS.map((prompt) => prompt.id),
+    ...OFFICIAL_ACTIVITIES.map((activity) => activity.id)
+  ]);
   for (const activity of OFFICIAL_ACTIVITIES) {
     if (activityIds.has(activity.id)) failures.push(`Duplicate activity id: ${activity.id}`);
     activityIds.add(activity.id);
     if (!activity.contentIds.length) failures.push(`${activity.id}: no content ids`);
+    for (const contentId of activity.contentIds) {
+      if (!allowedActivityContentIds.has(contentId)) failures.push(`${activity.id}: unknown content id ${contentId}`);
+    }
     if (!activity.outcomeMappings.length) failures.push(`${activity.id}: no official outcome mapping`);
     for (const mapping of activity.outcomeMappings) {
       const outcome = OFFICIAL_OUTCOMES.find((item) => item.id === mapping.outcomeId);
