@@ -54,9 +54,8 @@ describe("official MOE source provenance", () => {
     expect(validateContentCatalog().filter((issue) => issue.code.includes("official"))).toEqual([]);
   });
 
-  it("maps the standalone handwriting and speaking activities", () => {
+  it("maps the standalone speaking and programme activities", () => {
     expect(OFFICIAL_ACTIVITIES.map((activity) => activity.id)).toEqual([
-      "activity-handwriting-12-characters",
       "activity-speaking-mandarin-basic-words",
       "activity-speaking-english-basic-words",
       "activity-mandarin-lower-primary-program"
@@ -66,6 +65,16 @@ describe("official MOE source provenance", () => {
       expect(activity.contentIds.length).toBeGreaterThan(0);
       for (const mapping of activity.outcomeMappings) expect(OFFICIAL_OUTCOMES_BY_ID.get(mapping.outcomeId)?.subject).toBe(activity.subject);
     }
+  });
+
+  it("keeps writing-only outcomes excluded from the no-writing product scope", () => {
+    const excluded = OFFICIAL_OUTCOMES.filter((outcome) => outcome.productScope === "excluded-no-writing");
+    expect(excluded).toHaveLength(5);
+    const mappedIds = new Set([
+      ...SKILLS.flatMap((skill) => skill.officialOutcomes.map((mapping) => mapping.outcomeId)),
+      ...OFFICIAL_ACTIVITIES.flatMap((activity) => activity.outcomeMappings.map((mapping) => mapping.outcomeId))
+    ]);
+    for (const outcome of excluded) expect(mappedIds.has(outcome.id)).toBe(false);
   });
 
   it("keeps the generated source coverage report in sync", () => {

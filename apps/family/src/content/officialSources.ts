@@ -27,6 +27,7 @@ export interface OfficialOutcome {
   quote?: string;
   quoteParts?: string[];
   summary: string;
+  productScope?: "included" | "excluded-no-writing";
 }
 
 export interface OfficialActivityMapping {

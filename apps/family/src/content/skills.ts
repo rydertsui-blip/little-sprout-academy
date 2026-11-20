@@ -64,7 +64,7 @@ const OFFICIAL_OUTCOMES_BY_SKILL: Record<string, Skill["officialOutcomes"]> = {
   "mandarin-finals": [{ outcomeId: "MOE-CN-P1P2-SOUND", mapping: "exact" }],
   "mandarin-tones": [{ outcomeId: "MOE-CN-P1P2-SOUND", mapping: "exact" }],
   "mandarin-syllables": [{ outcomeId: "MOE-CN-P1P2-SOUND", mapping: "exact" }],
-  "mandarin-characters": [{ outcomeId: "MOE-CN-P1P2-RECOGNITION", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-RADICALS", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-WRITE-CHAR", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-WRITE-STROKES", mapping: "exact" }],
+  "mandarin-characters": [{ outcomeId: "MOE-CN-P1P2-RECOGNITION", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-RADICALS", mapping: "exact" }],
   "mandarin-vocabulary": [{ outcomeId: "MOE-CN-P1P2-READ-UNDERSTAND", mapping: "broad" }, { outcomeId: "MOE-CN-P1P2-READ-INFER-WORD", mapping: "broad" }],
   "mandarin-reading": [{ outcomeId: "MOE-CN-P1P2-READ-DETAIL", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-READ-INFER-WORD", mapping: "broad" }],
   "mandarin-classifiers": [],

@@ -17,8 +17,9 @@
 
 - 官方来源：4 份 MOE PDF
 - 官方 P1/P2 outcome：44 条
+- 依產品範圍排除的書寫 outcome：5 条
 - 当前技能：33 个
-- 非测验活动：4 组
+- 非测验活动：3 组
 - 至少有一个 exact 映射的技能：26 个
 - 只有 broad 映射的技能：5 个
 - 不纳入官方覆盖的课外补充技能：2 个
@@ -61,9 +62,9 @@
 | MOE-CN-P1P2-READ-ALOUD | P1/P2 | 29 | Read age-appropriate passages accurately, fluently and with expression. | **尚未映射** |
 | MOE-CN-P1P2-READ-DETAIL | P1/P2 | 29 | Locate explicit information in a text. | mandarin-reading(exact) |
 | MOE-CN-P1P2-READ-INFER-WORD | P1/P2 | 29 | Infer the meaning of words and sentences in context. | mandarin-vocabulary(broad)<br>mandarin-reading(broad) |
-| MOE-CN-P1P2-WRITE-CHAR | P1/P2 | 30 | Write Chinese characters correctly. | mandarin-characters(exact)<br>activity-handwriting-12-characters(exact) |
-| MOE-CN-P1P2-WRITE-STROKES | P1/P2 | 30 | Use basic strokes and follow stroke-order rules. | mandarin-characters(exact)<br>activity-handwriting-12-characters(exact) |
-| MOE-CN-P1P2-WRITE-SENTENCE | P1/P2 | 31 | Write complete sentences. | **尚未映射** |
+| MOE-CN-P1P2-WRITE-CHAR | P1/P2 | 30 | Write Chinese characters correctly. | **產品排除：不做書寫** |
+| MOE-CN-P1P2-WRITE-STROKES | P1/P2 | 30 | Use basic strokes and follow stroke-order rules. | **產品排除：不做書寫** |
+| MOE-CN-P1P2-WRITE-SENTENCE | P1/P2 | 31 | Write complete sentences. | **產品排除：不做書寫** |
 
 ## 英语
 
@@ -75,9 +76,9 @@
 | MOE-EL-P1P2-READ-LITERAL-INFERENTIAL | P1/P2 | 22 | Understand literal and simple inferential meaning using context and comprehension strategies. | english-reading(exact) |
 | MOE-EL-P1P2-SPEAK-KNOWLEDGE | P1/P2 | 24 | Learn basic spoken-language features and purposes. | **尚未映射** |
 | MOE-EL-P1P2-SPEAK-FLUENCY | P1/P2 | 24 | Develop accurate and fluent pronunciation with appropriate stress and intonation. | activity-speaking-english-basic-words(broad) |
-| MOE-EL-P1P2-WRITE-HANDWRITING | P1/P2 | 26 | Develop handwriting readiness and print-script writing. | **尚未映射** |
+| MOE-EL-P1P2-WRITE-HANDWRITING | P1/P2 | 26 | Develop handwriting readiness and print-script writing. | **產品排除：不做書寫** |
 | MOE-EL-P1P2-WRITE-SPELLING | P1/P2 | 26 | Spell age-appropriate words accurately using spelling strategies. | english-spelling(exact) |
-| MOE-EL-P1P2-WRITE-IDEAS | P1/P2 | 26 | Generate, select, organise, develop, express and revise ideas in writing. | **尚未映射** |
+| MOE-EL-P1P2-WRITE-IDEAS | P1/P2 | 26 | Generate, select, organise, develop, express and revise ideas in writing. | **產品排除：不做書寫** |
 | MOE-EL-P1P2-GRAMMAR-WPS | P1/P2 | 28 | Apply grammar at word, phrase and sentence levels. | english-a-an(broad)<br>english-plural(broad)<br>english-sentence-order(broad) |
 | MOE-EL-P1P2-VOCAB-DEVELOP | P1/P2 | 30 | Build vocabulary knowledge and actively learn new words. | english-vocabulary(exact) |
 | MOE-EL-P1P2-VOCAB-USE | P1/P2 | 30 | Choose words appropriate to purpose, audience, context and culture. | english-vocabulary(exact) |

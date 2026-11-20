@@ -2,17 +2,6 @@
   "schemaVersion": 1,
   "activities": [
     {
-      "id": "activity-handwriting-12-characters",
-      "kind": "activity",
-      "subject": "mandarin",
-      "title": "12-character handwriting and tracing",
-      "contentIds": ["人", "口", "山", "手", "日", "月", "木", "水", "火", "田", "目", "足"],
-      "outcomeMappings": [
-        { "outcomeId": "MOE-CN-P1P2-WRITE-CHAR", "mapping": "exact" },
-        { "outcomeId": "MOE-CN-P1P2-WRITE-STROKES", "mapping": "exact" }
-      ]
-    },
-    {
       "id": "activity-speaking-mandarin-basic-words",
       "kind": "activity",
       "subject": "mandarin",
@@ -37,7 +26,7 @@
       "kind": "program",
       "subject": "mandarin",
       "title": "Mandarin lower-primary foundation programme",
-      "contentIds": ["mandarin-initials", "mandarin-finals", "mandarin-tones", "mandarin-syllables", "mandarin-characters", "mandarin-vocabulary", "mandarin-reading", "mandarin-classifiers", "mandarin-word-order", "activity-handwriting-12-characters", "activity-speaking-mandarin-basic-words"],
+      "contentIds": ["mandarin-initials", "mandarin-finals", "mandarin-tones", "mandarin-syllables", "mandarin-characters", "mandarin-vocabulary", "mandarin-reading", "mandarin-classifiers", "mandarin-word-order", "activity-speaking-mandarin-basic-words"],
       "outcomeMappings": [
         { "outcomeId": "MOE-CN-P1P2-EMPHASIS", "mapping": "exact" }
       ]

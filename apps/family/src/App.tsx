@@ -4,9 +4,7 @@ import { CONTENT_VERSION, QUESTIONS, SKILLS } from "./content/catalog";
 import { SUBJECT_NAMES, UI_COPY } from "./content/copy";
 import { VOICE_LINES } from "./content/audioAssets";
 import { OFFICIAL_ACTIVITIES, OFFICIAL_OUTCOMES, OFFICIAL_SOURCES } from "./content/officialSources";
-import { HANDWRITING_CHARACTERS, type HandwritingCharacter } from "./content/handwriting";
 import { classifyMastery, createSkillEvidence } from "./engine/bkt";
-import { recordHandwritingPractice } from "./engine/handwriting";
 import { buildChildInsights } from "./engine/insights";
 import { playOrSpeak } from "./lib/audio";
 import { formatBytes, getStorageHealth, requestPersistentStorage, type StorageHealth } from "./lib/storageHealth";
@@ -26,11 +24,10 @@ import {
   type EncryptedEnvelope
 } from "./lib/storage";
 import type { ChildProfile, ChoiceQuestion, HouseholdState, Question, SessionRecord, Subject } from "./lib/types";
-import HandwritingScreen from "./screens/HandwritingScreen";
 import MatchingBoard from "./screens/MatchingBoard";
 import SpeakingScreen from "./screens/SpeakingScreen";
 
-type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "handwriting" | "speaking";
+type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "speaking";
 
 const avatars = [
   { id: "star", label: "星星头像", image: "star" },
@@ -50,7 +47,8 @@ const mappedOfficialOutcomeIds = new Set([
   ...SKILLS.flatMap((skill) => skill.officialOutcomes.map((mapping) => mapping.outcomeId)),
   ...OFFICIAL_ACTIVITIES.flatMap((activity) => activity.outcomeMappings.map((mapping) => mapping.outcomeId))
 ]);
-const uncoveredOfficialOutcomeCount = OFFICIAL_OUTCOMES.filter((outcome) => !mappedOfficialOutcomeIds.has(outcome.id)).length;
+const excludedOfficialOutcomeCount = OFFICIAL_OUTCOMES.filter((outcome) => outcome.productScope === "excluded-no-writing").length;
+const uncoveredOfficialOutcomeCount = OFFICIAL_OUTCOMES.filter((outcome) => outcome.productScope !== "excluded-no-writing" && !mappedOfficialOutcomeIds.has(outcome.id)).length;
 const supplementarySkillCount = SKILLS.filter((skill) => skill.provenanceScope === "supplementary-practice").length;
 
 function createSalt(): string {
@@ -189,11 +187,6 @@ export default function App() {
       setActiveChildId(null);
       setScreen("parent");
     }
-  }
-
-  async function saveHandwriting(entry: HandwritingCharacter, mistakes: number): Promise<boolean> {
-    if (!activeChild) return false;
-    return updateChild(activeChild.id, (child) => recordHandwritingPractice(child, entry, mistakes, new Date()));
   }
 
   async function handleLegacyUnlock(pin: string) {
@@ -342,11 +335,6 @@ export default function App() {
     startSubject(subject);
   }
 
-  function openHandwriting() {
-    playOrSpeak(VOICE_LINES.introWrite, "zh-CN");
-    setScreen("handwriting");
-  }
-
   function openSpeaking() {
     playOrSpeak(VOICE_LINES.speakingIntro, "zh-CN");
     setScreen("speaking");
@@ -398,10 +386,6 @@ export default function App() {
 
   if (screen === "parent") {
     return <>{storageBanner}<ParentDashboard household={household} onBack={backToProfiles} onAddChild={addChild} onDeleteChild={deleteChild} onUpdateChild={updateChild} onLock={lockHousehold} onImport={importBackup} /></>;
-  }
-
-  if (screen === "handwriting" && activeChild) {
-    return <>{storageBanner}<HandwritingScreen child={activeChild} onBack={() => setScreen("child")} onLock={lockHousehold} onRecord={saveHandwriting} /></>;
   }
 
   if (screen === "speaking" && activeChild) {
@@ -477,11 +461,6 @@ export default function App() {
             ))}
           </div>
           <div className="offline-activity-row">
-            <button className="handwriting-entry" type="button" onClick={openHandwriting}>
-              <span className="handwriting-entry-icon"><Pencil aria-hidden="true" /></span>
-              <span className="handwriting-entry-copy"><small>华文写字</small><strong>看笔顺，亲手写</strong><p>12 个基础汉字，写完会记入学习进度。</p></span>
-              <span className="handwriting-entry-progress">{HANDWRITING_CHARACTERS.filter((entry) => activeChild.handwriting[entry.character]).length} / {HANDWRITING_CHARACTERS.length}<ChevronRight aria-hidden="true" /></span>
-            </button>
             <button className="handwriting-entry speaking-entry" type="button" onClick={openSpeaking}>
               <span className="handwriting-entry-icon speaking-entry-icon"><Mic aria-hidden="true" /></span>
               <span className="handwriting-entry-copy"><small>华文 · English</small><strong>听一听，跟着说</strong><p>听示范，录下自己的声音，再回放。</p></span>
@@ -804,7 +783,7 @@ function ParentDashboard({ household, onBack, onAddChild, onDeleteChild, onUpdat
                 <label><input type="checkbox" checked={child.settings.highContrast} onChange={(event) => changeAccessibility(child, "highContrast", event.target.checked)} />{UI_COPY.parent.highContrast}</label>
                 <label><input type="checkbox" checked={child.settings.largeText} onChange={(event) => changeAccessibility(child, "largeText", event.target.checked)} />{UI_COPY.parent.largeText}</label>
               </div>
-              <small>{UI_COPY.parent.contentSummary(CONTENT_VERSION, SKILLS.length, QUESTIONS.length)}<br />{UI_COPY.parent.officialSourceSummary(OFFICIAL_SOURCES.length, OFFICIAL_OUTCOMES.length, uncoveredOfficialOutcomeCount, supplementarySkillCount)}<br />{UI_COPY.parent.reviewStatus}</small>
+              <small>{UI_COPY.parent.contentSummary(CONTENT_VERSION, SKILLS.length, QUESTIONS.length)}<br />{UI_COPY.parent.officialSourceSummary(OFFICIAL_SOURCES.length, OFFICIAL_OUTCOMES.length, uncoveredOfficialOutcomeCount, excludedOfficialOutcomeCount, supplementarySkillCount)}<br />{UI_COPY.parent.reviewStatus}</small>
             </div>
             <div className="next-actions" aria-label={`${child.name}的下一步建议`}>
               {buildChildInsights(child).map((insight) => (

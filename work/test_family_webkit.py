@@ -112,11 +112,7 @@ with sync_playwright() as p:
     assert_layout(page, "WebKit speaking")
     page.get_by_role("button", name="返回").evaluate("(el) => el.click()")
     page.wait_for_timeout(300)
-    tap(page, page.get_by_role("button", name="看笔顺，亲手写"))
-    page.wait_for_selector("text=看笔顺，亲手写")
-    assert_layout(page, "WebKit handwriting")
-    page.get_by_role("button", name="返回").evaluate("(el) => el.click()")
-    page.wait_for_timeout(500)
+    assert page.get_by_role("button", name="看笔顺，亲手写").count() == 0
     page.wait_for_selector("button[aria-label='数学 Math']")
     tap(page, page.get_by_role("button", name="数学 Math"))
     page.wait_for_timeout(300)

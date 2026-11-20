@@ -3,7 +3,6 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { SKILLS } from "../src/content/skills";
-import { HANDWRITING_CHARACTERS } from "../src/content/handwriting";
 import { SPEAKING_PROMPTS } from "../src/content/speaking";
 import {
   OFFICIAL_ACTIVITIES,
@@ -54,6 +53,7 @@ function renderCoverageReport() {
     "",
     `- 官方来源：${OFFICIAL_SOURCES.length} 份 MOE PDF`,
     `- 官方 P1/P2 outcome：${OFFICIAL_OUTCOMES.length} 条`,
+    `- 依產品範圍排除的書寫 outcome：${OFFICIAL_OUTCOMES.filter((outcome) => outcome.productScope === "excluded-no-writing").length} 条`,
     `- 当前技能：${SKILLS.length} 个`,
     `- 非测验活动：${OFFICIAL_ACTIVITIES.length} 组`,
     `- 至少有一个 exact 映射的技能：${SKILLS.filter((skill) => skill.officialOutcomes.some((mapping) => mapping.mapping === "exact")).length} 个`,
@@ -71,7 +71,9 @@ function renderCoverageReport() {
         ? skills.map((skill) => `${skill.id}(${skill.officialOutcomes.find((mapping) => mapping.outcomeId === outcome.id)?.mapping})`).join("<br>")
         : "";
       const activityStatus = activities.map((activity) => `${activity.id}(${activity.outcomeMappings.find((mapping) => mapping.outcomeId === outcome.id)?.mapping})`).join("<br>");
-      const status = [skillStatus, activityStatus].filter(Boolean).join("<br>") || "**尚未映射**";
+      const status = outcome.productScope === "excluded-no-writing"
+        ? "**產品排除：不做書寫**"
+        : [skillStatus, activityStatus].filter(Boolean).join("<br>") || "**尚未映射**";
       return `| ${outcome.id} | ${outcome.levels.join("/")} | ${outcome.pdfPage} | ${outcome.summary} | ${status} |`;
     });
     lines.push(`## ${subjectNames[subject]}`, "", "| Outcome | 年級 | PDF 頁 | 官方摘要 | 當前技能／活動映射 |", "|---|---|---:|---|---|", ...mappedOutcomeIds, "");
@@ -200,7 +202,6 @@ async function verify() {
   const activityIds = new Set<string>();
   const allowedActivityContentIds = new Set([
     ...SKILLS.map((skill) => skill.id),
-    ...HANDWRITING_CHARACTERS.map((entry) => entry.character),
     ...SPEAKING_PROMPTS.map((prompt) => prompt.id),
     ...OFFICIAL_ACTIVITIES.map((activity) => activity.id)
   ]);
@@ -219,6 +220,16 @@ async function verify() {
     }
   }
 
+  const mappedOutcomeIds = new Set([
+    ...SKILLS.flatMap((skill) => skill.officialOutcomes.map((mapping) => mapping.outcomeId)),
+    ...OFFICIAL_ACTIVITIES.flatMap((activity) => activity.outcomeMappings.map((mapping) => mapping.outcomeId))
+  ]);
+  for (const outcome of OFFICIAL_OUTCOMES) {
+    if (outcome.productScope === "excluded-no-writing" && mappedOutcomeIds.has(outcome.id)) {
+      failures.push(`${outcome.id}: writing-excluded outcome must not be mapped to current content`);
+    }
+  }
+
   if (failures.length) {
     console.error("Official-source verification failed:");
     for (const failure of failures) console.error(`- ${failure}`);
@@ -228,20 +239,19 @@ async function verify() {
   const exactSkills = SKILLS.filter((skill) => skill.officialOutcomes.some((mapping) => mapping.mapping === "exact")).length;
   const broadOnlySkills = SKILLS.filter((skill) => skill.officialOutcomes.length > 0 && skill.officialOutcomes.every((mapping) => mapping.mapping === "broad")).length;
   const supplementarySkills = SKILLS.filter((skill) => skill.provenanceScope === "supplementary-practice").length;
-  const mappedOutcomes = new Set([
-    ...SKILLS.flatMap((skill) => skill.officialOutcomes.map((mapping) => mapping.outcomeId)),
-    ...OFFICIAL_ACTIVITIES.flatMap((activity) => activity.outcomeMappings.map((mapping) => mapping.outcomeId))
-  ]);
-  const unmappedOutcomes = OFFICIAL_OUTCOMES.filter((outcome) => !mappedOutcomes.has(outcome.id));
+  const includedOutcomes = OFFICIAL_OUTCOMES.filter((outcome) => outcome.productScope !== "excluded-no-writing");
+  const excludedWritingOutcomes = OFFICIAL_OUTCOMES.filter((outcome) => outcome.productScope === "excluded-no-writing");
+  const unmappedOutcomes = includedOutcomes.filter((outcome) => !mappedOutcomeIds.has(outcome.id));
   const reportPath = resolve(officialDirectory, "coverage-report.md");
   const report = renderCoverageReport();
   if (!existsSync(reportPath) || readFileSync(reportPath, "utf8") !== report) writeFileSync(reportPath, report, "utf8");
   console.log(`Official sources verified: ${OFFICIAL_SOURCES.length} MOE PDFs, ${OFFICIAL_OUTCOMES.length} outcomes.`);
   console.log(`Skill mapping: ${exactSkills} skills with at least one exact outcome; ${broadOnlySkills} broad-only skills.`);
   console.log(`Supplementary practice outside official coverage: ${supplementarySkills} skills.`);
-  console.log(`P1/P2 outcomes with no current content mapping: ${unmappedOutcomes.length}`);
+  console.log(`Included P1/P2 outcomes with no current content mapping: ${unmappedOutcomes.length}`);
+  console.log(`Writing outcomes excluded by product scope: ${excludedWritingOutcomes.length}`);
   if (summaryOnly) {
-    console.log(JSON.stringify({ sources: OFFICIAL_SOURCE_MANIFEST.sources.map((source) => ({ id: source.id, sha256: source.sha256, pages: source.pages })), outcomeSchemaVersion: OFFICIAL_OUTCOME_DATA.schemaVersion, activitySchemaVersion: OFFICIAL_ACTIVITY_DATA.schemaVersion, exactSkills, broadOnlySkills, supplementarySkills, unmappedOutcomeIds: unmappedOutcomes.map((outcome) => outcome.id) }, null, 2));
+    console.log(JSON.stringify({ sources: OFFICIAL_SOURCE_MANIFEST.sources.map((source) => ({ id: source.id, sha256: source.sha256, pages: source.pages })), outcomeSchemaVersion: OFFICIAL_OUTCOME_DATA.schemaVersion, activitySchemaVersion: OFFICIAL_ACTIVITY_DATA.schemaVersion, exactSkills, broadOnlySkills, supplementarySkills, excludedWritingOutcomeIds: excludedWritingOutcomes.map((outcome) => outcome.id), unmappedOutcomeIds: unmappedOutcomes.map((outcome) => outcome.id) }, null, 2));
   }
 }
 
