@@ -133,7 +133,7 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
           <div className="teacher-mascot" aria-hidden="true"><img src="./assets/images/seedling.png" alt="" /><i /><i /><i /></div>
           <div className="teacher-bubble">
             <small>小芽老师</small>
-            <strong>{state === "recording" ? "我在听，慢慢说。" : state === "recorded" ? "录好了，按一下听听自己的声音。" : state === "playing" ? "正在听你的声音。" : state === "error" ? error : "先听一次，再跟着说。"}</strong>
+            <strong>{state === "recording" ? "我在录音，慢慢说。" : state === "recorded" ? "录好了，按一下听听自己的声音。" : state === "playing" ? "正在播放你的录音。" : state === "error" ? error : "先听一次，再跟着说。"}</strong>
             <button className="audio-button" type="button" onClick={() => playOrSpeak(prompt.text, prompt.language)} aria-label={`听示范 ${prompt.display}`}><Volume2 aria-hidden="true" /></button>
           </div>
         </section>
