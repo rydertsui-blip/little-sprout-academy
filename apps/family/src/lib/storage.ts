@@ -74,7 +74,12 @@ const childSchema = z.object({
   sessions: z.array(sessionSchema),
   activeSessions: z.record(z.string(), sessionSchema),
   handwriting: z.record(z.string(), handwritingRecordSchema).default({}),
-  settings: z.object({ sessionLength: z.number().int().positive(), enabledSkills: z.array(z.string()) })
+  settings: z.object({
+    sessionLength: z.number().int().positive(),
+    enabledSkills: z.array(z.string()),
+    highContrast: z.boolean().default(false),
+    largeText: z.boolean().default(false)
+  })
 });
 const householdSchema = z.object({
   version: z.literal(2),
@@ -152,6 +157,8 @@ export function migrateHousehold(raw: unknown): HouseholdState {
     const sessionLengthValue = settings.sessionLength === undefined ? 8 : Number(settings.sessionLength);
     if (!Number.isInteger(sessionLengthValue) || sessionLengthValue < 4 || sessionLengthValue > 20) throw new Error("孩子的每次题量设置已损坏");
     if (requireVersion2Fields && child.diagnostics === undefined) throw new Error("孩子的定位记录缺失");
+    if (settings.highContrast !== undefined && typeof settings.highContrast !== "boolean") throw new Error("孩子的对比度设置已损坏");
+    if (settings.largeText !== undefined && typeof settings.largeText !== "boolean") throw new Error("孩子的大字设置已损坏");
     if (requireVersion2Fields && child.sessions === undefined) throw new Error("孩子的学习会话缺失");
     if (requireVersion2Fields && child.activeSessions === undefined) throw new Error("孩子的进行中学习会话缺失");
     return {
@@ -164,7 +171,9 @@ export function migrateHousehold(raw: unknown): HouseholdState {
       handwriting: child.handwriting === undefined ? {} : asRecord(child.handwriting),
       settings: {
         sessionLength: sessionLengthValue,
-        enabledSkills
+        enabledSkills,
+        highContrast: settings.highContrast === undefined ? false : settings.highContrast,
+        largeText: settings.largeText === undefined ? false : settings.largeText
       }
     };
   });

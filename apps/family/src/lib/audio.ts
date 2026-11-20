@@ -2,12 +2,18 @@ import { getAudioAsset } from "../content/audioAssets";
 
 let activeAudio: HTMLAudioElement | null = null;
 
+function getPlayer(): HTMLAudioElement {
+  activeAudio ??= new Audio();
+  return activeAudio;
+}
+
 export function playOrSpeak(text: string, language: string): void {
   const asset = getAudioAsset(text);
   try { activeAudio?.pause(); } catch { /* Audio teardown can fail in restricted browser contexts. */ }
   if (asset) {
-    const audio = new Audio(`./assets/audio/${asset}.m4a`);
-    activeAudio = audio;
+    const audio = getPlayer();
+    audio.src = `./assets/audio/${asset}.m4a`;
+    audio.load();
     try {
       const playback = audio.play();
       if (playback && typeof playback.catch === "function") void playback.catch(() => speakFallback(text, language));

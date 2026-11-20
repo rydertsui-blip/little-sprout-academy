@@ -241,6 +241,61 @@ describe("family learning app", () => {
     expect(screen.getByText(/人工课纲复核：待完成/)).toBeInTheDocument();
   });
 
+  it("shows independent versions and lets a parent edit, adapt and delete a child profile", async () => {
+    const pinSalt = "profile-admin-salt";
+    const child = createChildProfile("小树", "leaf", new Date("2026-11-20T00:00:00Z"));
+    saveHousehold({
+      version: 2,
+      householdName: "测试家庭",
+      parentName: "妈妈",
+      pinHash: await hashPin("2468", pinSalt),
+      pinSalt,
+      createdAt: "2026-11-20T00:00:00.000Z",
+      children: [child]
+    });
+    render(<App />);
+    fireEvent.change(screen.getByLabelText("家长密码"), { target: { value: "2468" } });
+    fireEvent.click(screen.getByRole("button", { name: "打开家庭学习区" }));
+    await waitFor(() => expect(screen.getByText("今天谁来学习？")).toBeInTheDocument());
+    await openParentSettings();
+    expect(screen.getByText(/App 0\.3\.0/)).toBeInTheDocument();
+    expect(screen.getByText(/内容 pilot-3/)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/本机家庭数据/)).toBeInTheDocument());
+    fireEvent.click(screen.getByLabelText("高对比"));
+    await waitFor(async () => expect((await savedHousehold()).children[0].settings.highContrast).toBe(true));
+    fireEvent.click(screen.getByRole("button", { name: "修改档案" }));
+    fireEvent.change(screen.getByLabelText("孩子的名字"), { target: { value: "小树新" } });
+    fireEvent.click(screen.getByRole("button", { name: "花朵头像" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存档案" }));
+    await waitFor(() => expect(screen.getByRole("heading", { name: "小树新" })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "删除孩子" }));
+    await waitFor(() => expect(screen.getByText("还没有孩子档案。先添加一个孩子。")).toBeInTheDocument());
+    expect((await savedHousehold()).children).toHaveLength(0);
+  });
+
+  it("applies parent-managed high contrast and large text settings on the child surface", async () => {
+    const pinSalt = "display-settings-salt";
+    const child = createChildProfile("小星", "star", new Date("2026-11-20T00:00:00Z"));
+    child.settings.highContrast = true;
+    child.settings.largeText = true;
+    saveHousehold({
+      version: 2,
+      householdName: "测试家庭",
+      parentName: "妈妈",
+      pinHash: await hashPin("2468", pinSalt),
+      pinSalt,
+      createdAt: "2026-11-20T00:00:00.000Z",
+      children: [child]
+    });
+    render(<App />);
+    fireEvent.change(screen.getByLabelText("家长密码"), { target: { value: "2468" } });
+    fireEvent.click(screen.getByRole("button", { name: "打开家庭学习区" }));
+    await waitFor(() => expect(screen.getByText("今天谁来学习？")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /小星/ }));
+    expect(document.querySelector(".child-high-contrast")).toBeInTheDocument();
+    expect(document.querySelector(".child-large-text")).toBeInTheDocument();
+  });
+
   it("restores an interrupted diagnostic after reload without repeating the answered question", async () => {
     const first = render(<App />);
     await createFamilyWithChild("小树");

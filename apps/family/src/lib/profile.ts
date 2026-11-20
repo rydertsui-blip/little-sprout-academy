@@ -18,7 +18,9 @@ export function createChildProfile(name: string, avatar = "star", now = new Date
     handwriting: {},
     settings: {
       sessionLength: 8,
-      enabledSkills: SKILLS.map((skill) => skill.id)
+      enabledSkills: SKILLS.map((skill) => skill.id),
+      highContrast: false,
+      largeText: false
     }
   };
 }

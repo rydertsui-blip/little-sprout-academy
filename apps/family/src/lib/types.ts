@@ -118,6 +118,8 @@ export interface ChildProfile {
   settings: {
     sessionLength: number;
     enabledSkills: string[];
+    highContrast: boolean;
+    largeText: boolean;
   };
 }
 

@@ -129,7 +129,7 @@ export default function HandwritingScreen({ child, onBack, onLock, onRecord }: H
           : "没关系，再看一次笔顺，慢慢写。";
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${child.settings.highContrast ? "child-high-contrast" : ""} ${child.settings.largeText ? "child-large-text" : ""}`.trim()}>
       <header className="session-header handwriting-header">
         <button className="quiet-button compact-button" type="button" onClick={onBack}><ChevronLeft aria-hidden="true" />返回</button>
         <div><p className="eyebrow">{child.name} · 小芽写字</p><h1>看笔顺，亲手写</h1></div>

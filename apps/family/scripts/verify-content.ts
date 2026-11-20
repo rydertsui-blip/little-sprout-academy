@@ -16,6 +16,16 @@ if (QUESTIONS.length !== 180) {
 }
 
 const digest = createHash("sha256").update(canonicalContentPayload(), "utf8").digest("hex");
+const historyPath = resolve(import.meta.dirname, "../src/content/question-id-history.json");
+const history = existsSync(historyPath)
+  ? JSON.parse(readFileSync(historyPath, "utf8")) as string[]
+  : [];
+const currentIds = new Set(QUESTIONS.map((question) => question.id));
+const missingHistoricalIds = history.filter((id) => !currentIds.has(id));
+if (missingHistoricalIds.length > 0) {
+  console.error(`Historical question ids are missing: ${missingHistoricalIds.join(", ")}`);
+  process.exit(1);
+}
 if (process.argv.includes("--update")) {
   writeFileSync(signaturePath, `${digest}\n`, "utf8");
   console.log(`Updated content signature: ${digest}`);

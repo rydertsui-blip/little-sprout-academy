@@ -32,6 +32,7 @@ with sync_playwright() as p:
     page.add_init_script("""
       class SilentAudio {
         constructor(src) { this.src = src; this.currentTime = 0; }
+        load() {}
         play() { return Promise.resolve(); }
         pause() {}
       }

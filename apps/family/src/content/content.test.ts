@@ -109,4 +109,9 @@ describe("curriculum content catalog", () => {
     const digest = createHash("sha256").update(canonicalContentPayload(), "utf8").digest("hex");
     expect(digest).toBe(signature);
   });
+
+  it("keeps every released historical question id resolvable", () => {
+    const history = JSON.parse(readFileSync(resolve(process.cwd(), "src/content/question-id-history.json"), "utf8")) as string[];
+    for (const id of history) expect(getQuestionById(id)).toBeDefined();
+  });
 });

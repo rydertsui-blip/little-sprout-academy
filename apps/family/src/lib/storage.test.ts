@@ -89,6 +89,8 @@ describe("household storage", () => {
     expect(result.household.children[0].settings.enabledSkills).toEqual(SKILLS.map((skill) => skill.id));
     expect(result.household.children[0].evidence["math-count-100"].questionIds).toEqual([]);
     expect(result.household.children[0].evidence["math-count-100"].lastStageAdvanceAt).toBeNull();
+    expect(result.household.children[0].settings.highContrast).toBe(false);
+    expect(result.household.children[0].settings.largeText).toBe(false);
   });
 
   it("adds an empty handwriting record when migrating an older version 2 child", () => {

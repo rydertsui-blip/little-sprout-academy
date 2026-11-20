@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, Check, Download, Headphones, Lock, Pencil, Plus, ShieldCheck, Star, Upload, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight, Check, Download, Headphones, Lock, Pencil, Plus, ShieldCheck, Star, Trash2, Upload, X } from "lucide-react";
 import { CONTENT_VERSION, SKILLS } from "./content/catalog";
 import { SUBJECT_NAMES, UI_COPY } from "./content/copy";
 import { VOICE_LINES } from "./content/audioAssets";
@@ -8,6 +8,8 @@ import { classifyMastery, createSkillEvidence } from "./engine/bkt";
 import { recordHandwritingPractice } from "./engine/handwriting";
 import { buildChildInsights } from "./engine/insights";
 import { playOrSpeak } from "./lib/audio";
+import { formatBytes, getStorageHealth, requestPersistentStorage, type StorageHealth } from "./lib/storageHealth";
+import { APP_VERSION, DATA_SCHEMA_VERSION } from "./lib/version";
 import { completeSession, createAdaptiveSession, recordSessionAnswer, selectNextQuestion } from "./engine/session";
 import { createChildProfile } from "./lib/profile";
 import { hashPin, validatePin } from "./lib/pin";
@@ -48,6 +50,11 @@ function createSalt(): string {
 
 function clone<T>(value: T): T {
   return structuredClone(value);
+}
+
+function childSurfaceClass(child: ChildProfile | null): string {
+  if (!child) return "app-shell";
+  return `app-shell ${child.settings.highContrast ? "child-high-contrast" : ""} ${child.settings.largeText ? "child-large-text" : ""}`.trim();
 }
 
 export default function App() {
@@ -147,6 +154,10 @@ export default function App() {
 
   async function addChild(child: ChildProfile): Promise<boolean> {
     return commitHousehold((current) => ({ ...current, children: [...current.children, child] }));
+  }
+
+  async function deleteChild(childId: string): Promise<boolean> {
+    return commitHousehold((current) => ({ ...current, children: current.children.filter((child) => child.id !== childId) }));
   }
 
   async function updateChild(childId: string, update: (child: ChildProfile) => ChildProfile): Promise<boolean> {
@@ -371,7 +382,7 @@ export default function App() {
   };
 
   if (screen === "parent") {
-    return <>{storageBanner}<ParentDashboard household={household} onBack={backToProfiles} onAddChild={addChild} onUpdateChild={updateChild} onLock={lockHousehold} onImport={importBackup} /></>;
+    return <>{storageBanner}<ParentDashboard household={household} onBack={backToProfiles} onAddChild={addChild} onDeleteChild={deleteChild} onUpdateChild={updateChild} onLock={lockHousehold} onImport={importBackup} /></>;
   }
 
   if (screen === "handwriting" && activeChild) {
@@ -380,7 +391,7 @@ export default function App() {
 
   if (screen === "assessment" && activeChild && session && currentQuestion) {
     return (
-      <div className="app-shell">
+      <div className={childSurfaceClass(activeChild)}>
         {storageBanner}
         <SessionHeader child={activeChild} subject={session.subject} kind={session.kind} answered={session.attempts.length} total={session.length} onBack={() => setScreen("child")} />
         <QuizScreen question={currentQuestion} feedback={feedback} onAnswer={answerQuestion} onNext={advanceSession} />
@@ -390,7 +401,7 @@ export default function App() {
 
   if (screen === "result" && activeChild && session && summary) {
     return (
-      <div className="app-shell">
+      <div className={childSurfaceClass(activeChild)}>
         {storageBanner}
         <SessionHeader child={activeChild} subject={session.subject} kind={session.kind} answered={session.length} total={session.length} onBack={() => setScreen("child")} />
         <SessionResult child={activeChild} subject={session.subject} kind={session.kind} summary={summary} onDone={() => setScreen("child")} onParent={() => { setShowParentGate(true); }} />
@@ -423,7 +434,7 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={childSurfaceClass(activeChild)}>
       {storageBanner}
       <TopBar title={activeChild?.name ?? UI_COPY.child.topbarFallback} subtitle={UI_COPY.child.subtitle} onBack={backToProfiles} onLock={lockHousehold} />
       {activeChild ? (
@@ -645,8 +656,14 @@ function SessionResult({ child, subject, kind, summary, onDone, onParent }: { ch
   );
 }
 
-function ParentDashboard({ household, onBack, onAddChild, onUpdateChild, onLock, onImport }: { household: HouseholdState; onBack: () => void; onAddChild: (child: ChildProfile) => Promise<boolean>; onUpdateChild: (childId: string, update: (child: ChildProfile) => ChildProfile) => Promise<boolean>; onLock: () => void | Promise<void>; onImport: (household: HouseholdState) => void }) {
+function ParentDashboard({ household, onBack, onAddChild, onDeleteChild, onUpdateChild, onLock, onImport }: { household: HouseholdState; onBack: () => void; onAddChild: (child: ChildProfile) => Promise<boolean>; onDeleteChild: (childId: string) => Promise<boolean>; onUpdateChild: (childId: string, update: (child: ChildProfile) => ChildProfile) => Promise<boolean>; onLock: () => void | Promise<void>; onImport: (household: HouseholdState) => void }) {
   const [showAddChild, setShowAddChild] = useState(false);
+  const [editingChild, setEditingChild] = useState<ChildProfile | null>(null);
+  const [storageHealth, setStorageHealth] = useState<StorageHealth | null>(null);
+
+  useEffect(() => {
+    void getStorageHealth().then(setStorageHealth);
+  }, [household]);
 
   function resetSubject(child: ChildProfile, subject: Subject) {
     if (!window.confirm(UI_COPY.parent.resetConfirm(subjectNames[subject]))) return;
@@ -663,6 +680,13 @@ function ParentDashboard({ household, onBack, onAddChild, onUpdateChild, onLock,
   function changeSessionLength(child: ChildProfile, length: number) {
     void onUpdateChild(child.id, (next) => {
       next.settings.sessionLength = length;
+      return next;
+    });
+  }
+
+  function changeAccessibility(child: ChildProfile, key: "highContrast" | "largeText", enabled: boolean) {
+    void onUpdateChild(child.id, (next) => {
+      next.settings[key] = enabled;
       return next;
     });
   }
@@ -705,21 +729,46 @@ function ParentDashboard({ household, onBack, onAddChild, onUpdateChild, onLock,
     if (await onAddChild(child)) setShowAddChild(false);
   }
 
+  async function saveEditedChild(child: ChildProfile) {
+    if (await onUpdateChild(child.id, (current) => ({ ...current, name: child.name, avatar: child.avatar }))) setEditingChild(null);
+  }
+
+  function deleteChild(child: ChildProfile) {
+    if (!window.confirm(UI_COPY.parent.deleteConfirm(child.name))) return;
+    void onDeleteChild(child.id);
+  }
+
+  async function persistStorage() {
+    await requestPersistentStorage();
+    setStorageHealth(await getStorageHealth());
+  }
+
   return (
     <div className="app-shell">
-      <header className="app-header"><div><p className="eyebrow">{UI_COPY.parent.eyebrow}</p><h1>{UI_COPY.parent.dashboardTitle}</h1></div><div className="dashboard-actions"><button className="quiet-button compact-button" type="button" onClick={onBack}><X aria-hidden="true" />{UI_COPY.parent.close}</button><button className="quiet-button compact-button" type="button" onClick={() => void onLock()}><Lock aria-hidden="true" />{UI_COPY.parent.lock}</button></div></header>
+      <header className="app-header"><div><p className="eyebrow">{UI_COPY.parent.eyebrow}</p><h1>{UI_COPY.parent.dashboardTitle}</h1><p className="version-line">{UI_COPY.parent.appVersion(APP_VERSION, CONTENT_VERSION, DATA_SCHEMA_VERSION)}</p></div><div className="dashboard-actions"><button className="quiet-button compact-button" type="button" onClick={onBack}><X aria-hidden="true" />{UI_COPY.parent.close}</button><button className="quiet-button compact-button" type="button" onClick={() => void onLock()}><Lock aria-hidden="true" />{UI_COPY.parent.lock}</button></div></header>
       <main className="parent-dashboard">
         <div className="backup-panel">
           <button className="quiet-button compact-button" type="button" onClick={() => setShowAddChild(true)}><Plus aria-hidden="true" />{UI_COPY.parent.addChild}</button>
           <button className="quiet-button compact-button" type="button" onClick={exportBackup}><Download aria-hidden="true" />{UI_COPY.parent.export}</button>
           <label className="quiet-button compact-button file-button"><Upload aria-hidden="true" />{UI_COPY.parent.import}<input type="file" accept="application/json,.json" onChange={(event) => void importBackupFile(event.target.files?.[0])} /></label>
         </div>
+        {storageHealth ? (
+          <div className={`storage-health ${storageHealth.usageRatio !== null && storageHealth.usageRatio >= 0.8 ? "is-warning" : ""}`}>
+            <span>本机家庭数据 {formatBytes(storageHealth.localBytes)}{storageHealth.quotaBytes !== null ? ` · 浏览器已用 ${formatBytes(storageHealth.usageBytes ?? 0)} / ${formatBytes(storageHealth.quotaBytes)}` : ""}</span>
+            {storageHealth.usageRatio !== null && storageHealth.usageRatio >= 0.8 ? <strong>储存空间接近上限，请先导出学习记录。</strong> : null}
+            {storageHealth.persisted === false ? <button className="quiet-button compact-button" type="button" onClick={() => void persistStorage()}>启用持久储存</button> : null}
+          </div>
+        ) : null}
         {household.children.length === 0 ? <div className="empty-panel">{UI_COPY.parent.empty}<button className="primary-button compact-button empty-action" type="button" onClick={() => setShowAddChild(true)}><Plus aria-hidden="true" />{UI_COPY.parent.addFirstChild}</button></div> : household.children.map((child) => (
           <section className="parent-child-panel" key={child.id}>
-            <div className="parent-child-heading"><div className={`profile-avatar small-avatar avatar-${child.avatar}`}><img src={`./assets/images/${avatars.find((avatar) => avatar.id === child.avatar)?.image ?? "star"}.png`} alt="" /></div><div><h2>{child.name}</h2><p>{UI_COPY.parent.childActivity(child.attempts.length, Object.keys(child.diagnostics).length)}</p></div><button className="quiet-button compact-button child-export-button" type="button" onClick={() => exportAttemptsCsv(child)}><Download aria-hidden="true" />{UI_COPY.parent.exportCsv}</button></div>
+            <div className="parent-child-heading"><div className={`profile-avatar small-avatar avatar-${child.avatar}`}><img src={`./assets/images/${avatars.find((avatar) => avatar.id === child.avatar)?.image ?? "star"}.png`} alt="" /></div><div><h2>{child.name}</h2><p>{UI_COPY.parent.childActivity(child.attempts.length, Object.keys(child.diagnostics).length)}</p></div><div className="child-profile-actions"><button className="quiet-button compact-button" type="button" onClick={() => setEditingChild(child)}><Pencil aria-hidden="true" />{UI_COPY.parent.editChild}</button><button className="quiet-button compact-button danger-button" type="button" onClick={() => deleteChild(child)}><Trash2 aria-hidden="true" />{UI_COPY.parent.deleteChild}</button><button className="quiet-button compact-button" type="button" onClick={() => exportAttemptsCsv(child)}><Download aria-hidden="true" />{UI_COPY.parent.exportCsv}</button></div></div>
             <div className="parent-controls">
               <label><span>{UI_COPY.parent.sessionLength}</span><select aria-label={`${child.name}的${UI_COPY.parent.sessionLength}`} value={child.settings.sessionLength} onChange={(event) => changeSessionLength(child, Number(event.target.value))}><option value="6">6 题</option><option value="8">8 题</option><option value="10">10 题</option></select></label>
               <div className="reset-group">{(Object.keys(subjectNames) as Subject[]).map((subject) => <button key={subject} className="quiet-button compact-button" type="button" onClick={() => resetSubject(child, subject)}>{UI_COPY.parent.resetSubject(subjectNames[subject])}</button>)}</div>
+              <div className="accessibility-controls" aria-label={`${child.name}的显示设置`}>
+                <label><input type="checkbox" checked={child.settings.highContrast} onChange={(event) => changeAccessibility(child, "highContrast", event.target.checked)} />{UI_COPY.parent.highContrast}</label>
+                <label><input type="checkbox" checked={child.settings.largeText} onChange={(event) => changeAccessibility(child, "largeText", event.target.checked)} />{UI_COPY.parent.largeText}</label>
+              </div>
               <small>{UI_COPY.parent.contentSummary(CONTENT_VERSION)}<br />{UI_COPY.parent.reviewStatus}</small>
             </div>
             <div className="next-actions" aria-label={`${child.name}的下一步建议`}>
@@ -742,13 +791,15 @@ function ParentDashboard({ household, onBack, onAddChild, onUpdateChild, onLock,
         ))}
       </main>
       {showAddChild ? <AddChildDialog onCancel={() => setShowAddChild(false)} onSave={saveChild} /> : null}
+      {editingChild ? <AddChildDialog initialChild={editingChild} onCancel={() => setEditingChild(null)} onSave={saveEditedChild} /> : null}
     </div>
   );
 }
 
-function AddChildDialog({ onCancel, onSave }: { onCancel: () => void; onSave: (child: ChildProfile) => void | Promise<void> }) {
-  const [name, setName] = useState("");
-  const [avatar, setAvatar] = useState("star");
+function AddChildDialog({ initialChild, onCancel, onSave }: { initialChild?: ChildProfile; onCancel: () => void; onSave: (child: ChildProfile) => void | Promise<void> }) {
+  const editing = Boolean(initialChild);
+  const [name, setName] = useState(initialChild?.name ?? "");
+  const [avatar, setAvatar] = useState(initialChild?.avatar ?? "star");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const savingRef = useRef(false);
@@ -759,14 +810,15 @@ function AddChildDialog({ onCancel, onSave }: { onCancel: () => void; onSave: (c
     savingRef.current = true;
     setSaving(true);
     try {
-      await onSave(createChildProfile(name, avatar));
+      const next = initialChild ? { ...initialChild, name: name.trim(), avatar } : createChildProfile(name, avatar);
+      await onSave(next);
     } finally {
       savingRef.current = false;
       setSaving(false);
     }
   }
   return (
-    <div className="modal-backdrop"><div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="add-child-title"><p className="eyebrow">家长设置</p><h2 id="add-child-title">新建孩子档案</h2><form onSubmit={submit} className="dialog-form"><label><span>孩子的名字</span><input aria-label="孩子的名字" value={name} onChange={(event) => setName(event.target.value)} placeholder="例如：小星，也可以只写小名" autoFocus /></label><div className="avatar-picker" aria-label="选择头像">{avatars.map((item) => <button key={item.id} className={`avatar-choice ${avatar === item.id ? "is-selected" : ""}`} type="button" aria-label={item.label} onClick={() => setAvatar(item.id)}><img src={`./assets/images/${item.image}.png`} alt="" /></button>)}</div>{error ? <p className="form-error" role="alert">{error}</p> : null}<div className="dialog-actions"><button className="quiet-button" type="button" onClick={onCancel}>取消</button><button className="primary-button" type="submit" disabled={saving}>{saving ? "保存中…" : "保存档案"}</button></div></form></div></div>
+    <div className="modal-backdrop"><div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="child-profile-title"><p className="eyebrow">家长设置</p><h2 id="child-profile-title">{editing ? "修改孩子档案" : "新建孩子档案"}</h2><form onSubmit={submit} className="dialog-form"><label><span>孩子的名字</span><input aria-label="孩子的名字" value={name} onChange={(event) => setName(event.target.value)} placeholder="例如：小星，也可以只写小名" autoFocus /></label><div className="avatar-picker" aria-label="选择头像">{avatars.map((item) => <button key={item.id} className={`avatar-choice ${avatar === item.id ? "is-selected" : ""}`} type="button" aria-label={item.label} onClick={() => setAvatar(item.id)}><img src={`./assets/images/${item.image}.png`} alt="" /></button>)}</div>{error ? <p className="form-error" role="alert">{error}</p> : null}<div className="dialog-actions"><button className="quiet-button" type="button" onClick={onCancel}>取消</button><button className="primary-button" type="submit" disabled={saving}>{saving ? "保存中…" : "保存档案"}</button></div></form></div></div>
   );
 }
 
