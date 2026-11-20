@@ -2,6 +2,10 @@
 
 一个给 iPad 使用的免费儿童学习网站，包含拼音、英语字母和首词、汉字笔顺描红，以及本地学习进度。
 
+家庭私用版自适应学习岛：<https://rydertsui-blip.github.io/little-sprout-academy/family/>
+
+家庭版源码与内容说明见 [`apps/family/README.md`](./apps/family/README.md)。
+
 ## 在线地址
 
 部署后：<https://rydertsui-blip.github.io/little-sprout-academy/>

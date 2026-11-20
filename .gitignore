@@ -1,0 +1,5 @@
+.DS_Store
+apps/family/node_modules/
+apps/family/*.tsbuildinfo
+apps/family/dist/
+apps/family/work/

@@ -1,0 +1,75 @@
+# 小芽家庭学习岛
+
+挂在主站 `/family/` 下的本地优先儿童学习 PWA，面向新加坡小学一年级至二年级。
+
+## 当前能力
+
+- 家长 PIN 解锁家庭空间，重新打开网页后需要再次解锁。
+- 家长可创建多个孩子档案，填写名字并选择头像。
+- 孩子在 iPad 上选择自己的档案，不创建独立账号。
+- 数学、华文、英语各有 8 题自适应入学小测。
+- 30 个知识点、180 道固定题；每题恰好三个选项，答案与解释固定。
+- BKT 知识追踪、前置知识关系、证据门槛和固定复习间隔。
+- 家长看板可查看每科证据数量、暂稳/稳固数量、作答总数。
+- 家长可调整每次题量，并重新定位任一科目。
+- 内容包和学习记录仅保存在当前设备的 `localStorage`。
+- PWA 离线应用壳，联网后自动缓存静态资源。
+
+## 内容文件
+
+- `src/content/skills.ts`：知识点、年级范围、前置关系、MOE 来源。
+- `src/content/math.ts`：12 个数学知识的固定题生成规则。
+- `src/content/language.ts`：华文和英语固定题。
+- `src/content/catalog.ts`：内容装配与完整性校验。
+- `CONTENT_VERSION = pilot-1`，家长看板显示当前内容版本。
+
+课程范围参考：
+
+- [MOE 2021 Mathematics Syllabus](https://www.moe.gov.sg/media/files/primary/92bff26d-b2b4-4535-b868-b8415c744b91.pdf)
+- [MOE 2024 Chinese Language Syllabus](https://www.moe.gov.sg/media/files/primary/syllabus/f41062a6-3a90-4ed1-bf93-2f1aaabeec43.pdf)
+- [MOE 2024 P1–P3 Chinese Character List](https://www.moe.gov.sg/media/files/primary/syllabus/99b31d48-7f90-420a-a748-f64167c45746.pdf)
+- [MOE 2020 English Language Syllabus](https://www.moe.gov.sg/media/files/primary/b8eb0437-67fb-4042-a26c-64fef2af12df.pdf)
+
+## 学习算法
+
+`BKT 技能概率 + 前置知识关系 + 证据门 + 固定间隔复习`。
+
+- 练习保持约 80% 预测成功率。
+- 一次答对不会标记为掌握。
+- “暂稳”至少需要 3 次独立正确、至少 2 种题型。
+- “稳固”还需要不同日期上的独立复习证据。
+- 诊断结果只显示“未知、正在发展、暂稳、稳固”，不给孩子贴全局年级标签。
+- 不使用 LLM；算法是固定、可解释的统计规则。
+
+## 准确性和质量
+
+发布前执行：
+
+```bash
+npm test
+npm run build
+```
+
+自动测试覆盖：
+
+- BKT 公式、证据门和复习重置
+- 前置知识无环
+- 每题三个互不重复选项、唯一正确答案、解释存在
+- 算术题独立重算
+- 拼音声母、韵母、完整音节和声调用 `pinyin-pro` 独立校验
+- 家长 PIN、双次解锁、建孩子、完整 8 题小测、看板和设置
+
+真实触摸审核另行覆盖：
+
+- iPad 横屏和竖屏、手机宽度
+- 横向溢出与 44 px 最小触摸目标
+- 真实 `touchscreen.tap`、重复触摸保护
+- 三科入口、完整诊断、家长二次 PIN、重新加载锁定、断网重载
+- 所有可见图片均可加载，浏览器无 console/page error
+
+## 已知边界
+
+- 这是单设备本地优先版本，尚未接入云同步或跨设备家长看板。
+- 家长 PIN 阻止普通误入，但不是企业级身份系统；静态资源本身仍在公开网站下。
+- 内容已做结构、规则和拼音自动校验，正式对外前仍应由熟悉新加坡 P1/P2 的教师做人工审校。
+- AI 功能按你的决定暂缓。

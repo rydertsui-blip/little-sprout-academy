@@ -16,6 +16,10 @@ Interface icons are from [Lucide](https://lucide.dev/), licensed ISC. The licens
 
 The Latin reading font is [Andika](https://software.sil.org/andika/), licensed under the SIL Open Font License. The license text is included at `licenses/andika-OFL.txt`.
 
+## React and pinyin-pro
+
+The family learning app bundles React (MIT) and pinyin-pro (MIT). License texts are included at `licenses/react-MIT.txt` and `licenses/pinyin-pro-MIT.txt`.
+
 ## Offline speech
 
 The bundled Mandarin and English word recordings were generated locally with macOS system voices and are included only in this private learning site.
