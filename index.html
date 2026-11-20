@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#b9e2ea">
+  <meta name="description" content="小芽学堂：给孩子的拼音、英语和汉字启蒙学习站。">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="小芽学堂">
+  <title>小芽学堂 | 拼音 · 英语 · 汉字</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="64x64" href="./assets/images/favicon-64.png">
+  <link rel="apple-touch-icon" href="./assets/images/apple-touch-icon.png">
+  <link rel="preload" href="./fonts/andika-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./fonts/andika-bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./vendor/lucide.min.js" defer></script>
+  <script src="./vendor/hanzi-writer.min.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <header class="app-header">
+      <button class="brand-button" id="brandHome" type="button" aria-label="回到首页">
+        <img src="./assets/images/seedling.png" alt="" class="brand-mark">
+        <span class="brand-copy">
+          <strong>小芽学堂</strong>
+          <small>Little Sprout</small>
+        </span>
+      </button>
+
+      <div class="header-tools">
+        <div class="star-pill" aria-label="已经收集的星星">
+          <img src="./assets/images/star.png" alt="" class="mini-icon">
+          <span id="headerStarCount">0</span>
+        </div>
+        <button class="icon-button" id="parentBtn" type="button" aria-label="家长设置">
+          <i data-lucide="settings" aria-hidden="true"></i>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="view home-view is-active" id="homeView" aria-label="首页">
+        <div class="hero-band">
+          <div class="hero-copy">
+            <p class="eyebrow">给小小学习者的每日一点点</p>
+            <h1>今天，学一点<br><span>新本领。</span></h1>
+            <p class="hero-leo">听一听声音，认一认字，再亲手写一写。</p>
+            <button class="primary-button" id="startDaily" type="button">
+              <i data-lucide="play" aria-hidden="true"></i>
+              <span>开始今天的小冒险</span>
+            </button>
+          </div>
+
+          <div class="hero-stage" aria-label="拼音、英语和汉字学习卡片">
+            <div class="stage-sun"></div>
+            <div class="stage-cloud stage-cloud-one"></div>
+            <div class="stage-cloud stage-cloud-two"></div>
+            <div class="stage-book">
+              <img src="./assets/images/books.png" alt="图画书">
+            </div>
+            <span class="floating-word floating-pinyin">māo</span>
+            <span class="floating-word floating-english">cat</span>
+            <span class="floating-word floating-hanzi">人</span>
+            <img class="stage-buddy" src="./assets/images/bird.png" alt="一只唱歌的小鸟">
+            <span class="stage-caption" id="dailyHint">今天从拼音森林出发</span>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">三片小小学习地</p>
+            <h2>想去哪里玩？</h2>
+          </div>
+          <p class="section-note" id="todayProgressText">今天完成 0 张小卡</p>
+        </div>
+
+        <div class="course-grid">
+          <button class="course-card pinyin-card" type="button" data-open="pinyin">
+            <span class="course-art course-art-pinyin">
+              <img src="./assets/images/bird.png" alt="">
+              <span class="art-bubble">bā</span>
+              <img class="art-mini" src="./assets/images/music.png" alt="">
+            </span>
+            <span class="course-body">
+              <span class="course-kicker">声母 · 韵母 · 声调</span>
+              <strong>拼音森林</strong>
+              <span>跟着声音找音节</span>
+            </span>
+            <span class="course-progress"><span data-progress="pinyin">0 / 8</span><i data-lucide="arrow-right" aria-hidden="true"></i></span>
+          </button>
+
+          <button class="course-card english-card" type="button" data-open="english">
+            <span class="course-art course-art-english">
+              <img src="./assets/images/house.png" alt="">
+              <span class="art-bubble">A a</span>
+              <img class="art-mini" src="./assets/images/apple.png" alt="">
+            </span>
+            <span class="course-body">
+              <span class="course-kicker">Letters · First words</span>
+              <strong>English Town</strong>
+              <span>认识字母和第一个单词</span>
+            </span>
+            <span class="course-progress"><span data-progress="english">0 / 10</span><i data-lucide="arrow-right" aria-hidden="true"></i></span>
+          </button>
+
+          <button class="course-card hanzi-card" type="button" data-open="hanzi">
+            <span class="course-art course-art-hanzi">
+              <span class="hanzi-art-glyph">人</span>
+              <img src="./assets/images/pencil.png" alt="">
+              <img class="art-mini" src="./assets/images/sparkles.png" alt="">
+            </span>
+            <span class="course-body">
+              <span class="course-kicker">笔顺 · 描红 · 词语</span>
+              <strong>汉字工坊</strong>
+              <span>看笔顺，亲手写一写</span>
+            </span>
+            <span class="course-progress"><span data-progress="hanzi">0 / 12</span><i data-lucide="arrow-right" aria-hidden="true"></i></span>
+          </button>
+        </div>
+
+        <div class="growth-band">
+          <div class="growth-copy">
+            <img src="./assets/images/trophy.png" alt="">
+            <div>
+              <p class="eyebrow">每一次练习都算数</p>
+              <h2>我的小小成长树</h2>
+            </div>
+          </div>
+          <div class="growth-meters">
+            <div class="growth-row">
+              <span>拼音</span>
+              <div class="meter"><span class="meter-fill pinyin-fill" data-meter="pinyin"></span></div>
+              <strong data-meter-label="pinyin">0 颗星</strong>
+            </div>
+            <div class="growth-row">
+              <span>英语</span>
+              <div class="meter"><span class="meter-fill english-fill" data-meter="english"></span></div>
+              <strong data-meter-label="english">0 颗星</strong>
+            </div>
+            <div class="growth-row">
+              <span>汉字</span>
+              <div class="meter"><span class="meter-fill hanzi-fill" data-meter="hanzi"></span></div>
+              <strong data-meter-label="hanzi">0 颗星</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view lesson-view" id="lessonView" aria-label="学习页" hidden>
+        <div class="lesson-toolbar">
+          <button class="back-button" id="backHome" type="button">
+            <i data-lucide="chevron-left" aria-hidden="true"></i>
+            <span>回到地图</span>
+          </button>
+          <div class="lesson-heading">
+            <span id="lessonKicker">拼音森林</span>
+            <h1 id="lessonTitle">听一听，找声音</h1>
+          </div>
+          <div class="lesson-progress-wrap">
+            <span id="lessonProgressText">0 / 8</span>
+            <div class="lesson-progress"><span id="lessonProgressBar"></span></div>
+          </div>
+        </div>
+
+        <div class="lesson-panel" id="pinyinPanel"></div>
+        <div class="lesson-panel" id="englishPanel" hidden></div>
+        <div class="lesson-panel" id="hanziPanel" hidden></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog class="parent-dialog" id="parentDialog">
+    <div class="dialog-head">
+      <div>
+        <p class="eyebrow">家长设置</p>
+        <h2>学习节奏</h2>
+      </div>
+      <button class="icon-button" id="closeParent" type="button" aria-label="关闭家长设置">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="setting-block">
+      <label for="voiceRate">朗读速度</label>
+      <div class="range-row">
+        <span>慢一点</span>
+        <input id="voiceRate" type="range" min="0.6" max="1.1" step="0.05" value="0.9">
+        <span>快一点</span>
+      </div>
+      <output id="voiceRateLabel" for="voiceRate">0.90×</output>
+    </div>
+    <div class="setting-block">
+      <label for="dailyTarget">今天的小目标</label>
+      <select id="dailyTarget">
+        <option value="3">3 张小卡</option>
+        <option value="5">5 张小卡</option>
+        <option value="8">8 张小卡</option>
+      </select>
+    </div>
+    <div class="dialog-actions">
+      <button class="quiet-button danger-button" id="resetProgress" type="button">清空学习记录</button>
+      <button class="primary-button" id="saveParent" type="button">保存</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <img src="./assets/images/star.png" alt="">
+    <span id="toastText">又学会了一张小卡！</span>
+  </div>
+</body>
+</html>
