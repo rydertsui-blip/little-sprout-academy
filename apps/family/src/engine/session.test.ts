@@ -9,6 +9,15 @@ import {
 } from "./session";
 
 describe("adaptive session engine", () => {
+  function markPrerequisiteReady(child: ReturnType<typeof createChildProfile>, skillId: string) {
+    child.evidence[skillId] = {
+      ...child.evidence[skillId],
+      independentCorrect: 2,
+      nEff: 2,
+      pKnown: 0.62
+    };
+  }
+
   it("creates a diagnostic session and selects eight distinct questions dynamically", () => {
     const child = createChildProfile("小星", "star");
     let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
@@ -85,5 +94,18 @@ describe("adaptive session engine", () => {
     const second = selectNextQuestion(child, updatedSession)!;
     expect(second.skillId).toBe(first.skillId);
     expect(second.id).not.toBe(first.id);
+  });
+
+  it("does not unlock a dependent skill before its prerequisite has independent evidence", () => {
+    const child = createChildProfile("小芽", "star", new Date("2026-11-20T10:00:00Z"));
+    child.diagnostics.math = { completedAt: "2026-11-20T09:00:00Z", sessionId: "setup" };
+    const before = recommendedNextSkills(child, "math", new Date("2026-11-20T10:00:00Z"));
+    expect(before.map((item) => item.skill.id)).not.toContain("math-add-sub-100");
+    expect(before[0].skill.id).toBe("math-count-100");
+    expect(before[0].reason).toBe("prerequisite-gap");
+
+    markPrerequisiteReady(child, "math-count-100");
+    const after = recommendedNextSkills(child, "math", new Date("2026-11-20T10:00:00Z"));
+    expect(after.map((item) => item.skill.id)).toContain("math-add-sub-100");
   });
 });

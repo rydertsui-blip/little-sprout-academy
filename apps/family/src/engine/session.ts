@@ -138,18 +138,32 @@ export function completeSession(session: SessionRecord, child?: ChildProfile): S
 
 export function recommendedNextSkills(child: ChildProfile, subject: Subject, now = new Date()): SkillRecommendation[] {
   const subjectSkills = SKILLS.filter((skill) => skill.subject === subject && child.settings.enabledSkills.includes(skill.id));
-  return subjectSkills.map((skill) => {
+  const skillById = new Map(subjectSkills.map((skill) => [skill.id, skill]));
+  const prerequisiteReady = (skillId: string) => {
+    const evidence = child.evidence[skillId];
+    if (!evidence) return false;
+    return evidence.independentCorrect >= 2 || classifyMastery(evidence, now) === "likely-secure" || classifyMastery(evidence, now) === "secure";
+  };
+  const ready = (skill: Skill) => skill.prerequisites.every((prerequisiteId) => !skillById.has(prerequisiteId) || prerequisiteReady(prerequisiteId));
+  const blockingDemand = new Map<string, number>();
+  for (const skill of subjectSkills) {
+    if (ready(skill) || (child.evidence[skill.id]?.nEff ?? 0) > 0) continue;
+    for (const prerequisiteId of skill.prerequisites) {
+      if (skillById.has(prerequisiteId) && !prerequisiteReady(prerequisiteId)) blockingDemand.set(prerequisiteId, (blockingDemand.get(prerequisiteId) ?? 0) + 1);
+    }
+  }
+  return subjectSkills.filter((skill) => (child.evidence[skill.id]?.nEff ?? 0) > 0 || ready(skill)).map((skill) => {
     const evidence = child.evidence[skill.id];
     const due = evidence.dueAt && new Date(evidence.dueAt).getTime() <= now.getTime();
     if (due && evidence.nEff > 0) return { skill, reason: "review-due" as const, priority: -1 };
-    const missingPrerequisite = skill.prerequisites.some((prerequisiteId) => {
-      const prerequisite = child.evidence[prerequisiteId];
-      return prerequisite && classifyMastery(prerequisite, now) === "unknown";
-    });
-    if (missingPrerequisite) return { skill, reason: "prerequisite-gap" as const, priority: 2 };
-    if (evidence.nEff > 0 && evidence.pKnown < 0.7) return { skill, reason: "weak-skill" as const, priority: 0 };
+    if (blockingDemand.has(skill.id)) return { skill, reason: "prerequisite-gap" as const, priority: 0 };
+    if (evidence.nEff > 0 && evidence.pKnown < 0.7) return { skill, reason: "weak-skill" as const, priority: 0.2 };
+    if (evidence.nEff > 0) return null;
     return { skill, reason: "new-skill" as const, priority: 1 };
-  }).sort((a, b) => a.priority - b.priority || child.evidence[a.skill.id].pKnown - child.evidence[b.skill.id].pKnown);
+  }).filter((item): item is SkillRecommendation => Boolean(item))
+    .sort((a, b) => a.priority - b.priority
+      || child.evidence[a.skill.id].pKnown - child.evidence[b.skill.id].pKnown
+      || subjectSkills.indexOf(a.skill) - subjectSkills.indexOf(b.skill));
 }
 
 export function masteryForChild(child: ChildProfile, skillId: string, now = new Date()): MasteryLevel {

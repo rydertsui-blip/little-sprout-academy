@@ -27,7 +27,7 @@ describe("role-specific interface copy", () => {
     expect(summary).toContain("228 道题");
     expect(summary).toContain("小学一、二年级");
     expect(summary).toContain("不是完整课程");
-    const sourceSummary = UI_COPY.parent.officialSourceSummary(3, 44, 7, 2);
+    const sourceSummary = UI_COPY.parent.officialSourceSummary(4, 44, 7, 2);
     expect(sourceSummary).toContain("官方来源已机器核对");
     expect(sourceSummary).toContain("7 条尚未有内容");
     expect(sourceSummary).toContain("2 个技能为课外补充");

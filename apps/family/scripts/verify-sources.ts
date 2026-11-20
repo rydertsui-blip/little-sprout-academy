@@ -167,6 +167,7 @@ async function verify() {
       continue;
     }
     if (source.subject !== outcome.subject) failures.push(`${outcome.id}: subject does not match its source`);
+    if (source.role !== "curriculum") failures.push(`${outcome.id}: curriculum outcome cannot use a ${source.role} source`);
     if (!outcome.levels.length || outcome.levels.some((level) => !["P1", "P2"].includes(level))) failures.push(`${outcome.id}: outcome is outside the supported P1/P2 scope`);
     if (outcome.pdfPage < 1 || outcome.pdfPage > source.pages) {
       failures.push(`${outcome.id}: PDF page ${outcome.pdfPage} is outside ${source.pages} pages`);

@@ -6,6 +6,7 @@ import type { Subject } from "../lib/types";
 export interface OfficialSource {
   id: string;
   subject: Subject;
+  role: "curriculum" | "textbook-scope";
   title: string;
   documentVersion: string;
   officialUrl: string;

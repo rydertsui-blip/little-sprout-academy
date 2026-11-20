@@ -1,11 +1,12 @@
 {
   "schemaVersion": 1,
-  "authorityPolicy": "Only official https://www.moe.gov.sg documents may support a curriculum outcome. Downloaded bytes are verified by SHA-256 before use.",
+  "authorityPolicy": "Only official https://www.moe.gov.sg documents are accepted. Curriculum outcomes require MOE syllabus evidence; MOE textbook scope lists may support sequence and character scope but never override a syllabus outcome. Downloaded bytes are verified by SHA-256 before use.",
   "retrievedAt": "2026-11-21",
   "sources": [
     {
       "id": "moe-math-2021-oct-2025",
       "subject": "math",
+      "role": "curriculum",
       "title": "Mathematics Syllabus: Primary One to Primary Six",
       "documentVersion": "2021 syllabus, updated October 2025",
       "officialUrl": "https://www.moe.gov.sg/media/files/primary/2021-primary-mathematics-syllabus-p1-to-p6-updated-october-2025.pdf",
@@ -18,6 +19,7 @@
     {
       "id": "moe-chinese-primary-2024",
       "subject": "mandarin",
+      "role": "curriculum",
       "title": "Chinese Language Syllabus: Primary",
       "documentVersion": "2024 syllabus, implementation starting with the 2024 Primary One cohort",
       "officialUrl": "https://www.moe.gov.sg/media/files/primary/syllabus/f41062a6-3a90-4ed1-bf93-2f1aaabeec43.pdf",
@@ -30,6 +32,7 @@
     {
       "id": "moe-english-primary-2020",
       "subject": "english",
+      "role": "curriculum",
       "title": "English Language Syllabus 2020: Primary",
       "documentVersion": "English Language Syllabus 2020, Primary",
       "officialUrl": "https://www.moe.gov.sg/media/files/primary/2020-english-language-primary.pdf",
@@ -38,6 +41,19 @@
       "bytes": 18435020,
       "pages": 54,
       "publishedDateInPdf": "2019-12-24"
+    },
+    {
+      "id": "moe-chinese-character-list-p1-p3",
+      "subject": "mandarin",
+      "role": "textbook-scope",
+      "title": "《欢乐伙伴2.0》小学华文生字表",
+      "documentVersion": "Primary Chinese character list, P1 first semester through P3 second semester",
+      "officialUrl": "https://www.moe.gov.sg/media/files/primary/syllabus/99b31d48-7f90-420a-a748-f64167c45746.pdf",
+      "cacheFile": "moe-chinese-character-list-p1-p3.pdf",
+      "sha256": "d833e9a4e4e632fb633a04b6471e9e6465a0097c7ea07a43e70913956942c145",
+      "bytes": 959771,
+      "pages": 6,
+      "publishedDateInPdf": "unknown"
     }
   ]
 }

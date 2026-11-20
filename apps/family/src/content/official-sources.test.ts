@@ -12,7 +12,7 @@ import {
 
 describe("official MOE source provenance", () => {
   it("uses only SHA-256 pinned MOE HTTPS sources", () => {
-    expect(OFFICIAL_SOURCES).toHaveLength(3);
+    expect(OFFICIAL_SOURCES).toHaveLength(4);
     for (const source of OFFICIAL_SOURCES) {
       const url = new URL(source.officialUrl);
       expect(url.protocol).toBe("https:");

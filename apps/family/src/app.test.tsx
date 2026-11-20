@@ -287,7 +287,7 @@ describe("family learning app", () => {
     await openParentSettings();
     expect(screen.getByText("到了复习时间", { exact: false })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "导出作答 CSV" })).toBeInTheDocument();
-    expect(screen.getByText(/官方来源已机器核对：3 份 MOE PDF、44 条目标；7 条尚未有内容；2 个技能为课外补充/)).toBeInTheDocument();
+    expect(screen.getByText(/官方来源已机器核对：4 份 MOE PDF、44 条目标；7 条尚未有内容；2 个技能为课外补充/)).toBeInTheDocument();
     expect(screen.getByText(/人工课纲复核：未进行/)).toBeInTheDocument();
   });
 
@@ -308,8 +308,8 @@ describe("family learning app", () => {
     fireEvent.click(screen.getByRole("button", { name: "打开家庭学习区" }));
     await waitFor(() => expect(screen.getByText("今天谁来学习？")).toBeInTheDocument());
     await openParentSettings();
-    expect(screen.getByText(/App 0\.6\.0/)).toBeInTheDocument();
-    expect(screen.getByText(/内容 pilot-6/)).toBeInTheDocument();
+    expect(screen.getByText(/App 0\.7\.0/)).toBeInTheDocument();
+    expect(screen.getByText(/内容 pilot-7/)).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/本机家庭数据/)).toBeInTheDocument());
     fireEvent.click(screen.getByLabelText("高对比"));
     await waitFor(async () => expect((await savedHousehold()).children[0].settings.highContrast).toBe(true));

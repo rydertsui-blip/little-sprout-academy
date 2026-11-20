@@ -26,7 +26,7 @@
 - 家长看板分别显示 App、内容和资料 schema 版本，并显示本机储存用量和接近上限警告。
 - 每个孩子可独立开启高对比和大字显示。
 - 55 段普通话和英语录音优先离线播放。
-- `pilot-6` 内容包有逐题 MOE 官方来源、PDF hash、逐页原文证据、exact/broad 映射和 SHA-256 签名。
+- `pilot-7` 内容包有逐题 MOE 官方来源、PDF hash、逐页原文证据、exact/broad 映射和 SHA-256 签名。
 - 228 个已发布题目 ID 有历史快照；删除旧 ID 会导致内容验证失败。
 
 ## 内容文件
@@ -36,11 +36,11 @@
 - `src/content/language.ts`：华文和英语固定题。
 - `src/content/matching.ts`：华文、英语和数学的三对点击配对题。
 - `src/content/catalog.ts`：内容装配与完整性校验。
-- `CONTENT_VERSION = pilot-6`，家长看板显示当前内容版本、官方来源状态和“人工课纲复核未进行”。
+- `CONTENT_VERSION = pilot-7`，家长看板显示当前内容版本、官方来源状态和“人工课纲复核未进行”。
 
 ## 官方来源验证
 
-课程目标只使用 `https://www.moe.gov.sg/` 的官方 PDF。来源清单、44 条 outcome 和自动覆盖率矩阵位于 `sources/official/`。
+课程目标只使用 `https://www.moe.gov.sg/` 的官方 PDF。4 份官方来源、44 条 outcome 和自动覆盖率矩阵位于 `sources/official/`。其中《欢乐伙伴2.0》生字表只用于教材范围和顺序，不覆盖 syllabus outcome。
 
 ```bash
 npm run verify:sources

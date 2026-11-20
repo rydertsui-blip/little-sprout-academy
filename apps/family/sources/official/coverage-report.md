@@ -11,10 +11,11 @@
 | moe-math-2021-oct-2025 | [官方 PDF](https://www.moe.gov.sg/media/files/primary/2021-primary-mathematics-syllabus-p1-to-p6-updated-october-2025.pdf) | 2021 syllabus, updated October 2025 | 50 | `e8f77fe10d768e2ad5266dfc39a8821674be7eb1c81bc545ba4b841b12ae70e1` |
 | moe-chinese-primary-2024 | [官方 PDF](https://www.moe.gov.sg/media/files/primary/syllabus/f41062a6-3a90-4ed1-bf93-2f1aaabeec43.pdf) | 2024 syllabus, implementation starting with the 2024 Primary One cohort | 44 | `6c58e38740ca135fbd8b31c655fe9dcccdcd9b83a2ae430671f41ef7db757973` |
 | moe-english-primary-2020 | [官方 PDF](https://www.moe.gov.sg/media/files/primary/2020-english-language-primary.pdf) | English Language Syllabus 2020, Primary | 54 | `5738e831e71aa7b98a912013ba5a26b267f4a8f375c99a307426bd7724d24746` |
+| moe-chinese-character-list-p1-p3 | [官方 PDF](https://www.moe.gov.sg/media/files/primary/syllabus/99b31d48-7f90-420a-a748-f64167c45746.pdf) | Primary Chinese character list, P1 first semester through P3 second semester | 6 | `d833e9a4e4e632fb633a04b6471e9e6465a0097c7ea07a43e70913956942c145` |
 
 ## 汇总
 
-- 官方来源：3 份 MOE PDF
+- 官方来源：4 份 MOE PDF
 - 官方 P1/P2 outcome：44 条
 - 当前技能：33 个
 - 非测验活动：4 组
