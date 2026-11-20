@@ -44,8 +44,10 @@ export interface SkillEvidence {
   independentCorrect: number;
   correctWithHint: number;
   templates: string[];
+  questionIds: string[];
   lastAttemptAt: string | null;
   firstEvidenceAt: string | null;
+  lastStageAdvanceAt: string | null;
   delayedEvidence: boolean;
   reviewStage: number;
   dueAt: string | null;
@@ -94,6 +96,7 @@ export interface ChildProfile {
   evidence: Record<string, SkillEvidence>;
   attempts: Attempt[];
   sessions: SessionRecord[];
+  activeSessions: Partial<Record<Subject, SessionRecord>>;
   settings: {
     sessionLength: number;
     enabledSkills: string[];
@@ -101,7 +104,7 @@ export interface ChildProfile {
 }
 
 export interface HouseholdState {
-  version: 1;
+  version: 2;
   householdName: string;
   parentName: string;
   pinHash: string;

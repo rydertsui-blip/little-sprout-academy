@@ -5,20 +5,13 @@ import type { ChoiceQuestion, ContentIssue, Subject } from "../lib/types";
 
 export { SKILLS };
 
-export const CONTENT_VERSION = "pilot-1";
+export const CONTENT_VERSION = "pilot-2";
 
 const rawQuestions = SKILLS.flatMap((skill) => skill.subject === "math" ? buildMathQuestions(skill) : buildLanguageQuestions(skill));
 
-for (const subject of ["math", "mandarin", "english"] as const) {
-  const firstSkillQuestions = new Map<string, ChoiceQuestion>();
-  for (const skill of SKILLS.filter((item) => item.subject === subject)) {
-    const question = rawQuestions.find((item) => item.skillId === skill.id);
-    if (question) firstSkillQuestions.set(skill.id, question);
-  }
-  Array.from(firstSkillQuestions.values()).slice(0, 8).forEach((question) => {
-    question.diagnostic = true;
-  });
-}
+rawQuestions.forEach((question) => {
+  question.diagnostic = true;
+});
 
 export const QUESTIONS = rawQuestions;
 

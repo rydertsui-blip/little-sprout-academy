@@ -9,12 +9,29 @@ import {
 } from "./session";
 
 describe("adaptive session engine", () => {
-  it("creates a diagnostic session with eight distinct questions", () => {
+  it("creates a diagnostic session and selects eight distinct questions dynamically", () => {
     const child = createChildProfile("小星", "star");
-    const session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
+    let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
     expect(session.kind).toBe("diagnostic");
-    expect(session.plannedQuestionIds).toHaveLength(8);
-    expect(new Set(session.plannedQuestionIds).size).toBe(8);
+    expect(session.length).toBe(8);
+    const selected: string[] = [];
+    for (let index = 0; index < 8; index += 1) {
+      const question = selectNextQuestion(child, session)!;
+      selected.push(question.id);
+      session = recordSessionAnswer(child, session, { questionId: question.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
+    }
+    expect(new Set(selected).size).toBe(8);
+  });
+
+  it("raises diagnostic difficulty after consecutive correct answers", () => {
+    const child = createChildProfile("小星", "star", new Date("2026-11-20T10:00:00Z"));
+    let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
+    const first = selectNextQuestion(child, session)!;
+    session = recordSessionAnswer(child, session, { questionId: first.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
+    const second = selectNextQuestion(child, session)!;
+    session = recordSessionAnswer(child, session, { questionId: second.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
+    const third = selectNextQuestion(child, session)!;
+    expect(third.difficulty).toBeGreaterThan(first.difficulty);
   });
 
   it("does not repeat an already answered item in the same session", () => {

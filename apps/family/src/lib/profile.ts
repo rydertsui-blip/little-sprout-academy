@@ -14,6 +14,7 @@ export function createChildProfile(name: string, avatar = "star", now = new Date
     evidence,
     attempts: [],
     sessions: [],
+    activeSessions: {},
     settings: {
       sessionLength: 8,
       enabledSkills: SKILLS.map((skill) => skill.id)

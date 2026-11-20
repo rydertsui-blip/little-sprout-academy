@@ -1,11 +1,21 @@
-import { useMemo, useState, type FormEvent } from "react";
-import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Check, Headphones, Plus, ShieldCheck, Star, X } from "lucide-react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
+import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Check, Download, Headphones, Lock, Plus, ShieldCheck, Star, Upload, X } from "lucide-react";
 import { CONTENT_VERSION, SKILLS } from "./content/catalog";
 import { classifyMastery, createSkillEvidence } from "./engine/bkt";
 import { completeSession, createAdaptiveSession, recordSessionAnswer, selectNextQuestion } from "./engine/session";
 import { createChildProfile } from "./lib/profile";
 import { hashPin, validatePin } from "./lib/pin";
-import { loadHousehold, saveHousehold } from "./lib/storage";
+import {
+  clearHousehold,
+  createEncryptedHousehold,
+  flushStorageWrites,
+  parseHouseholdBackup,
+  readHousehold,
+  saveEncryptedHousehold,
+  unlockEncryptedHousehold,
+  writeEncryptedEnvelope,
+  type EncryptedEnvelope
+} from "./lib/storage";
 import type { ChildProfile, ChoiceQuestion, HouseholdState, MasteryLevel, SessionRecord, Subject } from "./lib/types";
 
 type Screen = "profiles" | "child" | "assessment" | "result" | "parent";
@@ -35,9 +45,13 @@ function clone<T>(value: T): T {
 }
 
 export default function App() {
-  const initialHousehold = loadHousehold();
-  const [household, setHousehold] = useState<HouseholdState | null>(initialHousehold);
-  const [unlocked, setUnlocked] = useState(!initialHousehold);
+  const initialStorage = readHousehold();
+  const [household, setHousehold] = useState<HouseholdState | null>(initialStorage.status === "ok" ? initialStorage.household : null);
+  const [unlocked, setUnlocked] = useState(initialStorage.status === "empty");
+  const [encryptedEnvelope, setEncryptedEnvelope] = useState<EncryptedEnvelope | null>(initialStorage.status === "encrypted" ? initialStorage.envelope : null);
+  const encryptionKeyRef = useRef<CryptoKey | null>(null);
+  const [recovery, setRecovery] = useState(initialStorage.status === "corrupt" ? { raw: initialStorage.raw, error: initialStorage.error } : null);
+  const [storageError, setStorageError] = useState("");
   const [screen, setScreen] = useState<Screen>("profiles");
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
   const [showAddChild, setShowAddChild] = useState(false);
@@ -48,8 +62,14 @@ export default function App() {
   const [currentQuestion, setCurrentQuestion] = useState<ChoiceQuestion | null>(null);
   const [feedback, setFeedback] = useState<{ correct: boolean; answer: string } | null>(null);
   const [summary, setSummary] = useState<SessionRecord["summary"] | null>(null);
+  const answeringRef = useRef(false);
 
   const activeChild = household?.children.find((child) => child.id === activeChildId) ?? null;
+  const storageBanner = storageError ? <div className="storage-banner" role="alert">保存失败：{storageError}</div> : null;
+
+  if (recovery) {
+    return <RecoveryScreen recovery={recovery} onReset={() => { clearHousehold(); setRecovery(null); setHousehold(null); setUnlocked(true); setStorageError(""); }} />;
+  }
 
   async function createHousehold(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -60,7 +80,7 @@ export default function App() {
     const pinSalt = createSalt();
     const pinHash = await hashPin(setupValues.pin, pinSalt);
     const next: HouseholdState = {
-      version: 1,
+      version: 2,
       householdName: setupValues.householdName.trim() || "小芽家庭",
       parentName: setupValues.parentName.trim() || "家长",
       pinHash,
@@ -68,32 +88,121 @@ export default function App() {
       createdAt: new Date().toISOString(),
       children: []
     };
-    saveHousehold(next);
+    const sealed = await createEncryptedHousehold(next, setupValues.pin);
+    const result = writeEncryptedEnvelope(sealed.envelope);
+    if (!result.ok) {
+      setSetupError(`保存失败：${result.error}`);
+      return;
+    }
+    encryptionKeyRef.current = sealed.key;
+    setEncryptedEnvelope(sealed.envelope);
     setHousehold(next);
     setUnlocked(true);
     setSetupError("");
   }
 
-  function persistHousehold(next: HouseholdState) {
-    saveHousehold(next);
+  async function persistHousehold(next: HouseholdState): Promise<boolean> {
     setHousehold(next);
+    if (!encryptionKeyRef.current) {
+      setStorageError("当前会话没有可用的加密密钥，请重新解锁");
+      return false;
+    }
+    const result = await saveEncryptedHousehold(next, encryptionKeyRef.current);
+    if (!result.ok) {
+      setStorageError(result.error);
+      return false;
+    }
+    setStorageError("");
+    return true;
   }
 
-  function addChild(child: ChildProfile) {
+  async function addChild(child: ChildProfile) {
     if (!household) return;
-    persistHousehold({ ...household, children: [...household.children, child] });
-    setShowAddChild(false);
+    if (await persistHousehold({ ...household, children: [...household.children, child] })) setShowAddChild(false);
   }
 
-  function updateChild(child: ChildProfile) {
+  async function updateChild(child: ChildProfile): Promise<boolean> {
+    if (!household) return false;
+    return persistHousehold({ ...household, children: household.children.map((item) => item.id === child.id ? child : item) });
+  }
+
+  async function importBackup(next: HouseholdState) {
     if (!household) return;
-    persistHousehold({ ...household, children: household.children.map((item) => item.id === child.id ? child : item) });
+    const saved = await persistHousehold({
+      ...next,
+      version: 2,
+      householdName: household.householdName,
+      parentName: household.parentName,
+      pinHash: household.pinHash,
+      pinSalt: household.pinSalt
+    });
+    if (saved) {
+      setActiveChildId(null);
+      setScreen("parent");
+    }
+  }
+
+  async function handleLegacyUnlock(pin: string) {
+    if (!household) return;
+    try {
+      const sealed = await createEncryptedHousehold(household, pin);
+      const result = writeEncryptedEnvelope(sealed.envelope);
+      if (!result.ok) setStorageError(result.error);
+      encryptionKeyRef.current = sealed.key;
+      setEncryptedEnvelope(sealed.envelope);
+      setUnlocked(true);
+    } catch (error) {
+      setStorageError(error instanceof Error ? error.message : String(error));
+      setUnlocked(true);
+    }
+  }
+
+  async function lockHousehold() {
+    const pending = await flushStorageWrites();
+    if (!pending.ok) {
+      setStorageError(pending.error);
+      return;
+    }
+    encryptionKeyRef.current = null;
+    setHousehold(null);
+    setActiveChildId(null);
+    setSession(null);
+    setCurrentQuestion(null);
+    setUnlocked(false);
+    const stored = readHousehold();
+    if (stored.status === "encrypted") setEncryptedEnvelope(stored.envelope);
+    else if (stored.status === "ok") setHousehold(stored.household);
+    else if (stored.status === "corrupt") setRecovery({ raw: stored.raw, error: stored.error });
   }
 
   function startSubject(subject: Subject) {
+    void startSubjectAsync(subject);
+  }
+
+  async function startSubjectAsync(subject: Subject) {
     if (!activeChild) return;
-    const nextSession = createAdaptiveSession(activeChild, subject);
+    const existing = activeChild.activeSessions?.[subject];
+    const nextSession = existing ?? createAdaptiveSession(activeChild, subject);
+    if (!existing) {
+      const child = clone(activeChild);
+      child.activeSessions[subject] = nextSession;
+      if (!(await updateChild(child))) return;
+    }
     const question = selectNextQuestion(activeChild, nextSession);
+    if (nextSession.attempts.length >= nextSession.length) {
+      const child = clone(activeChild);
+      const completed = completeSession(nextSession, child);
+      if (completed) {
+        delete child.activeSessions[subject];
+        child.diagnostics[subject] = { completedAt: completed.completedAt!, sessionId: completed.id };
+        child.sessions.push(completed);
+        if (!(await updateChild(child))) return;
+        setSession(completed);
+        setSummary(completed.summary);
+        setScreen("result");
+      }
+      return;
+    }
     setSession(nextSession);
     setCurrentQuestion(question);
     setFeedback(null);
@@ -101,20 +210,25 @@ export default function App() {
     setScreen("assessment");
   }
 
-  function answerQuestion(answer: string) {
-    if (!activeChild || !session || !currentQuestion || feedback) return;
+  async function answerQuestion(answer: string) {
+    if (!activeChild || !session || !currentQuestion || feedback || answeringRef.current) return;
+    answeringRef.current = true;
     const child = clone(activeChild);
     const nextSession = recordSessionAnswer(child, session, {
       questionId: currentQuestion.id,
       correct: answer === currentQuestion.correctAnswer,
       hintUsed: false
     });
-    updateChild(child);
-    setSession(nextSession);
-    setFeedback({ correct: answer === currentQuestion.correctAnswer, answer });
+    child.activeSessions[session.subject] = nextSession;
+    const saved = await updateChild(child);
+    if (saved) {
+      setSession(nextSession);
+      setFeedback({ correct: answer === currentQuestion.correctAnswer, answer });
+    }
+    answeringRef.current = false;
   }
 
-  function advanceSession() {
+  async function advanceSession() {
     if (!activeChild || !session) return;
     if (session.attempts.length >= session.length) {
       const child = clone(activeChild);
@@ -122,7 +236,8 @@ export default function App() {
       if (!completed) return;
       child.diagnostics[session.subject] = { completedAt: completed.completedAt!, sessionId: completed.id };
       child.sessions.push(completed);
-      updateChild(child);
+      delete child.activeSessions[session.subject];
+      if (!(await updateChild(child))) return;
       setSummary(completed.summary);
       setScreen("result");
       setFeedback(null);
@@ -130,6 +245,19 @@ export default function App() {
     }
     setCurrentQuestion(selectNextQuestion(activeChild, session));
     setFeedback(null);
+  }
+
+  if (encryptedEnvelope && !household) {
+    return <SecureUnlockScreen envelope={encryptedEnvelope} onUnlocked={(state, key) => {
+      encryptionKeyRef.current = key;
+      setHousehold(state);
+      setUnlocked(true);
+    }} onRecover={() => {
+      clearHousehold();
+      setEncryptedEnvelope(null);
+      setHousehold(null);
+      setUnlocked(true);
+    }} />;
   }
 
   if (!household) {
@@ -153,7 +281,7 @@ export default function App() {
   }
 
   if (!unlocked) {
-    return <UnlockScreen household={household} onUnlocked={() => setUnlocked(true)} />;
+    return <UnlockScreen household={household} onUnlocked={handleLegacyUnlock} />;
   }
 
   const backToProfiles = () => {
@@ -164,12 +292,13 @@ export default function App() {
   };
 
   if (screen === "parent") {
-    return <ParentDashboard household={household} onBack={backToProfiles} onUpdateChild={updateChild} />;
+    return <>{storageBanner}<ParentDashboard household={household} onBack={backToProfiles} onUpdateChild={updateChild} onLock={lockHousehold} onImport={importBackup} /></>;
   }
 
   if (screen === "assessment" && activeChild && session && currentQuestion) {
     return (
       <div className="app-shell">
+        {storageBanner}
         <SessionHeader child={activeChild} subject={session.subject} kind={session.kind} answered={session.attempts.length} total={session.length} onBack={() => setScreen("child")} />
         <QuizScreen question={currentQuestion} feedback={feedback} onAnswer={answerQuestion} onNext={advanceSession} />
       </div>
@@ -179,6 +308,7 @@ export default function App() {
   if (screen === "result" && activeChild && session && summary) {
     return (
       <div className="app-shell">
+        {storageBanner}
         <SessionHeader child={activeChild} subject={session.subject} kind={session.kind} answered={session.length} total={session.length} onBack={() => setScreen("child")} />
         <SessionResult child={activeChild} subject={session.subject} kind={session.kind} summary={summary} onDone={() => setScreen("child")} onParent={() => { setShowParentGate(true); }} />
         {showParentGate ? <ParentPinDialog household={household} onCancel={() => setShowParentGate(false)} onSuccess={() => { setShowParentGate(false); setScreen("parent"); }} /> : null}
@@ -189,7 +319,8 @@ export default function App() {
   if (screen === "profiles") {
     return (
       <div className="app-shell">
-        <TopBar title={household.householdName} subtitle="选择今天的学习档案" />
+        {storageBanner}
+        <TopBar title={household.householdName} subtitle="选择今天的学习档案" onLock={lockHousehold} />
         <main className="profile-screen">
           <div className="profile-heading"><p className="eyebrow">孩子模式</p><h1>今天谁来学习？</h1><p>每个孩子都有自己的进度、复习节奏和学习计划。</p></div>
           <div className="profile-grid">
@@ -211,7 +342,8 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <TopBar title={activeChild?.name ?? "学习岛"} subtitle="今天想学什么？" onBack={backToProfiles} />
+      {storageBanner}
+      <TopBar title={activeChild?.name ?? "学习岛"} subtitle="今天想学什么？" onBack={backToProfiles} onLock={lockHousehold} />
       {activeChild ? (
         <main className="child-home">
           <section className="child-hero"><div className="child-hero-copy"><p className="eyebrow">今天的一点点</p><h1>{activeChild.name}，今天想学什么？</h1><p>每次只要 10–15 分钟。做对了会变成新的证据，不会只用一次答题就判定已经掌握。</p></div><div className="child-hero-visual"><img src="./assets/images/books.png" alt="" /><span>+1</span></div></section>
@@ -231,7 +363,7 @@ export default function App() {
   );
 }
 
-function UnlockScreen({ household, onUnlocked }: { household: HouseholdState; onUnlocked: () => void }) {
+function UnlockScreen({ household, onUnlocked }: { household: HouseholdState; onUnlocked: (pin: string) => void | Promise<void> }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(false);
@@ -241,7 +373,7 @@ function UnlockScreen({ household, onUnlocked }: { household: HouseholdState; on
     setChecking(true);
     const result = await hashPin(pin, household.pinSalt);
     setChecking(false);
-    if (result === household.pinHash) onUnlocked();
+    if (result === household.pinHash) await onUnlocked(pin);
     else setError("密码不正确，请再试一次");
   }
   return (
@@ -256,6 +388,67 @@ function UnlockScreen({ household, onUnlocked }: { household: HouseholdState; on
           {error ? <p className="form-error" role="alert">{error}</p> : null}
           <button className="primary-button wide-button" type="submit" disabled={checking}><ShieldCheck aria-hidden="true" />解锁家庭空间</button>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function SecureUnlockScreen({ envelope, onUnlocked, onRecover }: { envelope: EncryptedEnvelope; onUnlocked: (household: HouseholdState, key: CryptoKey) => void; onRecover: () => void }) {
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+  const [checking, setChecking] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!validatePin(pin)) { setError("请输入 4 到 6 位数字"); return; }
+    setChecking(true);
+    try {
+      const result = await unlockEncryptedHousehold(envelope, pin);
+      onUnlocked(result.household, result.key);
+    } catch {
+      setError("密码不正确，或家庭数据无法解密");
+      setFailedAttempts((count) => count + 1);
+    } finally {
+      setChecking(false);
+    }
+  }
+  return (
+    <div className="app-shell setup-shell">
+      <div className="setup-card unlock-card">
+        <div className="setup-mark"><img src="./assets/images/seedling.png" alt="" /></div>
+        <p className="eyebrow">家庭学习空间</p>
+        <h1>输入家长密码</h1>
+        <p className="setup-copy">孩子档案已加密保存在这台设备上，只有正确密码能够解密。</p>
+        <form onSubmit={submit} className="setup-form">
+          <label><span>家长密码</span><input aria-label="家长密码" type="password" inputMode="numeric" maxLength={6} value={pin} onChange={(event) => { setPin(event.target.value.replace(/[^0-9]/g, "")); setError(""); }} autoFocus /></label>
+          {error ? <p className="form-error" role="alert">{error}</p> : null}
+          <button className="primary-button wide-button" type="submit" disabled={checking}><ShieldCheck aria-hidden="true" />解锁家庭空间</button>
+          {failedAttempts > 0 ? <button className="quiet-button wide-button" type="button" onClick={() => {
+            downloadJson(envelope, `little-sprout-encrypted-${new Date().toISOString().slice(0, 10)}.json`);
+            if (window.confirm("如果密码仍然无法解密，可以下载当前加密数据后重新建立家庭。确定继续吗？")) onRecover();
+          }}>下载加密数据并重新开始</button> : null}
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function RecoveryScreen({ recovery, onReset }: { recovery: { raw: string; error: string }; onReset: () => void }) {
+  function downloadBackup() {
+    downloadText(recovery.raw, `little-sprout-backup-${new Date().toISOString().slice(0, 10)}.json`);
+  }
+  return (
+    <div className="app-shell setup-shell">
+      <div className="setup-card">
+        <div className="setup-mark"><ShieldCheck aria-hidden="true" /></div>
+        <p className="eyebrow">数据保护</p>
+        <h1>学习记录需要修复</h1>
+        <p className="setup-copy">检测到无法读取的数据。系统没有自动覆盖它，你可以先下载损坏数据备份，再重新建立家庭空间。</p>
+        <div className="recovery-detail">{recovery.error}</div>
+        <div className="dialog-actions">
+          <button className="quiet-button" type="button" onClick={downloadBackup}>下载损坏数据</button>
+          <button className="primary-button" type="button" onClick={onReset}>清除并重新开始</button>
+        </div>
       </div>
     </div>
   );
@@ -285,14 +478,14 @@ function ParentPinDialog({ household, onCancel, onSuccess }: { household: Househ
   );
 }
 
-function TopBar({ title, subtitle, onBack }: { title: string; subtitle: string; onBack?: () => void }) {
+function TopBar({ title, subtitle, onBack, onLock }: { title: string; subtitle: string; onBack?: () => void; onLock?: () => void }) {
   return (
     <header className="app-header">
       <button className="brand-button" type="button" onClick={onBack} aria-label="回到孩子选择">
         <img className="brand-mark" src="./assets/images/seedling.png" alt="" />
         <span className="brand-copy"><strong>{title}</strong><small>{subtitle}</small></span>
       </button>
-      <div className="header-badge"><ShieldCheck aria-hidden="true" /><span>家庭空间</span></div>
+      <div className="header-tools"><div className="header-badge"><ShieldCheck aria-hidden="true" /><span>家庭空间</span></div>{onLock ? <button className="icon-button" type="button" onClick={() => void onLock()} aria-label="锁定家庭空间"><Lock aria-hidden="true" /></button> : null}</div>
     </header>
   );
 }
@@ -326,6 +519,7 @@ function QuizScreen({ question, feedback, onAnswer, onNext }: { question: Choice
             <button
               key={option}
               className={`answer-option ${feedback && option === feedback.answer ? (correct ? "is-correct" : "is-wrong") : ""} ${feedback && !correct && option === question.correctAnswer ? "is-correct-answer" : ""}`}
+              data-correct={option === question.correctAnswer ? "true" : "false"}
               type="button"
               onClick={() => onAnswer(option)}
               disabled={Boolean(feedback)}
@@ -356,10 +550,11 @@ function SessionResult({ child, subject, kind, summary, onDone, onParent }: { ch
   );
 }
 
-function ParentDashboard({ household, onBack, onUpdateChild }: { household: HouseholdState; onBack: () => void; onUpdateChild: (child: ChildProfile) => void }) {
+function ParentDashboard({ household, onBack, onUpdateChild, onLock, onImport }: { household: HouseholdState; onBack: () => void; onUpdateChild: (child: ChildProfile) => void; onLock: () => void | Promise<void>; onImport: (household: HouseholdState) => void }) {
   function resetSubject(child: ChildProfile, subject: Subject) {
     const next = clone(child);
     delete next.diagnostics[subject];
+    delete next.activeSessions[subject];
     for (const skill of SKILLS.filter((item) => item.subject === subject)) {
       next.evidence[skill.id] = createSkillEvidence(skill.id);
     }
@@ -372,17 +567,36 @@ function ParentDashboard({ household, onBack, onUpdateChild }: { household: Hous
     onUpdateChild(next);
   }
 
+  function exportBackup() {
+    downloadJson(household, `little-sprout-family-backup-${new Date().toISOString().slice(0, 10)}.json`);
+  }
+
+  async function importBackupFile(file: File | undefined) {
+    if (!file) return;
+    try {
+      const imported = parseHouseholdBackup(await file.text());
+      if (!window.confirm("导入会替换当前家庭中的全部孩子和学习记录，确定继续吗？")) return;
+      onImport(imported);
+    } catch {
+      window.alert("这个备份文件无法读取，当前学习记录没有改变。");
+    }
+  }
+
   return (
     <div className="app-shell">
-      <header className="app-header"><div><p className="eyebrow">家长专属</p><h1>学习进度总览</h1></div><button className="quiet-button compact-button" type="button" onClick={onBack}><X aria-hidden="true" />关闭</button></header>
+      <header className="app-header"><div><p className="eyebrow">家长专属</p><h1>学习进度总览</h1></div><div className="dashboard-actions"><button className="quiet-button compact-button" type="button" onClick={onBack}><X aria-hidden="true" />关闭</button><button className="quiet-button compact-button" type="button" onClick={() => void onLock()}><Lock aria-hidden="true" />锁定</button></div></header>
       <main className="parent-dashboard">
+        <div className="backup-panel">
+          <button className="quiet-button compact-button" type="button" onClick={exportBackup}><Download aria-hidden="true" />导出学习备份</button>
+          <label className="quiet-button compact-button file-button"><Upload aria-hidden="true" />导入学习备份<input type="file" accept="application/json,.json" onChange={(event) => void importBackupFile(event.target.files?.[0])} /></label>
+        </div>
         {household.children.length === 0 ? <div className="empty-panel">还没有孩子档案。回到孩子选择页，添加第一个档案。</div> : household.children.map((child) => (
           <section className="parent-child-panel" key={child.id}>
             <div className="parent-child-heading"><div className={`profile-avatar small-avatar avatar-${child.avatar}`}><img src={`./assets/images/${avatars.find((avatar) => avatar.id === child.avatar)?.image ?? "star"}.png`} alt="" /></div><div><h2>{child.name}</h2><p>{child.attempts.length} 次有效作答 · {Object.keys(child.diagnostics).length} 科已完成定位</p></div></div>
             <div className="parent-controls">
               <label><span>每次题量</span><select aria-label={`${child.name}的每次题量`} value={child.settings.sessionLength} onChange={(event) => changeSessionLength(child, Number(event.target.value))}><option value="6">6 题</option><option value="8">8 题</option><option value="10">10 题</option></select></label>
               <div className="reset-group">{(Object.keys(subjectNames) as Subject[]).map((subject) => <button key={subject} className="quiet-button compact-button" type="button" onClick={() => resetSubject(child, subject)}>重新定位{subjectNames[subject]}</button>)}</div>
-              <small>内容包 {CONTENT_VERSION} · 30 个知识点 · 180 道固定题</small>
+              <small>内容包 {CONTENT_VERSION} · 30 个知识点 · 180 道选择题 · 试点覆盖，不代表完整 P1/P2 课程</small>
             </div>
             {(Object.keys(subjectNames) as Subject[]).map((subject) => {
               const subjectSkills = SKILLS.filter((skill) => skill.subject === subject);
@@ -397,18 +611,21 @@ function ParentDashboard({ household, onBack, onUpdateChild }: { household: Hous
   );
 }
 
-function AddChildDialog({ onCancel, onSave }: { onCancel: () => void; onSave: (child: ChildProfile) => void }) {
+function AddChildDialog({ onCancel, onSave }: { onCancel: () => void; onSave: (child: ChildProfile) => void | Promise<void> }) {
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState("star");
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const canSave = useMemo(() => name.trim().length > 0, [name]);
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!canSave) { setError("请先填写孩子名字"); return; }
-    onSave(createChildProfile(name, avatar));
+    if (!canSave || saving) { if (!canSave) setError("请先填写孩子名字"); return; }
+    setSaving(true);
+    await onSave(createChildProfile(name, avatar));
+    setSaving(false);
   }
   return (
-    <div className="modal-backdrop"><div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="add-child-title"><p className="eyebrow">家长操作</p><h2 id="add-child-title">新建孩子档案</h2><form onSubmit={submit} className="dialog-form"><label><span>孩子名字</span><input aria-label="孩子名字" value={name} onChange={(event) => setName(event.target.value)} placeholder="只填写日常称呼也可以" autoFocus /></label><div className="avatar-picker" aria-label="选择头像">{avatars.map((item) => <button key={item.id} className={`avatar-choice ${avatar === item.id ? "is-selected" : ""}`} type="button" aria-label={item.label} onClick={() => setAvatar(item.id)}><img src={`./assets/images/${item.image}.png`} alt="" /></button>)}</div>{error ? <p className="form-error" role="alert">{error}</p> : null}<div className="dialog-actions"><button className="quiet-button" type="button" onClick={onCancel}>取消</button><button className="primary-button" type="submit">保存档案</button></div></form></div></div>
+    <div className="modal-backdrop"><div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="add-child-title"><p className="eyebrow">家长操作</p><h2 id="add-child-title">新建孩子档案</h2><form onSubmit={submit} className="dialog-form"><label><span>孩子名字</span><input aria-label="孩子名字" value={name} onChange={(event) => setName(event.target.value)} placeholder="只填写日常称呼也可以" autoFocus /></label><div className="avatar-picker" aria-label="选择头像">{avatars.map((item) => <button key={item.id} className={`avatar-choice ${avatar === item.id ? "is-selected" : ""}`} type="button" aria-label={item.label} onClick={() => setAvatar(item.id)}><img src={`./assets/images/${item.image}.png`} alt="" /></button>)}</div>{error ? <p className="form-error" role="alert">{error}</p> : null}<div className="dialog-actions"><button className="quiet-button" type="button" onClick={onCancel}>取消</button><button className="primary-button" type="submit" disabled={saving}>{saving ? "保存中…" : "保存档案"}</button></div></form></div></div>
   );
 }
 
@@ -426,4 +643,18 @@ function speakText(text: string, language: string) {
   const voice = window.speechSynthesis.getVoices().find((item) => item.lang.startsWith(language.slice(0, 2)));
   if (voice) utterance.voice = voice;
   window.speechSynthesis.speak(utterance);
+}
+
+function downloadJson(value: unknown, filename: string) {
+  downloadText(JSON.stringify(value, null, 2), filename);
+}
+
+function downloadText(text: string, filename: string) {
+  const blob = new Blob([text], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
 }

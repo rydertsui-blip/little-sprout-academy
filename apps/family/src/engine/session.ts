@@ -10,22 +10,17 @@ export interface SkillRecommendation {
   priority: number;
 }
 
-function diagnosticQuestionIds(subject: Subject): string[] {
-  return getQuestionsForSubject(subject).filter((question) => question.diagnostic).map((question) => question.id).slice(0, 8);
-}
-
 function createSessionRecord(child: ChildProfile, subject: Subject, now: Date, kind: "diagnostic" | "practice", length: number): SessionRecord {
   if (kind === "diagnostic") {
-    const questionIds = diagnosticQuestionIds(subject);
     return {
       id: `session-${now.getTime()}-${Math.random().toString(36).slice(2, 7)}`,
       childId: child.id,
       subject,
       kind,
-      length: questionIds.length,
+      length,
       startedAt: now.toISOString(),
       completedAt: null,
-      plannedQuestionIds: questionIds,
+      plannedQuestionIds: [],
       attempts: [],
       summary: []
     };
@@ -58,16 +53,32 @@ export function createAdaptiveSession(
 
 export function selectNextQuestion(child: ChildProfile, session: SessionRecord): ChoiceQuestion | null {
   const answered = new Set(session.attempts.map((attempt) => attempt.questionId));
-  if (session.kind === "diagnostic") {
-    const planned = session.plannedQuestionIds.find((id) => !answered.has(id));
-    if (planned) return getQuestionById(planned) ?? null;
-  }
   if (session.attempts.length >= session.length) return null;
+  if (session.kind === "diagnostic") {
+    const recent = session.attempts.slice(-2);
+    const consecutiveCorrect = recent.length === 2 && recent.every((attempt) => attempt.correct);
+    const lastCorrect = recent.at(-1)?.correct ?? false;
+    const targetDifficulty = consecutiveCorrect ? 3 : lastCorrect ? 2 : 1;
+    const observedSkills = new Set(session.attempts.map((attempt) => attempt.skillId));
+    const candidates = getQuestionsForSubject(session.subject)
+      .filter((question) => question.diagnostic && !answered.has(question.id))
+      .sort((a, b) => {
+        const aNovel = observedSkills.has(a.skillId) ? 1 : 0;
+        const bNovel = observedSkills.has(b.skillId) ? 1 : 0;
+        return aNovel - bNovel
+          || Math.abs(a.difficulty - targetDifficulty) - Math.abs(b.difficulty - targetDifficulty)
+          || a.id.localeCompare(b.id);
+      });
+    return candidates[0] ?? null;
+  }
   const recommendations = recommendedNextSkills(child, session.subject, new Date());
   for (const recommendation of recommendations) {
+    const skillEvidence = child.evidence[recommendation.skill.id];
+    const targetDifficulty = skillEvidence.pKnown < 0.55 ? 1 : skillEvidence.pKnown < 0.8 ? 2 : 3;
     const question = getQuestionsForSubject(session.subject)
       .filter((item) => item.skillId === recommendation.skill.id && !answered.has(item.id))
-      .sort((a, b) => Math.abs(0.8 - predictedSuccess(child.evidence[a.skillId])) - Math.abs(0.8 - predictedSuccess(child.evidence[b.skillId])))[0];
+      .sort((a, b) => Math.abs(a.difficulty - targetDifficulty) - Math.abs(b.difficulty - targetDifficulty)
+        || Math.abs(0.8 - predictedSuccess(child.evidence[a.skillId])) - Math.abs(0.8 - predictedSuccess(child.evidence[b.skillId])))[0];
     if (question) return question;
   }
   return null;
@@ -80,7 +91,6 @@ export function recordSessionAnswer(
 ): SessionRecord {
   const question = getQuestionById(answer.questionId);
   if (!question) throw new Error(`Unknown question: ${answer.questionId}`);
-  if (session.kind === "diagnostic" && !session.plannedQuestionIds.includes(answer.questionId)) throw new Error(`Question not in session: ${answer.questionId}`);
   if (session.attempts.some((attempt) => attempt.questionId === answer.questionId)) throw new Error(`Question already answered: ${answer.questionId}`);
   const at = answer.at ?? new Date();
   const attempt: Attempt = {

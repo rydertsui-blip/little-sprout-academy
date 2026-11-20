@@ -6,6 +6,7 @@ import {
   getQuestionsForSubject,
   validateContentCatalog
 } from "./catalog";
+import { classifyMastery, createSkillEvidence, updateBktEvidence } from "../engine/bkt";
 
 describe("curriculum content catalog", () => {
   it("has acyclic prerequisite skills", () => {
@@ -50,6 +51,29 @@ describe("curriculum content catalog", () => {
       const operator = operators![2];
       const expected = operator === "+" ? left + right : operator === "-" ? left - right : operator === "×" ? left * right : left / right;
       expect(Number(question.correctAnswer)).toBe(expected);
+    }
+  });
+
+  it("has at least four distinct questions available for mastery evidence in every skill", () => {
+    for (const skill of SKILLS) {
+      expect(getQuestionsForSubject(skill.subject).filter((question) => question.skillId === skill.id).map((question) => question.id).length).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it("can reach secure mastery using the actual question ids of every skill", () => {
+    for (const skill of SKILLS) {
+      const questions = getQuestionsForSubject(skill.subject).filter((question) => question.skillId === skill.id).slice(0, 4);
+      let evidence = createSkillEvidence(skill.id, new Date("2026-11-20T08:00:00Z"));
+      for (const [index, question] of questions.entries()) {
+        evidence = updateBktEvidence(evidence, {
+          correct: true,
+          hintUsed: false,
+          template: question.template,
+          questionId: question.id,
+          at: new Date(index === 3 ? "2026-11-21T08:00:00Z" : "2026-11-20T08:00:00Z")
+        });
+      }
+      expect(classifyMastery(evidence, new Date("2026-11-21T08:01:00Z"))).toBe("secure");
     }
   });
 

@@ -27,8 +27,10 @@ export function createSkillEvidence(skillId: string, at = new Date()): SkillEvid
     independentCorrect: 0,
     correctWithHint: 0,
     templates: [],
+    questionIds: [],
     lastAttemptAt: null,
     firstEvidenceAt: null,
+    lastStageAdvanceAt: null,
     delayedEvidence: false,
     reviewStage: 0,
     dueAt: new Date(at.getTime() + 24 * 60 * 60 * 1000).toISOString(),
@@ -38,6 +40,15 @@ export function createSkillEvidence(skillId: string, at = new Date()): SkillEvid
 
 export function updateBktEvidence(evidence: SkillEvidence, observation: BktObservation): SkillEvidence {
   const at = observation.at ?? new Date();
+  const independent = !observation.hintUsed;
+  const newQuestion = independent && (!observation.questionId || !evidence.questionIds.includes(observation.questionId));
+  if (!newQuestion) {
+    return {
+      ...evidence,
+      correctWithHint: evidence.correctWithHint + (observation.correct && observation.hintUsed ? 1 : 0),
+      lastAttemptAt: at.toISOString()
+    };
+  }
   const prior = evidence.pKnown;
   let posterior: number;
   if (observation.correct) {
@@ -50,33 +61,48 @@ export function updateBktEvidence(evidence: SkillEvidence, observation: BktObser
     posterior = numerator / denominator;
   }
   const pKnown = Math.min(0.999, Math.max(0.001, posterior + (1 - posterior) * evidence.pTransit));
-  const independent = !observation.hintUsed;
-  const nextTemplates = independent && !evidence.templates.includes(observation.template)
+  const nextQuestionIds = newQuestion && observation.questionId && !evidence.questionIds.includes(observation.questionId)
+    ? [...evidence.questionIds, observation.questionId]
+    : evidence.questionIds;
+  const nextTemplates = newQuestion && !evidence.templates.includes(observation.template)
     ? [...evidence.templates, observation.template]
     : evidence.templates;
   const delayedEvidence = evidence.delayedEvidence || Boolean(
+    newQuestion
+    &&
     evidence.firstEvidenceAt
       && at.getTime() - new Date(evidence.firstEvidenceAt).getTime() >= 24 * 60 * 60 * 1000
   );
 
   let reviewStage = evidence.reviewStage;
-  if (observation.correct && independent) reviewStage = Math.min(5, reviewStage + 1);
+  let lastStageAdvanceAt = evidence.lastStageAdvanceAt;
+  let scheduledDueAt = evidence.dueAt;
+  if (observation.correct && newQuestion) {
+    const dueReached = !evidence.dueAt || at.getTime() >= new Date(evidence.dueAt).getTime();
+    if (reviewStage === 0 || dueReached) {
+      reviewStage = Math.min(5, reviewStage + 1);
+      lastStageAdvanceAt = at.toISOString();
+      const intervals = [1, 3, 7, 14, 30, 60];
+      scheduledDueAt = new Date(at.getTime() + intervals[Math.max(0, reviewStage - 1)] * 24 * 60 * 60 * 1000).toISOString();
+    }
+  }
   if (!observation.correct && independent) reviewStage = 0;
-  const intervals = [1, 3, 7, 14, 30, 60];
-  const dueAt = new Date(at.getTime() + intervals[Math.max(0, reviewStage - 1)] * 24 * 60 * 60 * 1000).toISOString();
+  if (!observation.correct && independent) scheduledDueAt = new Date(at.getTime() + 24 * 60 * 60 * 1000).toISOString();
 
   return {
     ...evidence,
     pKnown,
-    nEff: evidence.nEff + (independent ? 1 : 0),
-    independentCorrect: evidence.independentCorrect + (observation.correct && independent ? 1 : 0),
+    nEff: evidence.nEff + (newQuestion ? 1 : 0),
+    independentCorrect: evidence.independentCorrect + (observation.correct && newQuestion ? 1 : 0),
     correctWithHint: evidence.correctWithHint + (observation.correct && observation.hintUsed ? 1 : 0),
     templates: nextTemplates,
+    questionIds: nextQuestionIds,
     lastAttemptAt: at.toISOString(),
     firstEvidenceAt: evidence.firstEvidenceAt ?? (independent ? at.toISOString() : null),
+    lastStageAdvanceAt,
     delayedEvidence,
     reviewStage,
-    dueAt,
+    dueAt: scheduledDueAt,
     wrongStreak: observation.correct ? 0 : evidence.wrongStreak + 1
   };
 }
@@ -97,10 +123,10 @@ export function classifyMastery(evidence: SkillEvidence, now = new Date()): Mast
   const lower = wilsonLowerBound(evidence.independentCorrect, evidence.nEff);
   const hasDelayedReview = evidence.delayedEvidence && evidence.lastAttemptAt
     && new Date(evidence.lastAttemptAt).getTime() >= new Date(evidence.firstEvidenceAt ?? evidence.lastAttemptAt).getTime() + 24 * 60 * 60 * 1000;
-  if (evidence.independentCorrect >= 4 && evidence.nEff >= 4 && evidence.templates.length >= 3 && lower >= 0.59 && hasDelayedReview) {
+  if (evidence.independentCorrect >= 4 && evidence.nEff >= 4 && evidence.questionIds.length >= 4 && lower >= 0.59 && hasDelayedReview) {
     return "secure";
   }
-  if (evidence.independentCorrect >= 3 && evidence.nEff >= 3 && evidence.templates.length >= 2 && lower >= 0.5) {
+  if (evidence.independentCorrect >= 3 && evidence.nEff >= 3 && evidence.questionIds.length >= 3 && lower >= 0.5) {
     return "likely-secure";
   }
   if (evidence.independentCorrect >= 1 || evidence.pKnown >= 0.45) {

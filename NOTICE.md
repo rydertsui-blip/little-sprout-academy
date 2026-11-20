@@ -18,7 +18,7 @@ The Latin reading font is [Andika](https://software.sil.org/andika/), licensed u
 
 ## React and pinyin-pro
 
-The family learning app bundles React (MIT) and pinyin-pro (MIT). License texts are included at `licenses/react-MIT.txt` and `licenses/pinyin-pro-MIT.txt`.
+The family learning app bundles React (MIT), pinyin-pro (MIT) and Zod (MIT). License texts are included under `licenses/`.
 
 ## Offline speech
 
