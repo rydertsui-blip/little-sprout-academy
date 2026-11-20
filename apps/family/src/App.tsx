@@ -3,6 +3,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, Check, Download, Headphones, Loc
 import { CONTENT_VERSION, SKILLS } from "./content/catalog";
 import { SUBJECT_NAMES, UI_COPY } from "./content/copy";
 import { VOICE_LINES } from "./content/audioAssets";
+import { OFFICIAL_ACTIVITIES, OFFICIAL_OUTCOMES, OFFICIAL_SOURCES } from "./content/officialSources";
 import { HANDWRITING_CHARACTERS, type HandwritingCharacter } from "./content/handwriting";
 import { classifyMastery, createSkillEvidence } from "./engine/bkt";
 import { recordHandwritingPractice } from "./engine/handwriting";
@@ -45,6 +46,12 @@ const subjectCards: Array<{ subject: Subject; title: string; shortLabel: string;
 ];
 
 const subjectNames = SUBJECT_NAMES;
+const mappedOfficialOutcomeIds = new Set([
+  ...SKILLS.flatMap((skill) => skill.officialOutcomes.map((mapping) => mapping.outcomeId)),
+  ...OFFICIAL_ACTIVITIES.flatMap((activity) => activity.outcomeMappings.map((mapping) => mapping.outcomeId))
+]);
+const uncoveredOfficialOutcomeCount = OFFICIAL_OUTCOMES.filter((outcome) => !mappedOfficialOutcomeIds.has(outcome.id)).length;
+const supplementarySkillCount = SKILLS.filter((skill) => skill.provenanceScope === "supplementary-practice").length;
 
 function createSalt(): string {
   return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
@@ -797,7 +804,7 @@ function ParentDashboard({ household, onBack, onAddChild, onDeleteChild, onUpdat
                 <label><input type="checkbox" checked={child.settings.highContrast} onChange={(event) => changeAccessibility(child, "highContrast", event.target.checked)} />{UI_COPY.parent.highContrast}</label>
                 <label><input type="checkbox" checked={child.settings.largeText} onChange={(event) => changeAccessibility(child, "largeText", event.target.checked)} />{UI_COPY.parent.largeText}</label>
               </div>
-              <small>{UI_COPY.parent.contentSummary(CONTENT_VERSION)}<br />{UI_COPY.parent.reviewStatus}</small>
+              <small>{UI_COPY.parent.contentSummary(CONTENT_VERSION)}<br />{UI_COPY.parent.officialSourceSummary(OFFICIAL_SOURCES.length, OFFICIAL_OUTCOMES.length, uncoveredOfficialOutcomeCount, supplementarySkillCount)}<br />{UI_COPY.parent.reviewStatus}</small>
             </div>
             <div className="next-actions" aria-label={`${child.name}的下一步建议`}>
               {buildChildInsights(child).map((insight) => (

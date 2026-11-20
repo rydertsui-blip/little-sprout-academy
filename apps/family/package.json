@@ -1,16 +1,18 @@
 {
   "name": "little-sprout-family",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5176",
     "test": "vitest run",
     "test:watch": "vitest",
+    "verify:sources": "tsx scripts/verify-sources.ts",
+    "coverage:sources": "tsx scripts/verify-sources.ts --summary",
     "verify:content": "tsx scripts/verify-content.ts",
     "update:content": "tsx scripts/verify-content.ts --update",
     "update:question-ids": "tsx scripts/update-question-ids.ts",
-    "build": "npm run verify:content && tsc -b && vite build && cp src/manual-sw.js ../../family/sw.js && node scripts/postbuild.mjs"
+    "build": "npm run verify:sources && npm run verify:content && tsc -b && vite build && cp src/manual-sw.js ../../family/sw.js && node scripts/postbuild.mjs"
   },
   "dependencies": {
     "hanzi-writer": "^3.7.3",

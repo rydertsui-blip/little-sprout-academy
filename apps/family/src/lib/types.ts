@@ -8,6 +8,7 @@ export interface ContentAudit {
   automatedReview: "passed" | "failed";
   humanLanguageReview: "pending" | "approved";
   humanPedagogyReview: "pending" | "approved";
+  provenanceScope: "official-outcome" | "supplementary-practice";
 }
 
 export interface Skill {
@@ -19,6 +20,11 @@ export interface Skill {
   description: string;
   prerequisites: string[];
   sourceDocument: string;
+  provenanceScope: "official-outcome" | "supplementary-practice";
+  officialOutcomes: Array<{
+    outcomeId: string;
+    mapping: "exact" | "broad";
+  }>;
 }
 
 interface QuestionBase {

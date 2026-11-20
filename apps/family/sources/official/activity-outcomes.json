@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "activities": [
+    {
+      "id": "activity-handwriting-12-characters",
+      "subject": "mandarin",
+      "title": "12-character handwriting and tracing",
+      "contentIds": ["人", "口", "山", "手", "日", "月", "木", "水", "火", "田", "目", "足"],
+      "outcomeMappings": [
+        { "outcomeId": "MOE-CN-P1P2-WRITE-CHAR", "mapping": "exact" },
+        { "outcomeId": "MOE-CN-P1P2-WRITE-STROKES", "mapping": "exact" }
+      ]
+    },
+    {
+      "id": "activity-speaking-mandarin-basic-words",
+      "subject": "mandarin",
+      "title": "Listen and repeat: 12 basic Mandarin words",
+      "contentIds": ["zh-ren", "zh-kou", "zh-shan", "zh-shou", "zh-ri", "zh-yue", "zh-mu", "zh-shui", "zh-huo", "zh-tian", "zh-mu-eye", "zh-zu"],
+      "outcomeMappings": [
+        { "outcomeId": "MOE-CN-P1P2-SPEAK-FLUENT", "mapping": "broad" }
+      ]
+    },
+    {
+      "id": "activity-speaking-english-basic-words",
+      "subject": "english",
+      "title": "Listen and repeat: 10 basic English words",
+      "contentIds": ["en-apple", "en-bear", "en-cat", "en-dog", "en-fish", "en-flower", "en-moon", "en-star", "en-sun", "en-tree"],
+      "outcomeMappings": [
+        { "outcomeId": "MOE-EL-P1P2-SPEAK-FLUENCY", "mapping": "broad" }
+      ]
+    }
+  ]
+}

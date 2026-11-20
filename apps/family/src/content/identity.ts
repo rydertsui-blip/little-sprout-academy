@@ -1,6 +1,7 @@
 import { CONTENT_PACK } from "./release";
 import { QUESTIONS } from "./catalog";
 import { SKILLS } from "./skills";
+import { OFFICIAL_ACTIVITIES, OFFICIAL_OUTCOMES, OFFICIAL_SOURCES } from "./officialSources";
 
 export function canonicalContentPayload(): string {
   const skills = [...SKILLS]
@@ -13,7 +14,9 @@ export function canonicalContentPayload(): string {
       gradeBand: skill.gradeBand,
       description: skill.description,
       prerequisites: [...skill.prerequisites].sort(),
-      sourceDocument: skill.sourceDocument
+      sourceDocument: skill.sourceDocument,
+      provenanceScope: skill.provenanceScope,
+      officialOutcomes: [...skill.officialOutcomes].sort((a, b) => a.outcomeId.localeCompare(b.outcomeId))
     }));
   const questions = [...QUESTIONS]
     .sort((a, b) => a.id.localeCompare(b.id))
@@ -41,5 +44,14 @@ export function canonicalContentPayload(): string {
       image: question.image ?? null,
       passage: question.passage ?? null
     }));
-  return JSON.stringify({ pack: CONTENT_PACK, skills, questions });
+  const officialSources = [...OFFICIAL_SOURCES]
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((source) => ({ ...source }));
+  const officialOutcomes = [...OFFICIAL_OUTCOMES]
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((outcome) => ({ ...outcome, levels: [...outcome.levels].sort(), quoteParts: outcome.quoteParts ? [...outcome.quoteParts] : undefined }));
+  const officialActivities = [...OFFICIAL_ACTIVITIES]
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((activity) => ({ ...activity, contentIds: [...activity.contentIds], outcomeMappings: [...activity.outcomeMappings].sort((a, b) => a.outcomeId.localeCompare(b.outcomeId)) }));
+  return JSON.stringify({ pack: CONTENT_PACK, skills, questions, officialSources, officialOutcomes, officialActivities });
 }

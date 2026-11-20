@@ -21,7 +21,8 @@ const question: MatchQuestion = {
     sourceRefs: ["test"],
     automatedReview: "passed",
     humanLanguageReview: "pending",
-    humanPedagogyReview: "pending"
+    humanPedagogyReview: "pending",
+    provenanceScope: "official-outcome"
   },
   leftLabel: "Number",
   rightLabel: "Word",

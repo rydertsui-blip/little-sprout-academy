@@ -1,10 +1,12 @@
 import type { Skill } from "../lib/types";
 
+type SkillSeed = Omit<Skill, "officialOutcomes" | "provenanceScope">;
+
 const M = "MOE 2021 Mathematics Syllabus (Primary 1 to 6)";
 const C = "MOE 2024 Chinese Language (Primary) Syllabus";
 const E = "MOE 2020 English Language (Primary) Syllabus";
 
-export const SKILLS: Skill[] = [
+const SKILL_SEEDS: SkillSeed[] = [
   { id: "math-count-100", subject: "math", title: "Numbers to 100", shortTitle: "数到100", gradeBand: "P1", description: "Counting, tens and ones, comparing numbers.", prerequisites: [], sourceDocument: M },
   { id: "math-place-value-1000", subject: "math", title: "Numbers to 1000", shortTitle: "三位数", gradeBand: "P2", description: "Hundreds, tens and ones up to 1000.", prerequisites: ["math-count-100"], sourceDocument: M },
   { id: "math-add-sub-100", subject: "math", title: "Add and subtract to 100", shortTitle: "100内加减", gradeBand: "P1", description: "Addition and subtraction within 100 without regrouping.", prerequisites: ["math-count-100"], sourceDocument: M },
@@ -38,3 +40,42 @@ export const SKILLS: Skill[] = [
   { id: "english-reading", subject: "english", title: "Reading comprehension", shortTitle: "阅读理解", gradeBand: "P2", description: "Find literal information in a short text.", prerequisites: ["english-sight-words"], sourceDocument: E },
   { id: "english-spelling", subject: "english", title: "Basic spelling", shortTitle: "拼写", gradeBand: "P1-P2", description: "Choose correctly spelled high-frequency words.", prerequisites: ["english-phonics"], sourceDocument: E }
 ];
+
+const OFFICIAL_OUTCOMES_BY_SKILL: Record<string, Skill["officialOutcomes"]> = {
+  "math-count-100": [{ outcomeId: "MOE-MATH-P1-WN-NUM", mapping: "exact" }],
+  "math-place-value-1000": [{ outcomeId: "MOE-MATH-P2-WN-NUM", mapping: "exact" }],
+  "math-add-sub-100": [{ outcomeId: "MOE-MATH-P1-WN-AS", mapping: "exact" }],
+  "math-add-sub-regroup": [{ outcomeId: "MOE-MATH-P1-WN-AS", mapping: "exact" }, { outcomeId: "MOE-MATH-P2-WN-AS", mapping: "exact" }],
+  "math-add-sub-1000": [{ outcomeId: "MOE-MATH-P2-WN-AS", mapping: "exact" }],
+  "math-multiply-tables": [{ outcomeId: "MOE-MATH-P1-WN-MD", mapping: "exact" }, { outcomeId: "MOE-MATH-P2-WN-MD", mapping: "exact" }],
+  "math-divide-tables": [{ outcomeId: "MOE-MATH-P1-WN-MD", mapping: "exact" }, { outcomeId: "MOE-MATH-P2-WN-MD", mapping: "exact" }],
+  "math-fractions": [{ outcomeId: "MOE-MATH-P2-FRAC-WHOLE", mapping: "exact" }],
+  "math-money": [{ outcomeId: "MOE-MATH-P1-MONEY", mapping: "exact" }, { outcomeId: "MOE-MATH-P2-MONEY", mapping: "exact" }],
+  "math-time": [{ outcomeId: "MOE-MATH-P1-TIME", mapping: "exact" }, { outcomeId: "MOE-MATH-P2-TIME", mapping: "exact" }],
+  "math-shapes": [{ outcomeId: "MOE-MATH-P1-2D", mapping: "exact" }, { outcomeId: "MOE-MATH-P2-2D-PATTERN", mapping: "exact" }, { outcomeId: "MOE-MATH-P2-3D", mapping: "exact" }],
+  "math-picture-graph": [{ outcomeId: "MOE-MATH-P1-PICGRAPH", mapping: "exact" }, { outcomeId: "MOE-MATH-P2-PICGRAPH", mapping: "exact" }],
+  "mandarin-initials": [{ outcomeId: "MOE-CN-P1P2-SOUND", mapping: "exact" }],
+  "mandarin-finals": [{ outcomeId: "MOE-CN-P1P2-SOUND", mapping: "exact" }],
+  "mandarin-tones": [{ outcomeId: "MOE-CN-P1P2-SOUND", mapping: "exact" }],
+  "mandarin-syllables": [{ outcomeId: "MOE-CN-P1P2-SOUND", mapping: "exact" }],
+  "mandarin-characters": [{ outcomeId: "MOE-CN-P1P2-RECOGNITION", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-RADICALS", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-WRITE-CHAR", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-WRITE-STROKES", mapping: "exact" }],
+  "mandarin-vocabulary": [{ outcomeId: "MOE-CN-P1P2-READ-UNDERSTAND", mapping: "broad" }, { outcomeId: "MOE-CN-P1P2-READ-INFER-WORD", mapping: "broad" }],
+  "mandarin-reading": [{ outcomeId: "MOE-CN-P1P2-READ-DETAIL", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-READ-INFER-WORD", mapping: "broad" }],
+  "mandarin-classifiers": [],
+  "mandarin-word-order": [],
+  "english-letters": [{ outcomeId: "MOE-EL-P1P2-READ-BEGIN", mapping: "broad" }],
+  "english-phonics": [{ outcomeId: "MOE-EL-P1P2-LISTEN-SOUND", mapping: "exact" }],
+  "english-sight-words": [{ outcomeId: "MOE-EL-P1P2-READ-BEGIN", mapping: "exact" }],
+  "english-vocabulary": [{ outcomeId: "MOE-EL-P1P2-VOCAB-DEVELOP", mapping: "exact" }, { outcomeId: "MOE-EL-P1P2-VOCAB-USE", mapping: "exact" }],
+  "english-a-an": [{ outcomeId: "MOE-EL-P1P2-GRAMMAR-WPS", mapping: "broad" }],
+  "english-plural": [{ outcomeId: "MOE-EL-P1P2-GRAMMAR-WPS", mapping: "broad" }],
+  "english-sentence-order": [{ outcomeId: "MOE-EL-P1P2-GRAMMAR-WPS", mapping: "broad" }],
+  "english-reading": [{ outcomeId: "MOE-EL-P1P2-READ-LITERAL-INFERENTIAL", mapping: "exact" }],
+  "english-spelling": [{ outcomeId: "MOE-EL-P1P2-WRITE-SPELLING", mapping: "exact" }]
+};
+
+export const SKILLS: Skill[] = SKILL_SEEDS.map((skill) => ({
+  ...skill,
+  officialOutcomes: OFFICIAL_OUTCOMES_BY_SKILL[skill.id] ?? [],
+  provenanceScope: (OFFICIAL_OUTCOMES_BY_SKILL[skill.id]?.length ?? 0) > 0 ? "official-outcome" : "supplementary-practice"
+}));

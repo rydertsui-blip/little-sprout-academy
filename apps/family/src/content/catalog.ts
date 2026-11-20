@@ -4,6 +4,7 @@ import { buildMatchingQuestions } from "./matching";
 import { SKILLS } from "./skills";
 import type { Question, ContentIssue, Subject } from "../lib/types";
 import { CONTENT_PACK, CONTENT_VERSION } from "./release";
+import { OFFICIAL_OUTCOMES_BY_ID } from "./officialSources";
 
 export { SKILLS };
 export { CONTENT_PACK, CONTENT_VERSION };
@@ -39,6 +40,19 @@ export function validateContentCatalog(): ContentIssue[] {
   for (const skill of SKILLS) {
     if (skillIds.has(skill.id)) {
       issues.push({ code: "duplicate-skill-id", message: `Duplicate skill ${skill.id}`, skillId: skill.id });
+    }
+    if (!skill.officialOutcomes.length && skill.provenanceScope !== "supplementary-practice") {
+      issues.push({ code: "missing-official-outcome", message: `${skill.id} has no official outcome mapping but is not marked supplementary`, skillId: skill.id });
+    }
+    for (const mapping of skill.officialOutcomes) {
+      const outcome = OFFICIAL_OUTCOMES_BY_ID.get(mapping.outcomeId);
+      if (!outcome) {
+        issues.push({ code: "unknown-official-outcome", message: `${skill.id} references unknown outcome ${mapping.outcomeId}`, skillId: skill.id });
+      } else if (outcome.subject !== skill.subject) {
+        issues.push({ code: "official-outcome-subject", message: `${skill.id} maps to a ${outcome.subject} outcome`, skillId: skill.id });
+      } else if (!outcome.levels.some((level) => skill.gradeBand.includes(level))) {
+        issues.push({ code: "official-outcome-level", message: `${skill.id} maps to an outcome outside ${skill.gradeBand}`, skillId: skill.id });
+      }
     }
     skillIds.add(skill.id);
   }
@@ -118,8 +132,19 @@ export function validateContentCatalog(): ContentIssue[] {
     if (!question.audit.sourceRefs.length || (skill && !question.audit.sourceRefs.includes(skill.sourceDocument))) {
       issues.push({ code: "content-audit", message: `${question.id} does not reference its skill source`, questionId: question.id, skillId: question.skillId });
     }
+    if (skill) {
+      for (const mapping of skill.officialOutcomes) {
+        const outcome = OFFICIAL_OUTCOMES_BY_ID.get(mapping.outcomeId);
+        if (outcome && (!question.audit.sourceRefs.includes(outcome.id) || !question.audit.sourceRefs.includes(outcome.sourceId))) {
+          issues.push({ code: "content-audit", message: `${question.id} does not reference outcome ${outcome.id} and its source`, questionId: question.id, skillId: question.skillId });
+        }
+      }
+    }
     if (question.audit.automatedReview !== "passed") {
       issues.push({ code: "content-audit", message: `${question.id} has not passed automated review`, questionId: question.id, skillId: question.skillId });
+    }
+    if (question.audit.provenanceScope !== (skill?.provenanceScope ?? "supplementary-practice")) {
+      issues.push({ code: "content-audit", message: `${question.id} provenance scope does not match its skill`, questionId: question.id, skillId: question.skillId });
     }
     if (CONTENT_PACK.releaseStatus === "approved" && (question.audit.humanLanguageReview !== "approved" || question.audit.humanPedagogyReview !== "approved")) {
       issues.push({ code: "human-review-required", message: `${question.id} lacks required human review`, questionId: question.id, skillId: question.skillId });

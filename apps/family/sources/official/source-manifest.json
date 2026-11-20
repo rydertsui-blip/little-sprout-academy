@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "authorityPolicy": "Only official https://www.moe.gov.sg documents may support a curriculum outcome. Downloaded bytes are verified by SHA-256 before use.",
+  "retrievedAt": "2026-11-21",
+  "sources": [
+    {
+      "id": "moe-math-2021-oct-2025",
+      "subject": "math",
+      "title": "Mathematics Syllabus: Primary One to Primary Six",
+      "documentVersion": "2021 syllabus, updated October 2025",
+      "officialUrl": "https://www.moe.gov.sg/media/files/primary/2021-primary-mathematics-syllabus-p1-to-p6-updated-october-2025.pdf",
+      "cacheFile": "moe-math-p1-p6-2021-oct-2025.pdf",
+      "sha256": "e8f77fe10d768e2ad5266dfc39a8821674be7eb1c81bc545ba4b841b12ae70e1",
+      "bytes": 806004,
+      "pages": 50,
+      "publishedDateInPdf": "2025-10-09"
+    },
+    {
+      "id": "moe-chinese-primary-2024",
+      "subject": "mandarin",
+      "title": "Chinese Language Syllabus: Primary",
+      "documentVersion": "2024 syllabus, implementation starting with the 2024 Primary One cohort",
+      "officialUrl": "https://www.moe.gov.sg/media/files/primary/syllabus/f41062a6-3a90-4ed1-bf93-2f1aaabeec43.pdf",
+      "cacheFile": "moe-chinese-primary-2024.pdf",
+      "sha256": "6c58e38740ca135fbd8b31c655fe9dcccdcd9b83a2ae430671f41ef7db757973",
+      "bytes": 2134256,
+      "pages": 44,
+      "publishedDateInPdf": "2024-02-08"
+    },
+    {
+      "id": "moe-english-primary-2020",
+      "subject": "english",
+      "title": "English Language Syllabus 2020: Primary",
+      "documentVersion": "English Language Syllabus 2020, Primary",
+      "officialUrl": "https://www.moe.gov.sg/media/files/primary/2020-english-language-primary.pdf",
+      "cacheFile": "moe-english-primary-2020.pdf",
+      "sha256": "5738e831e71aa7b98a912013ba5a26b267f4a8f375c99a307426bd7724d24746",
+      "bytes": 18435020,
+      "pages": 54,
+      "publishedDateInPdf": "2019-12-24"
+    }
+  ]
+}
