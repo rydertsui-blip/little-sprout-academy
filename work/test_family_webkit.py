@@ -76,6 +76,11 @@ with sync_playwright() as p:
 
     tap(page, page.locator("button[aria-label='小苹果的学习档案']"))
     assert_layout(page, "WebKit child home")
+    tap(page, page.get_by_role("button", name="听一听，跟着说"))
+    page.wait_for_selector("text=听一听，跟着说")
+    assert_layout(page, "WebKit speaking")
+    page.get_by_role("button", name="返回").evaluate("(el) => el.click()")
+    page.wait_for_timeout(300)
     tap(page, page.get_by_role("button", name="看笔顺，亲手写"))
     page.wait_for_selector("text=看笔顺，亲手写")
     assert_layout(page, "WebKit handwriting")

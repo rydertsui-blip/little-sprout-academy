@@ -87,6 +87,7 @@ describe("family learning app", () => {
     expect(screen.getByRole("button", { name: "华文 Mandarin" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /英语/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /看笔顺，亲手写/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /听一听，跟着说/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /跟小芽开始/ })).toBeInTheDocument();
   });
 

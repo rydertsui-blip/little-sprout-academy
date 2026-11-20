@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, Check, Download, Headphones, Lock, Pencil, Plus, ShieldCheck, Star, Trash2, Upload, X } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Check, Download, Headphones, Lock, Mic, Pencil, Plus, ShieldCheck, Star, Trash2, Upload, X } from "lucide-react";
 import { CONTENT_VERSION, SKILLS } from "./content/catalog";
 import { SUBJECT_NAMES, UI_COPY } from "./content/copy";
 import { VOICE_LINES } from "./content/audioAssets";
@@ -26,8 +26,9 @@ import {
 } from "./lib/storage";
 import type { ChildProfile, ChoiceQuestion, HouseholdState, SessionRecord, Subject } from "./lib/types";
 import HandwritingScreen from "./screens/HandwritingScreen";
+import SpeakingScreen from "./screens/SpeakingScreen";
 
-type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "handwriting";
+type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "handwriting" | "speaking";
 
 const avatars = [
   { id: "star", label: "星星头像", image: "star" },
@@ -337,6 +338,11 @@ export default function App() {
     setScreen("handwriting");
   }
 
+  function openSpeaking() {
+    playOrSpeak(VOICE_LINES.speakingIntro, "zh-CN");
+    setScreen("speaking");
+  }
+
   if (encryptedEnvelope && !household) {
     return <SecureUnlockScreen envelope={encryptedEnvelope} onUnlocked={(state, key) => {
       encryptionKeyRef.current = key;
@@ -387,6 +393,10 @@ export default function App() {
 
   if (screen === "handwriting" && activeChild) {
     return <>{storageBanner}<HandwritingScreen child={activeChild} onBack={() => setScreen("child")} onLock={lockHousehold} onRecord={saveHandwriting} /></>;
+  }
+
+  if (screen === "speaking" && activeChild) {
+    return <>{storageBanner}<SpeakingScreen child={activeChild} onBack={() => setScreen("child")} onLock={lockHousehold} /></>;
   }
 
   if (screen === "assessment" && activeChild && session && currentQuestion) {
@@ -457,11 +467,18 @@ export default function App() {
               </button>
             ))}
           </div>
-          <button className="handwriting-entry" type="button" onClick={openHandwriting}>
-            <span className="handwriting-entry-icon"><Pencil aria-hidden="true" /></span>
-            <span className="handwriting-entry-copy"><small>华文写字</small><strong>看笔顺，亲手写</strong><p>12 个基础汉字，写完会记入学习进度。</p></span>
-            <span className="handwriting-entry-progress">{HANDWRITING_CHARACTERS.filter((entry) => activeChild.handwriting[entry.character]).length} / {HANDWRITING_CHARACTERS.length}<ChevronRight aria-hidden="true" /></span>
-          </button>
+          <div className="offline-activity-row">
+            <button className="handwriting-entry" type="button" onClick={openHandwriting}>
+              <span className="handwriting-entry-icon"><Pencil aria-hidden="true" /></span>
+              <span className="handwriting-entry-copy"><small>华文写字</small><strong>看笔顺，亲手写</strong><p>12 个基础汉字，写完会记入学习进度。</p></span>
+              <span className="handwriting-entry-progress">{HANDWRITING_CHARACTERS.filter((entry) => activeChild.handwriting[entry.character]).length} / {HANDWRITING_CHARACTERS.length}<ChevronRight aria-hidden="true" /></span>
+            </button>
+            <button className="handwriting-entry speaking-entry" type="button" onClick={openSpeaking}>
+              <span className="handwriting-entry-icon speaking-entry-icon"><Mic aria-hidden="true" /></span>
+              <span className="handwriting-entry-copy"><small>华文 · English</small><strong>听一听，跟着说</strong><p>听示范，录下自己的声音，再回放。</p></span>
+              <span className="handwriting-entry-progress"><ChevronRight aria-hidden="true" /></span>
+            </button>
+          </div>
         </main>
       ) : null}
     </div>

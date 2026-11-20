@@ -89,7 +89,10 @@ def answer_diagnostic(page, count=8):
 
 
 with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True)
+    browser = p.chromium.launch(
+        headless=True,
+        args=["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"],
+    )
     context = browser.new_context(
         viewport={"width": 1024, "height": 768},
         device_scale_factor=1,
@@ -97,6 +100,7 @@ with sync_playwright() as p:
         locale="zh-SG",
         timezone_id="Asia/Singapore",
     )
+    context.grant_permissions(["microphone"], origin="http://127.0.0.1:4185")
     page = context.new_page()
     page.on("dialog", lambda dialog: dialog.accept())
     page.on("console", lambda msg: errors.append(f"console:{msg.type}:{msg.text}") if msg.type == "error" else None)
@@ -124,6 +128,21 @@ with sync_playwright() as p:
     assert page.get_by_role("heading", name="小星，今天想学哪一科？").is_visible()
     assert_clean_layout(page, "iPad landscape child home")
     page.screenshot(path=str(SHOTS / "04-ipad-landscape-child-home.png"), full_page=True)
+
+    tap(page, page.get_by_role("button", name="听一听，跟着说"))
+    assert page.get_by_role("heading", name="听一听，跟着说").is_visible()
+    assert_clean_layout(page, "iPad landscape speaking")
+    tap(page, page.get_by_role("button", name="开始说"))
+    page.wait_for_selector("text=停止录音")
+    page.wait_for_timeout(800)
+    tap(page, page.get_by_role("button", name="停止录音"))
+    page.wait_for_selector("text=听自己")
+    tap(page, page.get_by_role("button", name="听自己"))
+    page.wait_for_timeout(500)
+    assert page.get_by_role("button", name="下一个").is_visible()
+    page.screenshot(path=str(SHOTS / "04a-ipad-landscape-speaking.png"), full_page=True)
+    tap(page, page.get_by_role("button", name="返回"))
+    page.wait_for_selector("button[aria-label='数学 Math']")
 
     tap(page, page.get_by_role("button", name="看笔顺，亲手写"))
     assert page.get_by_role("heading", name="看笔顺，亲手写").is_visible()

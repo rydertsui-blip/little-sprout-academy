@@ -10,6 +10,9 @@ export const VOICE_LINES = {
   wrongZh: "没关系，我们一起看答案。",
   nextZh: "继续下一题。",
   nextEn: "Let us try the next one.",
+  speakingIntro: "跟我读。先听一次，再录下你的声音。",
+  speakingListen: "听听自己的声音，再试一次。",
+  speakingNext: "说得很好，我们换下一个。",
   correctEn: "That is right. Well done.",
   wrongEn: "Not quite. Let us look at the answer together."
 } as const;
@@ -26,6 +29,9 @@ export const AUDIO_ASSETS: Record<string, string> = {
   [VOICE_LINES.wrongZh]: "zh-wrong",
   [VOICE_LINES.nextZh]: "zh-next",
   [VOICE_LINES.nextEn]: "en-next",
+  [VOICE_LINES.speakingIntro]: "zh-speaking-intro",
+  [VOICE_LINES.speakingListen]: "zh-speaking-listen",
+  [VOICE_LINES.speakingNext]: "zh-speaking-next",
   [VOICE_LINES.correctEn]: "en-correct",
   [VOICE_LINES.wrongEn]: "en-wrong",
   "人。先看老师怎样写。": "zh-trace-intro-ren",
