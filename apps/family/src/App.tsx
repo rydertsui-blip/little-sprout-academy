@@ -463,7 +463,7 @@ export default function App() {
           <div className="offline-activity-row">
             <button className="handwriting-entry speaking-entry" type="button" onClick={openSpeaking}>
               <span className="handwriting-entry-icon speaking-entry-icon"><Mic aria-hidden="true" /></span>
-              <span className="handwriting-entry-copy"><small>华文 · English</small><strong>听一听，跟着说</strong><p>听示范，录下自己的声音，再回放。</p></span>
+              <span className="handwriting-entry-copy"><small>华文 · English</small><strong>声音小游戏</strong><p>听示范、看图说两句、朗读和情境开口。</p></span>
               <span className="handwriting-entry-progress"><ChevronRight aria-hidden="true" /></span>
             </button>
           </div>
@@ -618,7 +618,7 @@ function QuizScreen({ question, feedback, onAnswer, onNext }: { question: Questi
   return (
     <main className="quiz-layout">
       <section className="quiz-stage">
-        <button className="audio-button" type="button" onClick={() => playOrSpeak(question.audioText ?? question.prompt, question.audioLanguage ?? "en-US")} aria-label="朗读题目"><Headphones aria-hidden="true" /></button>
+        <button className={`audio-button ${question.audioOnly ? "is-game-listen" : ""}`} type="button" onClick={() => playOrSpeak(question.audioText ?? question.prompt, question.audioLanguage ?? "en-US")} aria-label={question.audioOnly ? "听声音" : "朗读题目"}><Headphones aria-hidden="true" /></button>
         {question.passage ? <div className="question-passage"><span>{question.audioLanguage === "zh-CN" ? "读一读" : "Read"}</span><p>{question.passage}</p></div> : null}
         {question.displayCharacter ? <div className="character-display">{question.displayCharacter}</div> : null}
         {question.image ? <img className="question-image" src={`./assets/images/${question.image}.png`} alt="" /> : null}
@@ -631,12 +631,15 @@ function QuizScreen({ question, feedback, onAnswer, onNext }: { question: Questi
             {options.map((option) => (
               <button
                 key={option}
-                className={`answer-option ${feedback && option === feedback.answer ? (correct ? "is-correct" : "is-wrong") : ""} ${feedback && !correct && option === question.correctAnswer ? "is-correct-answer" : ""}`}
+                className={`answer-option ${question.optionImages ? "image-answer" : ""} ${feedback && option === feedback.answer ? (correct ? "is-correct" : "is-wrong") : ""} ${feedback && !correct && option === question.correctAnswer ? "is-correct-answer" : ""}`}
                 data-correct={option === question.correctAnswer ? "true" : "false"}
                 type="button"
                 onClick={() => void onAnswer(option === question.correctAnswer, option)}
                 disabled={Boolean(feedback)}
-              >{option}</button>
+              >
+                {question.optionImages?.[option] ? <img src={`./assets/images/${question.optionImages[option]}.png`} alt="" /> : null}
+                <span>{option}</span>
+              </button>
             ))}
           </div>
         ) : matchQuestion ? (

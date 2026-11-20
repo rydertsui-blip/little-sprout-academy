@@ -14,6 +14,8 @@ const rawQuestions: Question[] = [
   ...buildMatchingQuestions()
 ];
 
+const KNOWN_IMAGE_NAMES = new Set(["abc", "apple", "bear", "bird", "books", "cat", "compass", "dog", "fish", "flower", "house", "moon", "mountain", "music", "pencil", "rabbit", "rain", "seedling", "sparkles", "speech", "star", "sun", "trophy", "water", "tree"]);
+
 rawQuestions.forEach((question) => {
   question.diagnostic = true;
 });
@@ -102,6 +104,13 @@ export function validateContentCatalog(): ContentIssue[] {
       if (question.options.length !== 3) {
         issues.push({ code: "option-count", message: `${question.id} must have exactly three answer choices`, questionId: question.id, skillId: question.skillId });
       }
+      if (question.optionImages) {
+        const expected = new Set(question.options);
+        for (const option of question.options) if (!question.optionImages[option]) issues.push({ code: "missing-option-image", message: `${question.id} has no image for ${option}`, questionId: question.id, skillId: question.skillId });
+        for (const image of Object.values(question.optionImages)) if (!KNOWN_IMAGE_NAMES.has(image)) issues.push({ code: "unknown-option-image", message: `${question.id} references unknown image ${image}`, questionId: question.id, skillId: question.skillId });
+        if (Object.keys(question.optionImages).some((option) => !expected.has(option))) issues.push({ code: "extra-option-image", message: `${question.id} has an image for an unknown option`, questionId: question.id, skillId: question.skillId });
+      }
+      if (question.audioOnly && !question.audioText) issues.push({ code: "audio-only-source", message: `${question.id} is audio-only without audioText`, questionId: question.id, skillId: question.skillId });
     } else {
       if (question.pairs.length !== 3) {
         issues.push({ code: "match-pair-count", message: `${question.id} must have exactly three match pairs`, questionId: question.id, skillId: question.skillId });

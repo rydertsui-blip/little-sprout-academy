@@ -107,9 +107,20 @@ with sync_playwright() as p:
 
     tap(page, page.locator("button[aria-label='小苹果的学习档案']"))
     assert_layout(page, "WebKit child home")
-    tap(page, page.get_by_role("button", name="听一听，跟着说"))
+    tap(page, page.get_by_role("button", name="声音小游戏"))
     page.wait_for_selector("text=听一听，跟着说")
     assert_layout(page, "WebKit speaking")
+    tap(page, page.get_by_role("button", name="看图说两句"))
+    page.wait_for_selector("text=苹果")
+    assert page.locator(".speaking-image").is_visible()
+    page.wait_for_function("(img) => img.complete && img.naturalWidth > 0", arg=page.locator(".speaking-image").element_handle(), timeout=2000)
+    assert page.locator(".speaking-image").evaluate("(img) => img.naturalWidth > 0")
+    start_box = page.get_by_role("button", name="开始说").bounding_box()
+    assert start_box and start_box["y"] + start_box["height"] <= page.viewport_size["height"] + 1
+    tap(page, page.get_by_role("button", name="朗读"))
+    page.wait_for_selector("text=我爱妈妈。")
+    tap(page, page.get_by_role("button", name="情境开口"))
+    page.wait_for_selector("text=Hello! How are you?")
     page.get_by_role("button", name="返回").evaluate("(el) => el.click()")
     page.wait_for_timeout(300)
     assert page.get_by_role("button", name="看笔顺，亲手写").count() == 0

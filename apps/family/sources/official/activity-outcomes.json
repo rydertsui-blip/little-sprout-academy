@@ -22,6 +22,36 @@
       ]
     },
     {
+      "id": "activity-mandarin-organize-prompt-cards",
+      "kind": "activity",
+      "subject": "mandarin",
+      "title": "Look, plan and say two sentences",
+      "contentIds": ["zh-org-apple", "zh-org-dog", "zh-org-rain", "zh-org-tree", "zh-org-sun", "zh-org-books"],
+      "outcomeMappings": [
+        { "outcomeId": "MOE-CN-P1P2-SPEAK-ORGANISE", "mapping": "broad" }
+      ]
+    },
+    {
+      "id": "activity-mandarin-read-aloud",
+      "kind": "activity",
+      "subject": "mandarin",
+      "title": "Listen and read short sentences aloud",
+      "contentIds": ["zh-read-mum", "zh-read-book", "zh-read-sleep", "zh-read-bird", "zh-read-rain", "zh-read-park"],
+      "outcomeMappings": [
+        { "outcomeId": "MOE-CN-P1P2-READ-ALOUD", "mapping": "broad" }
+      ]
+    },
+    {
+      "id": "activity-english-speaking-purpose",
+      "kind": "activity",
+      "subject": "english",
+      "title": "Say the right phrase for the situation",
+      "contentIds": ["en-purpose-greet", "en-purpose-friend", "en-purpose-water", "en-purpose-thanks", "en-purpose-play", "en-purpose-help"],
+      "outcomeMappings": [
+        { "outcomeId": "MOE-EL-P1P2-SPEAK-KNOWLEDGE", "mapping": "broad" }
+      ]
+    },
+    {
       "id": "activity-mandarin-lower-primary-program",
       "kind": "program",
       "subject": "mandarin",

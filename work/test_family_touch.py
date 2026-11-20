@@ -169,7 +169,7 @@ with sync_playwright() as p:
     assert_clean_layout(page, "iPad landscape child home")
     page.screenshot(path=str(SHOTS / "04-ipad-landscape-child-home.png"), full_page=True)
 
-    tap(page, page.get_by_role("button", name="听一听，跟着说"))
+    tap(page, page.get_by_role("button", name="声音小游戏"))
     assert page.get_by_role("heading", name="听一听，跟着说").is_visible()
     assert_clean_layout(page, "iPad landscape speaking")
     tap(page, page.get_by_role("button", name="开始说"))
@@ -181,6 +181,21 @@ with sync_playwright() as p:
     page.wait_for_timeout(500)
     assert page.get_by_role("button", name="下一个").is_visible()
     page.screenshot(path=str(SHOTS / "04a-ipad-landscape-speaking.png"), full_page=True)
+    tap(page, page.get_by_role("button", name="看图说两句"))
+    page.wait_for_selector("text=苹果")
+    assert "先说这是什么" in page.locator(".speaking-translation").inner_text()
+    assert page.locator(".speaking-image").is_visible()
+    page.wait_for_function("(img) => img.complete && img.naturalWidth > 0", arg=page.locator(".speaking-image").element_handle(), timeout=2000)
+    image_info = page.locator(".speaking-image").evaluate("(img) => ({ src: img.currentSrc || img.src, naturalWidth: img.naturalWidth, complete: img.complete })")
+    assert image_info["naturalWidth"] > 0, f"Speaking image not loaded: {image_info}"
+    start_box = page.get_by_role("button", name="开始说").bounding_box()
+    assert start_box and start_box["y"] + start_box["height"] <= page.viewport_size["height"] + 1, "Speaking primary action is below the first viewport"
+    assert_clean_layout(page, "iPad landscape speaking organize game")
+    page.screenshot(path=str(SHOTS / "04b-ipad-landscape-speaking-organize.png"), full_page=True)
+    tap(page, page.get_by_role("button", name="朗读"))
+    page.wait_for_selector("text=我爱妈妈。")
+    tap(page, page.get_by_role("button", name="情境开口"))
+    page.wait_for_selector("text=Hello! How are you?")
     tap(page, page.get_by_role("button", name="返回"))
     page.wait_for_selector("button[aria-label='数学 Math']")
 

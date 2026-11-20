@@ -6,6 +6,14 @@ import { playOrSpeak } from "../lib/audio";
 import type { ChildProfile } from "../lib/types";
 
 type RecordingState = "idle" | "requesting" | "recording" | "recorded" | "playing" | "error";
+type SpeakingCategory = NonNullable<(typeof SPEAKING_PROMPTS)[number]["category"]>;
+
+const DECKS: Array<{ category: SpeakingCategory; label: string }> = [
+  { category: "word", label: "词语" },
+  { category: "organize", label: "看图说两句" },
+  { category: "read-aloud", label: "朗读" },
+  { category: "speaking-purpose", label: "情境开口" }
+];
 
 interface SpeakingScreenProps {
   child: ChildProfile;
@@ -23,6 +31,9 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
   const recordingUrlRef = useRef<string | null>(null);
   const playerRef = useRef<HTMLAudioElement | null>(null);
   const prompt = SPEAKING_PROMPTS[index];
+  const category = prompt.category ?? "word";
+  const categoryLabel = category === "organize" ? "看图说两句" : category === "read-aloud" ? "朗读小游戏" : category === "speaking-purpose" ? "情境开口" : prompt.language === "zh-CN" ? "词语跟读" : "English speaking";
+  const longText = category === "read-aloud" || category === "speaking-purpose";
 
   useEffect(() => {
     const timer = window.setTimeout(() => playOrSpeak(prompt.text, prompt.language), 500);
@@ -118,6 +129,15 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
     setIndex((value) => (value + 1) % SPEAKING_PROMPTS.length);
   }
 
+  function selectDeck(nextCategory: SpeakingCategory) {
+    const nextIndex = SPEAKING_PROMPTS.findIndex((item) => (item.category ?? "word") === nextCategory);
+    if (nextIndex < 0 || nextIndex === index) return;
+    revokeRecording();
+    setState("idle");
+    setError("");
+    setIndex(nextIndex);
+  }
+
   const primaryLabel = state === "recording" ? "停止录音" : state === "recorded" ? "听自己" : state === "playing" ? "正在播放…" : state === "requesting" ? "正在打开麦克风…" : "开始说";
 
   return (
@@ -129,6 +149,11 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
       </header>
 
       <main className="speaking-screen">
+        <nav className="speaking-decks" aria-label="选择声音游戏">
+          {DECKS.map((deck) => (
+            <button key={deck.category} className={`speaking-deck ${category === deck.category ? "is-active" : ""}`} type="button" aria-pressed={category === deck.category} onClick={() => selectDeck(deck.category)}>{deck.label}</button>
+          ))}
+        </nav>
         <section className={`teacher-command speaking-teacher ${state}`}>
           <div className="teacher-mascot" aria-hidden="true"><img src="./assets/images/seedling.png" alt="" /><i /><i /><i /></div>
           <div className="teacher-bubble">
@@ -138,8 +163,9 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
           </div>
         </section>
 
-        <section className="speaking-card">
-          <p className="eyebrow">{prompt.language === "zh-CN" ? "华文跟读" : "English speaking"}</p>
+        <section className={`speaking-card ${longText ? "is-long-text" : ""}`}>
+          <p className="eyebrow">{categoryLabel}</p>
+          {prompt.image ? <img className="speaking-image" src={`./assets/images/${prompt.image}.png`} alt="" /> : null}
           <h2>{prompt.display}</h2>
           <p className="speaking-translation">{prompt.translation}</p>
           <div className={`record-orb ${state}`} aria-live="polite">

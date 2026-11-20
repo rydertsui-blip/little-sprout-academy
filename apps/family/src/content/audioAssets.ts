@@ -73,7 +73,25 @@ export const AUDIO_ASSETS: Record<string, string> = {
   moon: "en-moon",
   star: "en-star",
   sun: "en-sun",
-  tree: "en-tree"
+  tree: "en-tree",
+  "苹果，红色，甜甜的。": "zh-org-apple",
+  "小狗，棕色，它会跑。": "zh-org-dog",
+  "下雨了，我带了雨伞。": "zh-org-rain",
+  "公园里有一棵大树。": "zh-org-tree",
+  "太阳出来了，天气很热。": "zh-org-sun",
+  "桌上有三本书。": "zh-org-books",
+  "我爱妈妈。": "zh-read-mum",
+  "这是我的书。": "zh-read-book",
+  "弟弟在睡觉。": "zh-read-sleep",
+  "小鸟在天上飞。": "zh-read-bird",
+  "今天下雨了。": "zh-read-rain",
+  "我们一起去公园。": "zh-read-park",
+  "Hello! How are you?": "en-purpose-greet",
+  "This is my friend.": "en-purpose-friend",
+  "May I have some water, please?": "en-purpose-water",
+  "Thank you for your help.": "en-purpose-thanks",
+  "Let's play together.": "en-purpose-play",
+  "Can you help me, please?": "en-purpose-help"
 };
 
 export function getAudioAsset(text: string): string | undefined {

@@ -34,6 +34,7 @@ const SKILL_SEEDS: SkillSeed[] = [
   { id: "mandarin-word-order", subject: "mandarin", title: "Sentence order", shortTitle: "句子顺序", gradeBand: "P1-P2", description: "Choose complete and natural Mandarin sentences.", prerequisites: ["mandarin-reading"], sourceDocument: C },
 
   { id: "english-letters", subject: "english", title: "Letters and sounds", shortTitle: "字母音", gradeBand: "P1", description: "Letter names and beginning sounds.", prerequisites: [], sourceDocument: E },
+  { id: "english-listening", subject: "english", title: "Listening and finding meaning", shortTitle: "听音找图", gradeBand: "P1", description: "Listen to familiar words and use picture context to find meaning.", prerequisites: [], sourceDocument: E },
   { id: "english-phonics", subject: "english", title: "Phonics", shortTitle: "拼读", gradeBand: "P1", description: "Sound-letter links and simple decoding.", prerequisites: ["english-letters"], sourceDocument: E },
   { id: "english-sight-words", subject: "english", title: "Sight words", shortTitle: "高频词", gradeBand: "P1-P2", description: "Read common words in short sentences.", prerequisites: ["english-letters"], sourceDocument: E },
   { id: "english-vocabulary", subject: "english", title: "Vocabulary", shortTitle: "词汇", gradeBand: "P1-P2", description: "Match common words to pictures and meaning.", prerequisites: ["english-letters"], sourceDocument: E },
@@ -70,6 +71,7 @@ const OFFICIAL_OUTCOMES_BY_SKILL: Record<string, Skill["officialOutcomes"]> = {
   "mandarin-classifiers": [],
   "mandarin-word-order": [],
   "english-letters": [{ outcomeId: "MOE-EL-P1P2-READ-BEGIN", mapping: "broad" }],
+  "english-listening": [{ outcomeId: "MOE-EL-P1P2-LISTEN-UNDERSTAND", mapping: "broad" }],
   "english-phonics": [{ outcomeId: "MOE-EL-P1P2-LISTEN-SOUND", mapping: "exact" }],
   "english-sight-words": [{ outcomeId: "MOE-EL-P1P2-READ-BEGIN", mapping: "exact" }],
   "english-vocabulary": [{ outcomeId: "MOE-EL-P1P2-VOCAB-DEVELOP", mapping: "exact" }, { outcomeId: "MOE-EL-P1P2-VOCAB-USE", mapping: "exact" }],

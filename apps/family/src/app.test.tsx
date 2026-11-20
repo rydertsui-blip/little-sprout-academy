@@ -125,7 +125,7 @@ describe("family learning app", () => {
     expect(screen.getByRole("button", { name: "华文 Mandarin" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /英语/ })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /看笔顺，亲手写/ })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /听一听，跟着说/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /声音小游戏/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /跟小芽开始/ })).toBeInTheDocument();
   });
 
@@ -187,6 +187,48 @@ describe("family learning app", () => {
     const saved = await savedHousehold();
     expect(saved.children[0].attempts).toHaveLength(1);
     expect(saved.children[0].attempts[0].correct).toBe(false);
+  });
+
+  it("renders the English listening game as audio plus picture choices", async () => {
+    const pinSalt = "listening-game-salt";
+    const child = createChildProfile("小音", "star", new Date("2026-11-20T00:00:00Z"));
+    child.diagnostics.english = { completedAt: "2026-11-20T00:00:00Z", sessionId: "setup" };
+    child.evidence["english-letters"] = {
+      ...child.evidence["english-letters"],
+      independentCorrect: 2,
+      nEff: 2,
+      pKnown: 0.9,
+      dueAt: "2026-12-20T00:00:00.000Z"
+    };
+    for (const skillId of ["english-phonics", "english-sight-words", "english-vocabulary"]) {
+      child.evidence[skillId] = {
+        ...child.evidence[skillId],
+        independentCorrect: 2,
+        nEff: 2,
+        pKnown: 0.9,
+        dueAt: "2026-12-20T00:00:00.000Z"
+      };
+    }
+    saveHousehold({
+      version: 2,
+      householdName: "测试家庭",
+      parentName: "妈妈",
+      pinHash: await hashPin("2468", pinSalt),
+      pinSalt,
+      createdAt: "2026-11-20T00:00:00.000Z",
+      children: [child]
+    });
+    render(<App />);
+    fireEvent.change(screen.getByLabelText("家长密码"), { target: { value: "2468" } });
+    fireEvent.click(screen.getByRole("button", { name: "打开家庭学习区" }));
+    await waitFor(() => expect(screen.getByText("今天谁来学习？")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /小音/ }));
+    fireEvent.click(screen.getByRole("button", { name: "英语 English" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "听声音" })).toBeInTheDocument());
+    expect(screen.getAllByRole("button", { name: /apple|bear|fish/ })).toHaveLength(3);
+    expect(document.querySelectorAll(".answer-option.image-answer img")).toHaveLength(3);
+    fireEvent.click(screen.getByRole("button", { name: "apple" }));
+    await waitFor(() => expect(screen.getByTestId("answer-feedback")).toBeInTheDocument());
   });
 
   it("protects the parent dashboard with a second PIN check", async () => {
@@ -287,7 +329,7 @@ describe("family learning app", () => {
     await openParentSettings();
     expect(screen.getByText("到了复习时间", { exact: false })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "导出作答 CSV" })).toBeInTheDocument();
-    expect(screen.getByText(/官方来源已机器核对：4 份 MOE PDF、44 条目标；4 条游戏内容待补；5 条书写目标不纳入；2 个技能为课外补充/)).toBeInTheDocument();
+    expect(screen.getByText(/官方来源已机器核对：4 份 MOE PDF、44 条目标；0 条游戏内容待补；5 条书写目标不纳入；2 个技能为课外补充/)).toBeInTheDocument();
     expect(screen.getByText(/人工课纲复核：未进行/)).toBeInTheDocument();
   });
 
@@ -308,8 +350,8 @@ describe("family learning app", () => {
     fireEvent.click(screen.getByRole("button", { name: "打开家庭学习区" }));
     await waitFor(() => expect(screen.getByText("今天谁来学习？")).toBeInTheDocument());
     await openParentSettings();
-    expect(screen.getByText(/App 0\.8\.0/)).toBeInTheDocument();
-    expect(screen.getByText(/内容 pilot-8/)).toBeInTheDocument();
+    expect(screen.getByText(/App 0\.9\.0/)).toBeInTheDocument();
+    expect(screen.getByText(/内容 pilot-9/)).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/本机家庭数据/)).toBeInTheDocument());
     fireEvent.click(screen.getByLabelText("高对比"));
     await waitFor(async () => expect((await savedHousehold()).children[0].settings.highContrast).toBe(true));

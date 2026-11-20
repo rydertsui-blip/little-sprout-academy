@@ -18,10 +18,10 @@
 - 官方来源：4 份 MOE PDF
 - 官方 P1/P2 outcome：44 条
 - 依產品範圍排除的書寫 outcome：5 条
-- 当前技能：33 个
-- 非测验活动：3 组
+- 当前技能：34 个
+- 非测验活动：6 组
 - 至少有一个 exact 映射的技能：26 个
-- 只有 broad 映射的技能：5 个
+- 只有 broad 映射的技能：6 个
 - 不纳入官方覆盖的课外补充技能：2 个
 
 ## 数学
@@ -56,10 +56,10 @@
 | MOE-CN-P1P2-RECOGNITION | P1/P2 | 23 | The regular Chinese course targets recognition of 700 to 750 characters by the end of the P1-P2 period. | mandarin-characters(exact) |
 | MOE-CN-P1P2-RADICALS | P1/P2 | 23 | Recognise radicals and components. | mandarin-characters(exact) |
 | MOE-CN-P1P2-SOUND | P1/P2 | 25 | Distinguish syllables, initials, finals and tones in spoken Mandarin. | mandarin-initials(exact)<br>mandarin-finals(exact)<br>mandarin-tones(exact)<br>mandarin-syllables(exact) |
-| MOE-CN-P1P2-SPEAK-ORGANISE | P1/P2 | 26 | Plan and organise spoken content. | **尚未映射** |
+| MOE-CN-P1P2-SPEAK-ORGANISE | P1/P2 | 26 | Plan and organise spoken content. | activity-mandarin-organize-prompt-cards(broad) |
 | MOE-CN-P1P2-SPEAK-FLUENT | P1/P2 | 26 | Speak accurately and fluently. | activity-speaking-mandarin-basic-words(broad) |
 | MOE-CN-P1P2-READ-UNDERSTAND | P1/P2 | 29 | Understand age-appropriate reading materials. | mandarin-vocabulary(broad) |
-| MOE-CN-P1P2-READ-ALOUD | P1/P2 | 29 | Read age-appropriate passages accurately, fluently and with expression. | **尚未映射** |
+| MOE-CN-P1P2-READ-ALOUD | P1/P2 | 29 | Read age-appropriate passages accurately, fluently and with expression. | activity-mandarin-read-aloud(broad) |
 | MOE-CN-P1P2-READ-DETAIL | P1/P2 | 29 | Locate explicit information in a text. | mandarin-reading(exact) |
 | MOE-CN-P1P2-READ-INFER-WORD | P1/P2 | 29 | Infer the meaning of words and sentences in context. | mandarin-vocabulary(broad)<br>mandarin-reading(broad) |
 | MOE-CN-P1P2-WRITE-CHAR | P1/P2 | 30 | Write Chinese characters correctly. | **產品排除：不做書寫** |
@@ -71,10 +71,10 @@
 | Outcome | 年級 | PDF 頁 | 官方摘要 | 當前技能／活動映射 |
 |---|---|---:|---|---|
 | MOE-EL-P1P2-LISTEN-SOUND | P1/P2 | 20 | Use phonological awareness and key-word recognition while listening and viewing. | english-phonics(exact) |
-| MOE-EL-P1P2-LISTEN-UNDERSTAND | P1/P2 | 20 | Listen and view for understanding using prior knowledge, context and strategies. | **尚未映射** |
+| MOE-EL-P1P2-LISTEN-UNDERSTAND | P1/P2 | 20 | Listen and view for understanding using prior knowledge, context and strategies. | english-listening(broad) |
 | MOE-EL-P1P2-READ-BEGIN | P1/P2 | 22 | Develop accurate and fluent beginning reading through word recognition. | english-letters(broad)<br>english-sight-words(exact) |
 | MOE-EL-P1P2-READ-LITERAL-INFERENTIAL | P1/P2 | 22 | Understand literal and simple inferential meaning using context and comprehension strategies. | english-reading(exact) |
-| MOE-EL-P1P2-SPEAK-KNOWLEDGE | P1/P2 | 24 | Learn basic spoken-language features and purposes. | **尚未映射** |
+| MOE-EL-P1P2-SPEAK-KNOWLEDGE | P1/P2 | 24 | Learn basic spoken-language features and purposes. | activity-english-speaking-purpose(broad) |
 | MOE-EL-P1P2-SPEAK-FLUENCY | P1/P2 | 24 | Develop accurate and fluent pronunciation with appropriate stress and intonation. | activity-speaking-english-basic-words(broad) |
 | MOE-EL-P1P2-WRITE-HANDWRITING | P1/P2 | 26 | Develop handwriting readiness and print-script writing. | **產品排除：不做書寫** |
 | MOE-EL-P1P2-WRITE-SPELLING | P1/P2 | 26 | Spell age-appropriate words accurately using spelling strategies. | english-spelling(exact) |

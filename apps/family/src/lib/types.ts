@@ -44,6 +44,8 @@ interface QuestionBase {
   displayCharacter?: string;
   image?: string;
   passage?: string;
+  audioOnly?: boolean;
+  optionImages?: Record<string, string>;
 }
 
 export interface ChoiceQuestion extends QuestionBase {

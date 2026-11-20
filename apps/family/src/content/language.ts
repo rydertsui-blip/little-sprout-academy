@@ -126,6 +126,15 @@ function buildEnglishQuestions(skill: Skill): ChoiceQuestion[] {
         { prompt: "Which letter starts the word “fish”?", instruction: "Tap the beginning letter.", correctAnswer: "F", options: ["F", "S", "H"], explanation: "Fish starts with F.", template: "beginning-letter", audioText: "fish", audioLanguage: "en-US" },
         { prompt: "Which letter starts the word “sun”?", instruction: "Tap the beginning letter.", correctAnswer: "S", options: ["S", "N", "U"], explanation: "Sun starts with S.", template: "beginning-letter", audioText: "sun", audioLanguage: "en-US" }
       ]);
+    case "english-listening":
+      return build([
+        { prompt: "Listen and tap the picture you hear.", instruction: "Listen first, then tap the matching picture.", correctAnswer: "apple", options: ["apple", "bear", "fish"], explanation: "You heard apple.", template: "listen-find", audioText: "apple", audioLanguage: "en-US", audioOnly: true, optionImages: { apple: "apple", bear: "bear", fish: "fish" } },
+        { prompt: "Listen and tap the picture you hear.", instruction: "Listen first, then tap the matching picture.", correctAnswer: "bear", options: ["bear", "cat", "tree"], explanation: "You heard bear.", template: "listen-find", audioText: "bear", audioLanguage: "en-US", audioOnly: true, optionImages: { bear: "bear", cat: "cat", tree: "tree" } },
+        { prompt: "Listen and tap the picture you hear.", instruction: "Listen first, then tap the matching picture.", correctAnswer: "cat", options: ["cat", "dog", "moon"], explanation: "You heard cat.", template: "listen-find", audioText: "cat", audioLanguage: "en-US", audioOnly: true, optionImages: { cat: "cat", dog: "dog", moon: "moon" } },
+        { prompt: "Listen and tap the picture you hear.", instruction: "Listen first, then tap the matching picture.", correctAnswer: "dog", options: ["dog", "sun", "star"], explanation: "You heard dog.", template: "listen-find", audioText: "dog", audioLanguage: "en-US", audioOnly: true, optionImages: { dog: "dog", sun: "sun", star: "star" } },
+        { prompt: "Listen and tap the picture you hear.", instruction: "Listen first, then tap the matching picture.", correctAnswer: "fish", options: ["fish", "flower", "tree"], explanation: "You heard fish.", template: "listen-find", audioText: "fish", audioLanguage: "en-US", audioOnly: true, optionImages: { fish: "fish", flower: "flower", tree: "tree" } },
+        { prompt: "Listen and tap the picture you hear.", instruction: "Listen first, then tap the matching picture.", correctAnswer: "tree", options: ["tree", "moon", "apple"], explanation: "You heard tree.", template: "listen-find", audioText: "tree", audioLanguage: "en-US", audioOnly: true, optionImages: { tree: "tree", moon: "moon", apple: "apple" } }
+      ]);
     case "english-phonics":
       return build([
         { prompt: "Which word starts with the /k/ sound?", instruction: "Tap the word.", correctAnswer: "cat", options: ["cat", "dog", "sun"], explanation: "Cat starts with the /k/ sound.", template: "initial-sound", audioText: "cat, dog, sun", audioLanguage: "en-US" },

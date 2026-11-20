@@ -58,6 +58,9 @@ describe("official MOE source provenance", () => {
     expect(OFFICIAL_ACTIVITIES.map((activity) => activity.id)).toEqual([
       "activity-speaking-mandarin-basic-words",
       "activity-speaking-english-basic-words",
+      "activity-mandarin-organize-prompt-cards",
+      "activity-mandarin-read-aloud",
+      "activity-english-speaking-purpose",
       "activity-mandarin-lower-primary-program"
     ]);
     expect(OFFICIAL_ACTIVITIES.find((activity) => activity.id === "activity-mandarin-lower-primary-program")?.kind).toBe("program");
