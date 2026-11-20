@@ -1,8 +1,10 @@
 from pathlib import Path
+import re
+import json
 import os
 from playwright.sync_api import sync_playwright
 
-BASE = os.getenv("BASE_URL", "http://127.0.0.1:4173/family/")
+BASE = os.getenv("BASE_URL", "http://127.0.0.1:4185/family/")
 SHOTS = Path("work/family-audit")
 SHOTS.mkdir(parents=True, exist_ok=True)
 
@@ -122,6 +124,40 @@ with sync_playwright() as p:
     assert_clean_layout(page, "iPad landscape child home")
     page.screenshot(path=str(SHOTS / "04-ipad-landscape-child-home.png"), full_page=True)
 
+    tap(page, page.get_by_role("button", name="看笔顺，亲手写"))
+    assert page.get_by_role("heading", name="看笔顺，亲手写").is_visible()
+    assert page.get_by_text("人", exact=True).first.is_visible()
+    assert_clean_layout(page, "iPad landscape handwriting")
+    page.screenshot(path=str(SHOTS / "04b-ipad-landscape-handwriting.png"), full_page=True)
+    tap(page, page.get_by_role("button", name="看笔顺"))
+    page.wait_for_function("() => { const b = document.querySelector('.handwriting-actions .primary-button'); return b && !b.disabled; }")
+    tap(page, page.get_by_role("button", name="朗读 人"))
+    page.wait_for_timeout(300)
+    tap(page, page.get_by_role("button", name="写一写"))
+    page.wait_for_timeout(200)
+    transform = page.locator(".hanzi-target svg g").first.get_attribute("transform") or ""
+    match = re.search(r"translate\(([-0-9.]+), ([-0-9.]+)\) scale\(([-0-9.]+),", transform)
+    assert match, f"Unexpected Hanzi transform: {transform}"
+    tx, ty, scale = map(float, match.groups())
+    box = page.locator(".hanzi-target").bounding_box()
+    assert box
+    with open("assets/hanzi/人.json", encoding="utf-8") as handle:
+        medians = json.load(handle)["medians"]
+    for median in medians:
+        points = [(box["x"] + tx + x * scale, box["y"] + ty - y * scale) for x, y in median]
+        page.mouse.move(*points[0])
+        page.mouse.down()
+        for point in points[1:]:
+            page.mouse.move(point[0], point[1], steps=4)
+        page.mouse.up()
+        page.wait_for_timeout(120)
+    page.wait_for_selector(".handwriting-feedback")
+    assert "写得很准" in page.locator(".handwriting-feedback").inner_text()
+    page.screenshot(path=str(SHOTS / "04c-ipad-landscape-handwriting-done.png"), full_page=True)
+    tap(page, page.get_by_role("button", name="返回"))
+    page.wait_for_selector("button[aria-label='数学 Math']")
+    assert "1 / 12" in page.get_by_role("button", name=re.compile("看笔顺，亲手写")).inner_text()
+
     tap(page, page.get_by_role("button", name="数学 Math"))
     assert page.get_by_role("heading", name="数学起点小试").is_visible()
     assert_clean_layout(page, "iPad landscape quiz")
@@ -148,6 +184,11 @@ with sync_playwright() as p:
     tap(page, page.get_by_role("button", name="进入设置"))
     assert page.get_by_role("heading", name="孩子学习概览").is_visible()
     assert_clean_layout(page, "iPad landscape parent dashboard")
+    with page.expect_download() as download_info:
+        tap(page, page.get_by_role("button", name="导出作答 CSV").first)
+    download_path = download_info.value.path()
+    assert download_path is not None
+    assert b"child_name" in Path(download_path).read_bytes()
     page.screenshot(path=str(SHOTS / "07-ipad-landscape-parent-dashboard.png"), full_page=True)
 
     tap(page, page.get_by_role("button", name="关闭"))
@@ -183,6 +224,8 @@ with sync_playwright() as p:
     assert page.get_by_role("heading", name="孩子学习概览").is_visible()
     assert page.get_by_text("小月").is_visible()
     assert page.get_by_text("16 题已完成 · 2 科完成起点小试").is_visible()
+    assert page.get_by_text(re.compile(r"近 7 天 \d+ 题")).first.is_visible()
+    assert page.get_by_role("button", name="导出作答 CSV").first.is_visible()
     page.screenshot(path=str(SHOTS / "08b-ipad-landscape-three-subject-dashboard.png"), full_page=True)
     tap(page, page.get_by_role("button", name="关闭"))
 

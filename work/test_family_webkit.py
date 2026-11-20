@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 from playwright.sync_api import sync_playwright
 
-BASE = os.getenv("BASE_URL", "http://127.0.0.1:4173/family/")
+BASE = os.getenv("BASE_URL", "http://127.0.0.1:4185/family/")
 SHOTS = Path("work/family-audit")
 errors = []
 
@@ -61,6 +61,10 @@ with sync_playwright() as p:
 
     tap(page, page.locator("button[aria-label='小苹果的学习档案']"))
     assert_layout(page, "WebKit child home")
+    tap(page, page.get_by_role("button", name="看笔顺，亲手写"))
+    page.wait_for_selector("text=看笔顺，亲手写")
+    assert_layout(page, "WebKit handwriting")
+    tap(page, page.get_by_role("button", name="返回"))
     tap(page, page.get_by_role("button", name="数学 Math"))
     page.wait_for_timeout(300)
     assert_layout(page, "WebKit math quiz")

@@ -1,5 +1,5 @@
 node_modules/
 *.tsbuildinfo
 .DS_Store
-family/
+/family/
 work/family-audit/
