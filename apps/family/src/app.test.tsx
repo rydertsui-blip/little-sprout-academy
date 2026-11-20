@@ -62,6 +62,44 @@ describe("family learning app", () => {
     await closeParentSettings();
   }
 
+  function currentQuestion() {
+    const id = screen.getByTestId("question-prompt").getAttribute("data-question-id");
+    const question = QUESTIONS.find((item) => item.id === id);
+    expect(question).toBeDefined();
+    return question!;
+  }
+
+  async function tapMatchPair(pairId: string) {
+    const left = document.querySelector(`[data-match-side="left"][data-pair-id="${pairId}"]`) as HTMLButtonElement | null;
+    const right = document.querySelector(`[data-match-side="right"][data-pair-id="${pairId}"]`) as HTMLButtonElement | null;
+    expect(left).not.toBeNull();
+    expect(right).not.toBeNull();
+    fireEvent.click(left!);
+    await waitFor(() => expect(right!).not.toBeDisabled());
+    fireEvent.click(right!);
+  }
+
+  async function answerCurrentQuestion(correct = true) {
+    const question = currentQuestion();
+    if (question.kind === "choice") {
+      const answer = correct ? question.correctAnswer : question.options.find((option) => option !== question.correctAnswer)!;
+      fireEvent.click(screen.getByRole("button", { name: answer }));
+    } else {
+      if (!correct) {
+        const first = question.pairs[0];
+        const wrongRight = question.pairs[1];
+        const left = document.querySelector(`[data-match-side="left"][data-pair-id="${first.id}"]`) as HTMLButtonElement | null;
+        const right = document.querySelector(`[data-match-side="right"][data-pair-id="${wrongRight.id}"]`) as HTMLButtonElement | null;
+        fireEvent.click(left!);
+        await waitFor(() => expect(right!).not.toBeDisabled());
+        fireEvent.click(right!);
+      }
+      for (const pair of question.pairs) await tapMatchPair(pair.id);
+    }
+    await waitFor(() => expect(screen.getByTestId("answer-feedback")).toBeInTheDocument());
+    return question;
+  }
+
   it("starts with a private parent setup instead of showing child data", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "建立家庭学习区" })).toBeInTheDocument();
@@ -124,12 +162,7 @@ describe("family learning app", () => {
     await waitFor(() => expect(screen.getByRole("heading", { name: /数学起点小试/ })).toBeInTheDocument());
 
     for (let index = 0; index < 8; index += 1) {
-      await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
-      const prompt = screen.getByTestId("question-prompt").textContent ?? "";
-      const question = QUESTIONS.find((item) => item.prompt === prompt && item.subject === "math" && item.diagnostic);
-      expect(question).toBeDefined();
-      fireEvent.click(screen.getByRole("button", { name: question!.correctAnswer }));
-      await waitFor(() => expect(screen.getByTestId("answer-feedback")).toBeInTheDocument());
+      await answerCurrentQuestion();
       fireEvent.click(screen.getByRole("button", { name: "下一题" }));
     }
     await waitFor(() => expect(screen.getByRole("heading", { name: /起点小试完成/ })).toBeInTheDocument());
@@ -139,6 +172,21 @@ describe("family learning app", () => {
     fireEvent.click(screen.getByRole("button", { name: "回到学习区" }));
     fireEvent.click(screen.getByRole("button", { name: "数学 Math" }));
     await waitFor(() => expect(screen.getByRole("heading", { name: "数学继续练习" })).toBeInTheDocument());
+  });
+
+  it("records one incorrect attempt when a child finishes a matching question after a mismatch", async () => {
+    render(<App />);
+    await createFamilyWithChild("小禾");
+    fireEvent.click(screen.getByRole("button", { name: /小禾/ }));
+    fireEvent.click(screen.getByRole("button", { name: "数学 Math" }));
+    await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
+    const question = await answerCurrentQuestion(false);
+    expect(question.kind).toBe("match");
+    expect(screen.getByTestId("answer-feedback")).toHaveClass("wrong-feedback");
+    expect(screen.getByTestId("answer-feedback")).toHaveTextContent("刚才有配错");
+    const saved = await savedHousehold();
+    expect(saved.children[0].attempts).toHaveLength(1);
+    expect(saved.children[0].attempts[0].correct).toBe(false);
   });
 
   it("protects the parent dashboard with a second PIN check", async () => {
@@ -259,8 +307,8 @@ describe("family learning app", () => {
     fireEvent.click(screen.getByRole("button", { name: "打开家庭学习区" }));
     await waitFor(() => expect(screen.getByText("今天谁来学习？")).toBeInTheDocument());
     await openParentSettings();
-    expect(screen.getByText(/App 0\.3\.0/)).toBeInTheDocument();
-    expect(screen.getByText(/内容 pilot-3/)).toBeInTheDocument();
+    expect(screen.getByText(/App 0\.4\.0/)).toBeInTheDocument();
+    expect(screen.getByText(/内容 pilot-4/)).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/本机家庭数据/)).toBeInTheDocument());
     fireEvent.click(screen.getByLabelText("高对比"));
     await waitFor(async () => expect((await savedHousehold()).children[0].settings.highContrast).toBe(true));
@@ -303,12 +351,10 @@ describe("family learning app", () => {
     fireEvent.click(screen.getByRole("button", { name: /小树/ }));
     fireEvent.click(screen.getByRole("button", { name: "数学 Math" }));
     await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
-    const prompt = screen.getByTestId("question-prompt").textContent ?? "";
-    const question = QUESTIONS.find((item) => item.prompt === prompt && item.subject === "math");
-    expect(question).toBeDefined();
-    fireEvent.click(screen.getByRole("button", { name: question!.correctAnswer }));
-    await waitFor(() => expect(screen.getByTestId("answer-feedback")).toBeInTheDocument());
+    const prompt = screen.getByTestId("question-prompt").textContent;
+    const question = await answerCurrentQuestion();
     expect(screen.getByText("1 / 8")).toBeInTheDocument();
+    expect(question.subject).toBe("math");
     first.unmount();
 
     render(<App />);
@@ -332,11 +378,7 @@ describe("family learning app", () => {
     await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
 
     for (let index = 0; index < 8; index += 1) {
-      const prompt = screen.getByTestId("question-prompt").textContent ?? "";
-      const question = QUESTIONS.find((item) => item.prompt === prompt && item.subject === "math");
-      expect(question).toBeDefined();
-      fireEvent.click(screen.getByRole("button", { name: question!.correctAnswer }));
-      await waitFor(() => expect(screen.getByTestId("answer-feedback")).toBeInTheDocument());
+      await answerCurrentQuestion();
       if (index < 7) {
         fireEvent.click(screen.getByRole("button", { name: "下一题" }));
         await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
@@ -360,19 +402,25 @@ describe("family learning app", () => {
     fireEvent.click(screen.getByRole("button", { name: "数学 Math" }));
     await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
 
-    const prompt = screen.getByTestId("question-prompt").textContent ?? "";
-    const question = QUESTIONS.find((item) => item.prompt === prompt && item.subject === "math");
-    expect(question).toBeDefined();
+    const question = currentQuestion();
     const writeSpy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Quota exceeded", "QuotaExceededError");
     });
-    fireEvent.click(screen.getByRole("button", { name: question!.correctAnswer }));
+    if (question.kind === "choice") {
+      fireEvent.click(screen.getByRole("button", { name: question.correctAnswer }));
+    } else {
+      for (const pair of question.pairs) await tapMatchPair(pair.id);
+    }
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("没有保存成功"));
     expect(screen.queryByTestId("answer-feedback")).not.toBeInTheDocument();
     expect(screen.getByText("0 / 8")).toBeInTheDocument();
 
     writeSpy.mockRestore();
-    fireEvent.click(screen.getByRole("button", { name: question!.correctAnswer }));
+    if (question.kind === "choice") {
+      fireEvent.click(screen.getByRole("button", { name: question.correctAnswer }));
+    } else {
+      fireEvent.click(screen.getByRole("button", { name: "重新保存" }));
+    }
     await waitFor(() => expect(screen.getByTestId("answer-feedback")).toBeInTheDocument());
     expect(screen.getByText("1 / 8")).toBeInTheDocument();
   });

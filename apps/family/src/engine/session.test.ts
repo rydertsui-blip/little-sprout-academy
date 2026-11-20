@@ -34,6 +34,14 @@ describe("adaptive session engine", () => {
     expect(third.difficulty).toBeGreaterThan(first.difficulty);
   });
 
+  it("leads every diagnostic with a hands-on matching item", () => {
+    for (const subject of ["math", "mandarin", "english"] as const) {
+      const child = createChildProfile("小星", "star", new Date("2026-11-20T10:00:00Z"));
+      const session = createAdaptiveSession(child, subject, new Date("2026-11-20T10:00:00Z"));
+      expect(selectNextQuestion(child, session)?.kind).toBe("match");
+    }
+  });
+
   it("does not repeat an already answered item in the same session", () => {
     const child = createChildProfile("小月", "moon");
     let session = createAdaptiveSession(child, "english", new Date("2026-11-20T10:00:00Z"));

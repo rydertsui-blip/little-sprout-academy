@@ -8,8 +8,8 @@ export const CONTENT_PACK: {
   requiredReviewRoles: string[];
 } = {
   id: "sg-primary-p1-p2",
-  version: "pilot-3",
-  schemaVersion: 2,
+  version: "pilot-4",
+  schemaVersion: 3,
   publishedAt: "2026-11-20",
   releaseStatus: "pilot",
   humanReviewStatus: "pending",

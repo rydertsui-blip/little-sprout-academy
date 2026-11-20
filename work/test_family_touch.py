@@ -69,9 +69,50 @@ def add_child(page, name, avatar_label, first=False):
     tap(page, page.get_by_role("button", name="关闭"))
     page.wait_for_selector(f"button[aria-label='{name}的学习档案']")
 
+def is_matching_question(page):
+    board = page.get_by_test_id("match-board")
+    return board.count() > 0 and board.first.is_visible()
+
+def tap_match_pair(page, pair_id):
+    left = page.locator(f'[data-match-side="left"][data-pair-id="{pair_id}"]')
+    right = page.locator(f'[data-match-side="right"][data-pair-id="{pair_id}"]')
+    tap(page, left)
+    page.wait_for_function(
+        "el => !el.disabled",
+        arg=right.element_handle(),
+        timeout=2000,
+    )
+    tap(page, right)
+
+def answer_current(page, correct=True, on_wrong=None):
+    if is_matching_question(page):
+        pair_ids = page.locator('[data-match-side="left"]').evaluate_all("els => els.map(el => el.dataset.pairId)")
+        assert len(pair_ids) == 3, f"Expected three matching pairs, found {pair_ids}"
+        if not correct:
+            first = page.locator(f'[data-match-side="left"][data-pair-id="{pair_ids[0]}"]')
+            wrong = page.locator(f'[data-match-side="right"][data-pair-id="{pair_ids[1]}"]')
+            tap(page, first)
+            page.wait_for_function(
+                "el => !el.disabled",
+                arg=wrong.element_handle(),
+                timeout=2000,
+            )
+            tap(page, wrong)
+            page.wait_for_function("document.querySelector('.match-status').textContent.includes('不相配')")
+            if on_wrong:
+                on_wrong()
+        for pair_id in pair_ids:
+            tap_match_pair(page, pair_id)
+        page.wait_for_selector("[data-testid=answer-feedback]")
+        return "match"
+    selector = "button[data-correct='true']" if correct else "button[data-correct='false']"
+    tap(page, page.locator(selector).first)
+    page.wait_for_selector("[data-testid=answer-feedback]")
+    return "choice"
+
 def answer_diagnostic(page, count=8):
     for index in range(count):
-        tap(page, page.locator("button[data-correct='true']").first)
+        answer_current(page)
         page.wait_for_timeout(220)
         assert page.get_by_test_id("answer-feedback").is_visible()
         next_button = page.get_by_role("button", name="下一题")
@@ -180,13 +221,23 @@ with sync_playwright() as p:
     assert page.get_by_role("heading", name="数学起点小试").is_visible()
     assert_clean_layout(page, "iPad landscape quiz")
     page.screenshot(path=str(SHOTS / "05-ipad-landscape-math-question.png"), full_page=True)
-    wrong_option = page.locator("button[data-correct='false']").first
-    tap(page, wrong_option)
-    tap(page, wrong_option)
+    if is_matching_question(page):
+        answer_current(
+            page,
+            correct=False,
+            on_wrong=lambda: page.screenshot(path=str(SHOTS / "05a-ipad-landscape-match-wrong-retry.png"), full_page=True),
+        )
+        assert page.get_by_test_id("match-board").is_visible()
+        assert "配错" in page.get_by_test_id("answer-feedback").inner_text()
+    else:
+        wrong_option = page.locator("button[data-correct='false']").first
+        tap(page, wrong_option)
+        tap(page, wrong_option)
     page.wait_for_selector("[data-testid=answer-feedback]")
     assert "1 / 8" in page.locator(".session-progress").inner_text()
     assert page.locator(".wrong-feedback").is_visible()
-    assert "is-correct-answer" in (page.locator("button[data-correct='true']").first.get_attribute("class") or "")
+    if not is_matching_question(page):
+        assert "is-correct-answer" in (page.locator("button[data-correct='true']").first.get_attribute("class") or "")
     page.wait_for_timeout(320)
     page.screenshot(path=str(SHOTS / "05b-ipad-landscape-wrong-feedback.png"), full_page=True)
     tap(page, page.get_by_role("button", name="下一题"))
@@ -218,7 +269,7 @@ with sync_playwright() as p:
     assert page.get_by_role("heading", name="华文起点小试完成").is_visible()
     tap(page, page.get_by_role("button", name="回到学习区"))
     tap(page, page.get_by_role("button", name="英语 English"))
-    tap(page, page.locator("button[data-correct='true']").first)
+    answer_current(page)
     page.wait_for_selector("[data-testid=answer-feedback]")
     feedback = page.get_by_test_id("answer-feedback")
     feedback.scroll_into_view_if_needed()
@@ -230,8 +281,7 @@ with sync_playwright() as p:
     page.screenshot(path=str(SHOTS / "08-ipad-landscape-english-feedback.png"), full_page=True)
     tap(page, page.get_by_role("button", name="下一题"))
     for _ in range(7):
-        tap(page, page.locator("button[data-correct='true']").first)
-        page.wait_for_selector("[data-testid=answer-feedback]")
+        answer_current(page)
         tap(page, page.get_by_role("button", name="下一题"))
         page.wait_for_timeout(130)
     assert page.get_by_role("heading", name="英语起点小试完成").is_visible()

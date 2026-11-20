@@ -12,6 +12,9 @@ import {
 } from "./catalog";
 import { canonicalContentPayload } from "./identity";
 import { classifyMastery, createSkillEvidence, updateBktEvidence } from "../engine/bkt";
+import type { ChoiceQuestion, Question } from "../lib/types";
+
+const isChoiceQuestion = (question: Question): question is ChoiceQuestion => question.kind === "choice";
 
 describe("curriculum content catalog", () => {
   it("has acyclic prerequisite skills", () => {
@@ -42,11 +45,13 @@ describe("curriculum content catalog", () => {
   it("provides exactly three distinct answer choices for every question", () => {
     const issues = validateContentCatalog();
     expect(issues.filter((issue) => issue.code === "option-count")).toEqual([]);
+    const choiceQuestions = ["math", "mandarin", "english"].flatMap((subject) => getQuestionsForSubject(subject as "math" | "mandarin" | "english")).filter(isChoiceQuestion);
+    expect(choiceQuestions.every((question) => question.options.length === 3)).toBe(true);
   });
 
   it("independently recalculates arithmetic answers", () => {
     const arithmeticTemplates = new Set(["addition", "subtraction", "regrouping", "three-digit", "multiplication", "division"]);
-    const arithmetic = getQuestionsForSubject("math").filter((question) => arithmeticTemplates.has(question.template));
+    const arithmetic = getQuestionsForSubject("math").filter(isChoiceQuestion).filter((question) => arithmeticTemplates.has(question.template));
     expect(arithmetic.length).toBeGreaterThan(0);
     for (const question of arithmetic) {
       const operators = question.prompt.match(/(\d+)\s*([+×÷\-])\s*(\d+)\s*=/);
@@ -88,6 +93,19 @@ describe("curriculum content catalog", () => {
       const questions = getQuestionsForSubject(subject).filter((item) => item.diagnostic);
       expect(questions.length).toBeGreaterThanOrEqual(8);
       expect(getQuestionById(questions[0].id)?.id).toBe(questions[0].id);
+    }
+  });
+
+  it("contains thirty valid matching questions with stable pair identifiers", () => {
+    const matching = ["math", "mandarin", "english"].flatMap((subject) => getQuestionsForSubject(subject as "math" | "mandarin" | "english")).filter((question) => question.kind === "match");
+    expect(matching).toHaveLength(30);
+    const issues = validateContentCatalog();
+    expect(issues.filter((issue) => issue.code.startsWith("match-") || issue.code.startsWith("duplicate-match") || issue.code === "empty-match-label")).toEqual([]);
+    for (const question of matching) {
+      expect(question.pairs).toHaveLength(3);
+      expect(new Set(question.pairs.map((pair) => pair.left)).size).toBe(3);
+      expect(new Set(question.pairs.map((pair) => pair.right)).size).toBe(3);
+      expect(new Set(question.pairs.map((pair) => pair.id)).size).toBe(3);
     }
   });
 

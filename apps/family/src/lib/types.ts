@@ -21,15 +21,12 @@ export interface Skill {
   sourceDocument: string;
 }
 
-export interface ChoiceQuestion {
+interface QuestionBase {
   id: string;
   subject: Subject;
   skillId: string;
-  kind: "choice";
   prompt: string;
   instruction: string;
-  options: string[];
-  correctAnswer: string;
   explanation: string;
   difficulty: 1 | 2 | 3 | 4 | 5;
   template: string;
@@ -42,6 +39,29 @@ export interface ChoiceQuestion {
   image?: string;
   passage?: string;
 }
+
+export interface ChoiceQuestion extends QuestionBase {
+  kind: "choice";
+  options: string[];
+  correctAnswer: string;
+}
+
+export interface MatchPair {
+  id: string;
+  left: string;
+  right: string;
+  audioText?: string;
+  audioLanguage?: "zh-CN" | "en-US";
+}
+
+export interface MatchQuestion extends QuestionBase {
+  kind: "match";
+  leftLabel: string;
+  rightLabel: string;
+  pairs: MatchPair[];
+}
+
+export type Question = ChoiceQuestion | MatchQuestion;
 
 export interface SkillEvidence {
   skillId: string;

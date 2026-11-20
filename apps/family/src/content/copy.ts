@@ -49,7 +49,10 @@ export const UI_COPY = {
     practiceResultBody: "这一轮完成了。下一次会继续安排适合你的练习。",
     resultCount: (count: number) => `这一轮做了 ${count} 题`,
     correctTitle: "答对了",
-    wrongTitle: "没关系，一起看答案"
+    wrongTitle: "没关系，一起看答案",
+    matchCorrectTitle: "三对都配好了",
+    matchWrongTitle: "三对配好了，刚才有配错",
+    matchMismatchNote: (count: number) => `中间配错 ${count} 次。先一起看正确配对，再继续。`
   },
   parent: {
     eyebrow: "家长设置",
@@ -59,7 +62,7 @@ export const UI_COPY = {
     sessionLength: "每轮题数",
     resetSubject: (subject: string) => `重做${subject}起点`,
     resetConfirm: (subject: string) => `重做${subject}起点会清除这一科当前的掌握记录和未完成练习，历史作答仍会保留。确定继续吗？`,
-    contentSummary: (version: string) => `内容版本 ${version}：30 个知识点、180 道题。覆盖小学一、二年级的部分内容，不是完整课程。`,
+    contentSummary: (version: string) => `内容版本 ${version}：30 个知识点、210 道题。覆盖小学一、二年级的部分内容，不是完整课程。`,
     reviewStatus: "人工课纲复核：待完成",
     practiced: (count: number) => `已练 ${count} 个知识点`,
     masteryCounts: (likely: number, secure: number) => `较稳定 ${likely} 个 · 已巩固 ${secure} 个`,

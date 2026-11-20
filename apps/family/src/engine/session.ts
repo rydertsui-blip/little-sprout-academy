@@ -1,6 +1,6 @@
 import { getQuestionById, getQuestionsForSubject, getSkillById, SKILLS } from "../content/catalog";
 import { classifyMastery, predictedSuccess, updateBktEvidence } from "./bkt";
-import type { Attempt, ChildProfile, ChoiceQuestion, MasteryLevel, SessionRecord, Skill, Subject } from "../lib/types";
+import type { Attempt, ChildProfile, MasteryLevel, Question, SessionRecord, Skill, Subject } from "../lib/types";
 
 export type RecommendationReason = "review-due" | "prerequisite-gap" | "weak-skill" | "new-skill";
 
@@ -51,7 +51,7 @@ export function createAdaptiveSession(
   return createSessionRecord(child, subject, now, kind, length);
 }
 
-export function selectNextQuestion(child: ChildProfile, session: SessionRecord): ChoiceQuestion | null {
+export function selectNextQuestion(child: ChildProfile, session: SessionRecord): Question | null {
   const answered = new Set(session.attempts.map((attempt) => attempt.questionId));
   if (session.attempts.length >= session.length) return null;
   if (session.kind === "diagnostic") {
@@ -60,12 +60,16 @@ export function selectNextQuestion(child: ChildProfile, session: SessionRecord):
     const lastCorrect = recent.at(-1)?.correct ?? false;
     const targetDifficulty = consecutiveCorrect ? 3 : lastCorrect ? 2 : 1;
     const observedSkills = new Set(session.attempts.map((attempt) => attempt.skillId));
+    const leadWithMatch = session.attempts.length === 0;
     const candidates = getQuestionsForSubject(session.subject)
       .filter((question) => question.diagnostic && !answered.has(question.id))
       .sort((a, b) => {
         const aNovel = observedSkills.has(a.skillId) ? 1 : 0;
         const bNovel = observedSkills.has(b.skillId) ? 1 : 0;
-        return aNovel - bNovel
+        const aKind = leadWithMatch ? (a.kind === "match" ? 0 : 1) : 0;
+        const bKind = leadWithMatch ? (b.kind === "match" ? 0 : 1) : 0;
+        return aKind - bKind
+          || aNovel - bNovel
           || Math.abs(a.difficulty - targetDifficulty) - Math.abs(b.difficulty - targetDifficulty)
           || a.id.localeCompare(b.id);
       });

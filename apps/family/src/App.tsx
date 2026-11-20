@@ -24,8 +24,9 @@ import {
   writeEncryptedEnvelope,
   type EncryptedEnvelope
 } from "./lib/storage";
-import type { ChildProfile, ChoiceQuestion, HouseholdState, SessionRecord, Subject } from "./lib/types";
+import type { ChildProfile, ChoiceQuestion, HouseholdState, Question, SessionRecord, Subject } from "./lib/types";
 import HandwritingScreen from "./screens/HandwritingScreen";
+import MatchingBoard from "./screens/MatchingBoard";
 import SpeakingScreen from "./screens/SpeakingScreen";
 
 type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "handwriting" | "speaking";
@@ -75,8 +76,8 @@ export default function App() {
   const [setupError, setSetupError] = useState("");
   const [setupValues, setSetupValues] = useState({ householdName: "", parentName: "", pin: "" });
   const [session, setSession] = useState<SessionRecord | null>(null);
-  const [currentQuestion, setCurrentQuestion] = useState<ChoiceQuestion | null>(null);
-  const [feedback, setFeedback] = useState<{ correct: boolean; answer: string } | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+  const [feedback, setFeedback] = useState<{ correct: boolean; answer: string; mismatchCount?: number } | null>(null);
   const [summary, setSummary] = useState<SessionRecord["summary"] | null>(null);
   const answeringRef = useRef(false);
   const advancingRef = useRef(false);
@@ -267,27 +268,28 @@ export default function App() {
     }
   }
 
-  async function answerQuestion(answer: string) {
-    if (!activeChild || !session || !currentQuestion || feedback || answeringRef.current) return;
+  async function answerQuestion(correct: boolean, answer: string, mismatchCount = 0): Promise<boolean> {
+    if (!activeChild || !session || !currentQuestion || feedback || answeringRef.current) return false;
     answeringRef.current = true;
     try {
       let nextSession: SessionRecord | null = null;
       const saved = await updateChild(activeChild.id, (child) => {
         nextSession = recordSessionAnswer(child, session, {
           questionId: currentQuestion.id,
-          correct: answer === currentQuestion.correctAnswer,
+          correct,
           hintUsed: false
         });
         child.activeSessions[session.subject] = nextSession;
         return child;
       });
       if (saved && nextSession) {
-        const correct = answer === currentQuestion.correctAnswer;
         const language = session.subject === "mandarin" ? "zh-CN" : "en-US";
         playOrSpeak(correct ? (language === "zh-CN" ? VOICE_LINES.correctZh : VOICE_LINES.correctEn) : (language === "zh-CN" ? VOICE_LINES.wrongZh : VOICE_LINES.wrongEn), language);
         setSession(nextSession);
-        setFeedback({ correct, answer });
+        setFeedback({ correct, answer, mismatchCount });
+        return true;
       }
+      return false;
     } finally {
       answeringRef.current = false;
     }
@@ -623,9 +625,10 @@ function SessionHeader({ child, subject, kind, answered, total, onBack }: { chil
   );
 }
 
-function QuizScreen({ question, feedback, onAnswer, onNext }: { question: ChoiceQuestion; feedback: { correct: boolean; answer: string } | null; onAnswer: (answer: string) => void; onNext: () => void }) {
-  const options = useMemo(() => deterministicOptions(question), [question]);
-  const correct = feedback?.answer === question.correctAnswer;
+function QuizScreen({ question, feedback, onAnswer, onNext }: { question: Question; feedback: { correct: boolean; answer: string; mismatchCount?: number } | null; onAnswer: (correct: boolean, answer: string, mismatchCount?: number) => Promise<boolean>; onNext: () => void }) {
+  const options = useMemo(() => question.kind === "choice" ? deterministicOptions(question) : [], [question]);
+  const correct = Boolean(feedback?.correct);
+  const matchQuestion = question.kind === "match" ? question : null;
   return (
     <main className="quiz-layout">
       <section className="quiz-stage">
@@ -634,24 +637,32 @@ function QuizScreen({ question, feedback, onAnswer, onNext }: { question: Choice
         {question.displayCharacter ? <div className="character-display">{question.displayCharacter}</div> : null}
         {question.image ? <img className="question-image" src={`./assets/images/${question.image}.png`} alt="" /> : null}
         <p className="question-instruction">{question.instruction}</p>
-        <h2 data-testid="question-prompt">{question.prompt}</h2>
+        <h2 data-testid="question-prompt" data-question-id={question.id}>{question.prompt}</h2>
       </section>
       <section className="answer-panel">
-        <div className="answer-grid">
-          {options.map((option) => (
-            <button
-              key={option}
-              className={`answer-option ${feedback && option === feedback.answer ? (correct ? "is-correct" : "is-wrong") : ""} ${feedback && !correct && option === question.correctAnswer ? "is-correct-answer" : ""}`}
-              data-correct={option === question.correctAnswer ? "true" : "false"}
-              type="button"
-              onClick={() => onAnswer(option)}
-              disabled={Boolean(feedback)}
-            >{option}</button>
-          ))}
-        </div>
+        {question.kind === "choice" ? (
+          <div className="answer-grid">
+            {options.map((option) => (
+              <button
+                key={option}
+                className={`answer-option ${feedback && option === feedback.answer ? (correct ? "is-correct" : "is-wrong") : ""} ${feedback && !correct && option === question.correctAnswer ? "is-correct-answer" : ""}`}
+                data-correct={option === question.correctAnswer ? "true" : "false"}
+                type="button"
+                onClick={() => void onAnswer(option === question.correctAnswer, option)}
+                disabled={Boolean(feedback)}
+              >{option}</button>
+            ))}
+          </div>
+        ) : matchQuestion ? (
+          <MatchingBoard key={matchQuestion.id} question={matchQuestion} disabled={Boolean(feedback)} onComplete={(matchCorrect, mismatchCount) => onAnswer(matchCorrect, "match", mismatchCount)} />
+        ) : null}
         {feedback ? (
           <div className={`answer-feedback ${correct ? "correct-feedback" : "wrong-feedback"}`} data-testid="answer-feedback">
-            <div className="feedback-title">{correct ? <><Check aria-hidden="true" />{UI_COPY.session.correctTitle}</> : <><X aria-hidden="true" />{UI_COPY.session.wrongTitle}</>}</div>
+            <div className="feedback-title">{correct
+              ? <><Check aria-hidden="true" />{question.kind === "match" ? UI_COPY.session.matchCorrectTitle : UI_COPY.session.correctTitle}</>
+              : <><X aria-hidden="true" />{question.kind === "match" ? UI_COPY.session.matchWrongTitle : UI_COPY.session.wrongTitle}</>}
+            </div>
+            {question.kind === "match" && feedback.mismatchCount ? <p className="match-mismatch-note">{UI_COPY.session.matchMismatchNote(feedback.mismatchCount)}</p> : null}
             <p>{question.explanation}</p>
             <button className="primary-button wide-button" type="button" onClick={onNext}>下一题<ArrowRight aria-hidden="true" /></button>
           </div>

@@ -19,6 +19,37 @@ def assert_layout(page, label):
     broken = page.evaluate("[...document.images].filter(i => i.complete && i.naturalWidth === 0).map(i => i.src)")
     assert not broken, f"{label}: broken images {broken}"
 
+def is_matching_question(page):
+    board = page.get_by_test_id("match-board")
+    return board.count() > 0 and board.first.is_visible()
+
+def tap_match_pair(page, pair_id):
+    left = page.locator(f'[data-match-side="left"][data-pair-id="{pair_id}"]')
+    right = page.locator(f'[data-match-side="right"][data-pair-id="{pair_id}"]')
+    tap(page, left)
+    page.wait_for_function("el => !el.disabled", arg=right.element_handle(), timeout=2000)
+    tap(page, right)
+
+def answer_current(page, correct=True):
+    if is_matching_question(page):
+        pair_ids = page.locator('[data-match-side="left"]').evaluate_all("els => els.map(el => el.dataset.pairId)")
+        assert len(pair_ids) == 3
+        if not correct:
+            left = page.locator(f'[data-match-side="left"][data-pair-id="{pair_ids[0]}"]')
+            wrong = page.locator(f'[data-match-side="right"][data-pair-id="{pair_ids[1]}"]')
+            tap(page, left)
+            page.wait_for_function("el => !el.disabled", arg=wrong.element_handle(), timeout=2000)
+            tap(page, wrong)
+            page.wait_for_function("document.querySelector('.match-status').textContent.includes('不相配')")
+        for pair_id in pair_ids:
+            tap_match_pair(page, pair_id)
+        page.wait_for_selector("[data-testid=answer-feedback]")
+        return "match"
+    selector = "button[data-correct='true']" if correct else "button[data-correct='false']"
+    tap(page, page.locator(selector).first)
+    page.wait_for_selector("[data-testid=answer-feedback]")
+    return "choice"
+
 with sync_playwright() as p:
     browser = p.webkit.launch(headless=True)
     context = browser.new_context(
@@ -90,18 +121,19 @@ with sync_playwright() as p:
     tap(page, page.get_by_role("button", name="数学 Math"))
     page.wait_for_timeout(300)
     assert_layout(page, "WebKit math quiz")
-    tap(page, page.locator("button[data-correct='false']").first)
-    page.wait_for_selector("[data-testid=answer-feedback]")
+    question_kind = answer_current(page, correct=False)
     page.wait_for_timeout(320)
     assert page.locator(".wrong-feedback").is_visible()
-    assert "is-correct-answer" in (page.locator("button[data-correct='true']").first.get_attribute("class") or "")
+    if question_kind == "choice":
+        assert "is-correct-answer" in (page.locator("button[data-correct='true']").first.get_attribute("class") or "")
+    else:
+        assert "刚才有配错" in page.get_by_test_id("answer-feedback").inner_text()
     page.screenshot(path=str(SHOTS / "14-webkit-ipad-feedback.png"), full_page=True)
     tap(page, page.get_by_role("button", name="下一题"))
     tap(page, page.get_by_role("button", name="退出"))
     tap(page, page.get_by_role("button", name="英语 English"))
     page.wait_for_timeout(300)
-    tap(page, page.locator("button[data-correct='true']").first)
-    page.wait_for_selector("[data-testid=answer-feedback]")
+    answer_current(page)
     page.wait_for_timeout(320)
     assert "1 / 8" in page.locator(".session-progress").inner_text()
 
