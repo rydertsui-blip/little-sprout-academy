@@ -4,11 +4,16 @@ let activeAudio: HTMLAudioElement | null = null;
 
 export function playOrSpeak(text: string, language: string): void {
   const asset = getAudioAsset(text);
-  activeAudio?.pause();
+  try { activeAudio?.pause(); } catch { /* Audio teardown can fail in restricted browser contexts. */ }
   if (asset) {
     const audio = new Audio(`./assets/audio/${asset}.m4a`);
     activeAudio = audio;
-    void audio.play().catch(() => speakFallback(text, language));
+    try {
+      const playback = audio.play();
+      if (playback && typeof playback.catch === "function") void playback.catch(() => speakFallback(text, language));
+    } catch {
+      speakFallback(text, language);
+    }
     return;
   }
   speakFallback(text, language);

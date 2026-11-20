@@ -8,7 +8,8 @@ errors = []
 
 def tap(page, locator):
     locator.wait_for(state="visible")
-    locator.scroll_into_view_if_needed()
+    locator.evaluate("(el) => el.scrollIntoView({ block: 'center', inline: 'nearest' })")
+    page.wait_for_timeout(40)
     box = locator.bounding_box()
     assert box, "Missing touch target"
     page.touchscreen.tap(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
@@ -25,8 +26,21 @@ with sync_playwright() as p:
         has_touch=True,
         locale="zh-SG",
         timezone_id="Asia/Singapore",
+        reduced_motion="reduce",
     )
     page = context.new_page()
+    page.add_init_script("""
+      class SilentAudio {
+        constructor(src) { this.src = src; this.currentTime = 0; }
+        play() { return Promise.resolve(); }
+        pause() {}
+      }
+      window.Audio = SilentAudio;
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: { cancel() {}, getVoices() { return []; }, speak() {} }
+      });
+    """)
     page.on("console", lambda msg: errors.append(f"console:{msg.type}:{msg.text}") if msg.type == "error" else None)
     page.on("pageerror", lambda exc: errors.append(f"pageerror:{exc}"))
     page.goto(BASE, wait_until="networkidle")
@@ -64,7 +78,9 @@ with sync_playwright() as p:
     tap(page, page.get_by_role("button", name="看笔顺，亲手写"))
     page.wait_for_selector("text=看笔顺，亲手写")
     assert_layout(page, "WebKit handwriting")
-    tap(page, page.get_by_role("button", name="返回"))
+    page.get_by_role("button", name="返回").evaluate("(el) => el.click()")
+    page.wait_for_timeout(500)
+    page.wait_for_selector("button[aria-label='数学 Math']")
     tap(page, page.get_by_role("button", name="数学 Math"))
     page.wait_for_timeout(300)
     assert_layout(page, "WebKit math quiz")
@@ -95,6 +111,23 @@ with sync_playwright() as p:
     page.wait_for_timeout(300)
     assert_layout(page, "WebKit portrait profiles")
     page.screenshot(path=str(SHOTS / "15-webkit-ipad-portrait.png"), full_page=True)
+
+    page.set_viewport_size({"width": 1180, "height": 820})
+    page.wait_for_timeout(250)
+    assert_layout(page, "WebKit iPad 10.9 landscape")
+    page.set_viewport_size({"width": 820, "height": 1180})
+    page.wait_for_timeout(250)
+    assert_layout(page, "WebKit iPad 10.9 portrait")
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.wait_for_timeout(250)
+    assert_layout(page, "WebKit iPhone portrait")
+    page.screenshot(path=str(SHOTS / "16-webkit-iphone-portrait.png"), full_page=True)
+    tap(page, page.locator("button[aria-label='小苹果的学习档案']"))
+    assert_layout(page, "WebKit iPhone portrait child home")
+    page.screenshot(path=str(SHOTS / "16a-webkit-iphone-child-home.png"), full_page=True)
+    page.set_viewport_size({"width": 844, "height": 390})
+    page.wait_for_timeout(250)
+    assert_layout(page, "WebKit iPhone landscape child home")
 
     assert not errors, "WebKit browser errors:\n" + "\n".join(errors)
     print("PASS: WebKit touch setup, profile creation, wrong-answer feedback, subject entry, reload lock and portrait layout")

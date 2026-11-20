@@ -29,7 +29,7 @@ button { color: inherit; cursor: pointer; -webkit-tap-highlight-color: transpare
 button:focus-visible, input:focus-visible { outline: 4px solid var(--yellow); outline-offset: 3px; }
 svg { width: 22px; height: 22px; }
 
-.app-shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 18px 0 42px; }
+.app-shell { width: min(1120px, 100%); margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(42px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
 .app-header { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .brand-button { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 4px 8px 4px 2px; border: 0; background: transparent; text-align: left; }
 .brand-mark { width: 48px; height: 48px; object-fit: contain; }
@@ -89,6 +89,24 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
 .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
 
 .child-home { display: grid; gap: 18px; }
+.child-teacher { display: grid; grid-template-columns: 124px minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 20px 24px; border: var(--border); border-radius: 10px; background: var(--sky); box-shadow: var(--shadow); overflow: hidden; }
+.child-teacher-bubble h1 { margin: 0; font-size: clamp(28px, 3.7vw, 44px); line-height: 1.12; }
+.child-teacher-bubble p { max-width: 540px; margin: 9px 0 0; color: var(--muted); font-size: 17px; line-height: 1.55; }
+.teacher-start { min-width: 190px; min-height: 64px; font-size: 19px; }
+.teacher-mascot { position: relative; width: 104px; height: 104px; display: grid; place-items: center; border: var(--border); border-radius: 50%; background: var(--paper-bright); box-shadow: 0 6px 0 rgba(23, 50, 77, 0.12); }
+.teacher-mascot img { width: 70px; animation: mascot-bob 2.8s ease-in-out infinite; }
+.teacher-mascot i { position: absolute; right: 1px; width: 13px; height: 13px; border: 2px solid var(--ink); border-radius: 50%; background: var(--yellow); animation: voice-wave 1.5s ease-in-out infinite; }
+.teacher-mascot i:nth-child(2) { right: -5px; top: 42px; animation-delay: 0.2s; }
+.teacher-mascot i:nth-child(3) { right: 6px; top: 67px; animation-delay: 0.4s; }
+.teacher-bubble { position: relative; display: grid; gap: 3px; }
+.teacher-bubble::before { content: ""; position: absolute; left: -19px; top: 38px; width: 18px; height: 24px; background: var(--paper-bright); border-left: var(--border); border-bottom: var(--border); transform: skewY(-35deg); }
+.teacher-bubble small { color: var(--muted); font-size: 13px; font-weight: 900; }
+.teacher-bubble strong { font-size: 21px; line-height: 1.5; }
+.teacher-bubble .audio-button { position: static; justify-self: start; margin-top: 4px; }
+.teacher-command { display: grid; grid-template-columns: 100px minmax(0, 1fr); align-items: center; gap: 18px; padding: 18px 20px; border: var(--border); border-radius: 10px; background: var(--sky); box-shadow: var(--shadow); }
+.handwriting-teacher.demonstrating .teacher-mascot img { animation-duration: 1.4s; }
+.handwriting-teacher.writing .teacher-mascot { box-shadow: 0 0 0 8px rgba(244, 184, 75, 0.18), 0 6px 0 rgba(23, 50, 77, 0.12); }
+.teacher-stage-label { align-self: end; padding: 8px 16px; border: var(--border); border-radius: 999px; background: var(--yellow); color: var(--ink); font-weight: 900; }
 .child-hero { display: grid; grid-template-columns: 1.2fr 0.8fr; min-height: 290px; border: var(--border); border-radius: 10px; background: var(--sky); box-shadow: var(--shadow); overflow: hidden; }
 .child-hero-copy { display: grid; align-content: center; padding: clamp(26px, 5vw, 54px); }
 .child-hero-copy h1 { max-width: 560px; font-size: clamp(36px, 4.6vw, 56px); line-height: 1.14; text-wrap: balance; }
@@ -240,6 +258,16 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes mascot-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-5px) rotate(2deg); }
+}
+
+@keyframes voice-wave {
+  0%, 100% { transform: scale(0.7); opacity: 0.45; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
 @media (max-width: 850px) {
   .profile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .child-hero { grid-template-columns: 1fr; }
@@ -256,10 +284,12 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
   .handwriting-rail { grid-template-columns: repeat(6, minmax(44px, 1fr)); }
   .handwriting-character-meta { grid-template-columns: auto minmax(0, 1fr); }
   .handwriting-character-meta .audio-button { grid-column: 1 / -1; justify-self: end; }
+  .child-teacher { grid-template-columns: 104px minmax(0, 1fr); }
+  .teacher-start { grid-column: 1 / -1; width: 100%; }
 }
 
 @media (max-width: 520px) {
-  .app-shell { width: calc(100% - 20px); }
+  .app-shell { padding-left: max(10px, env(safe-area-inset-left)); padding-right: max(10px, env(safe-area-inset-right)); }
   .brand-copy strong { font-size: 18px; }
   .brand-mark { width: 42px; height: 42px; }
   .header-badge span { display: none; }
@@ -296,6 +326,14 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
   .handwriting-character-meta h2 { font-size: 22px; }
   .handwriting-header { grid-template-columns: auto minmax(0, 1fr); }
   .handwriting-header > :last-child { grid-column: 1 / -1; justify-self: end; }
+  .child-teacher { grid-template-columns: 82px minmax(0, 1fr); padding: 16px; }
+  .teacher-mascot { width: 80px; height: 80px; }
+  .teacher-mascot img { width: 54px; }
+  .teacher-mascot i { display: none; }
+  .teacher-command { grid-template-columns: 76px minmax(0, 1fr); padding: 14px; }
+  .teacher-bubble strong { font-size: 18px; }
+  .handwriting-teacher .teacher-mascot { width: 72px; height: 72px; }
+  .handwriting-teacher .teacher-mascot img { width: 50px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

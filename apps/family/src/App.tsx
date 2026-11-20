@@ -1,7 +1,8 @@
 import { useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Check, Download, Headphones, Lock, Pencil, Plus, ShieldCheck, Star, Upload, X } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Check, Download, Headphones, Lock, Pencil, Plus, ShieldCheck, Star, Upload, X } from "lucide-react";
 import { CONTENT_VERSION, SKILLS } from "./content/catalog";
 import { SUBJECT_NAMES, UI_COPY } from "./content/copy";
+import { VOICE_LINES } from "./content/audioAssets";
 import { HANDWRITING_CHARACTERS, type HandwritingCharacter } from "./content/handwriting";
 import { classifyMastery, createSkillEvidence } from "./engine/bkt";
 import { recordHandwritingPractice } from "./engine/handwriting";
@@ -269,8 +270,11 @@ export default function App() {
         return child;
       });
       if (saved && nextSession) {
+        const correct = answer === currentQuestion.correctAnswer;
+        const language = session.subject === "mandarin" ? "zh-CN" : "en-US";
+        playOrSpeak(correct ? (language === "zh-CN" ? VOICE_LINES.correctZh : VOICE_LINES.correctEn) : (language === "zh-CN" ? VOICE_LINES.wrongZh : VOICE_LINES.wrongEn), language);
         setSession(nextSession);
-        setFeedback({ correct: answer === currentQuestion.correctAnswer, answer });
+        setFeedback({ correct, answer });
       }
     } finally {
       answeringRef.current = false;
@@ -300,9 +304,26 @@ export default function App() {
       }
       setCurrentQuestion(selectNextQuestion(activeChild, session));
       setFeedback(null);
+      const language = session.subject === "mandarin" ? "zh-CN" : "en-US";
+      playOrSpeak(language === "zh-CN" ? VOICE_LINES.nextZh : VOICE_LINES.nextEn, language);
     } finally {
       advancingRef.current = false;
     }
+  }
+
+  function startRecommendedLearning() {
+    if (!activeChild) return;
+    const priority = { "review-due": 0, "prerequisite-gap": 1, "weak-skill": 2, "new-skill": 3 } as const;
+    const recommendation = buildChildInsights(activeChild).sort((a, b) => priority[a.reason] - priority[b.reason])[0];
+    const subject = recommendation?.subject ?? "math";
+    const voice = subject === "math" ? VOICE_LINES.startMath : subject === "mandarin" ? VOICE_LINES.startMandarin : VOICE_LINES.startEnglish;
+    playOrSpeak(voice, "zh-CN");
+    startSubject(subject);
+  }
+
+  function openHandwriting() {
+    playOrSpeak(VOICE_LINES.introWrite, "zh-CN");
+    setScreen("handwriting");
   }
 
   if (encryptedEnvelope && !household) {
@@ -407,7 +428,15 @@ export default function App() {
       <TopBar title={activeChild?.name ?? UI_COPY.child.topbarFallback} subtitle={UI_COPY.child.subtitle} onBack={backToProfiles} onLock={lockHousehold} />
       {activeChild ? (
         <main className="child-home">
-          <section className="child-hero"><div className="child-hero-copy"><p className="eyebrow">{UI_COPY.child.eyebrow}</p><h1>{UI_COPY.child.greeting(activeChild.name)}</h1><p>{UI_COPY.child.body}</p></div><div className="child-hero-visual"><img src="./assets/images/books.png" alt="" /><span>+1</span></div></section>
+          <section className="child-teacher">
+            <div className="teacher-mascot child-mascot" aria-hidden="true"><img src="./assets/images/seedling.png" alt="" /><i /><i /><i /></div>
+            <div className="teacher-bubble child-teacher-bubble">
+              <small>小芽老师</small>
+              <h1>{UI_COPY.child.greeting(activeChild.name)}</h1>
+              <p>{UI_COPY.child.body}</p>
+            </div>
+            <button className="primary-button teacher-start" type="button" onClick={startRecommendedLearning}>跟小芽开始<ArrowRight aria-hidden="true" /></button>
+          </section>
           <div className="subject-grid">
             {subjectCards.map((card) => (
               <button key={card.subject} className={`subject-card ${card.className}`} type="button" aria-label={card.title} onClick={() => startSubject(card.subject)}>
@@ -417,12 +446,11 @@ export default function App() {
               </button>
             ))}
           </div>
-          <button className="handwriting-entry" type="button" onClick={() => setScreen("handwriting")}>
+          <button className="handwriting-entry" type="button" onClick={openHandwriting}>
             <span className="handwriting-entry-icon"><Pencil aria-hidden="true" /></span>
             <span className="handwriting-entry-copy"><small>华文写字</small><strong>看笔顺，亲手写</strong><p>12 个基础汉字，写完会记入学习进度。</p></span>
             <span className="handwriting-entry-progress">{HANDWRITING_CHARACTERS.filter((entry) => activeChild.handwriting[entry.character]).length} / {HANDWRITING_CHARACTERS.length}<ChevronRight aria-hidden="true" /></span>
           </button>
-          <section className="child-note"><BookOpen aria-hidden="true" /><span>{UI_COPY.child.note}</span></section>
         </main>
       ) : null}
     </div>

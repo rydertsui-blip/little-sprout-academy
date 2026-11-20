@@ -13,7 +13,8 @@ checks = []
 
 def tap(page, locator):
     locator.wait_for(state="visible")
-    locator.scroll_into_view_if_needed()
+    locator.evaluate("(el) => el.scrollIntoView({ block: 'center', inline: 'nearest' })")
+    page.wait_for_timeout(40)
     box = locator.bounding_box()
     assert box, "Missing touch target bounding box"
     page.touchscreen.tap(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
@@ -129,12 +130,10 @@ with sync_playwright() as p:
     assert page.get_by_text("人", exact=True).first.is_visible()
     assert_clean_layout(page, "iPad landscape handwriting")
     page.screenshot(path=str(SHOTS / "04b-ipad-landscape-handwriting.png"), full_page=True)
-    tap(page, page.get_by_role("button", name="看笔顺"))
-    page.wait_for_function("() => { const b = document.querySelector('.handwriting-actions .primary-button'); return b && !b.disabled; }")
+    page.wait_for_selector("text=轮到你写")
     tap(page, page.get_by_role("button", name="朗读 人"))
     page.wait_for_timeout(300)
-    tap(page, page.get_by_role("button", name="写一写"))
-    page.wait_for_timeout(200)
+    page.wait_for_timeout(900)
     transform = page.locator(".hanzi-target svg g").first.get_attribute("transform") or ""
     match = re.search(r"translate\(([-0-9.]+), ([-0-9.]+)\) scale\(([-0-9.]+),", transform)
     assert match, f"Unexpected Hanzi transform: {transform}"
@@ -249,7 +248,7 @@ with sync_playwright() as p:
     assert_clean_layout(page, "iPad portrait quiz")
     page.screenshot(path=str(SHOTS / "11-ipad-portrait-quiz.png"), full_page=True)
 
-    page.set_viewport_size({"width": 390, "height": 844})
+    page.set_viewport_size({"width": 1280, "height": 800})
     page.goto(BASE, wait_until="networkidle")
     page.wait_for_timeout(300)
     if page.get_by_role("heading", name="输入家长密码").is_visible():
@@ -257,8 +256,15 @@ with sync_playwright() as p:
         page.get_by_label("家长密码").fill("2468")
         tap(page, page.get_by_role("button", name="打开家庭学习区"))
     page.wait_for_selector("text=今天谁来学习？")
-    assert_clean_layout(page, "phone profiles")
-    page.screenshot(path=str(SHOTS / "12-phone-profiles.png"), full_page=True)
+    assert_clean_layout(page, "Android tablet landscape profiles")
+    page.screenshot(path=str(SHOTS / "12-android-tablet-landscape-profiles.png"), full_page=True)
+    tap(page, page.locator("button[aria-label='小星的学习档案']"))
+    assert_clean_layout(page, "Android tablet landscape child home")
+    page.screenshot(path=str(SHOTS / "12a-android-tablet-landscape-child-home.png"), full_page=True)
+    page.set_viewport_size({"width": 800, "height": 1280})
+    page.wait_for_timeout(250)
+    assert_clean_layout(page, "Android tablet portrait child home")
+    page.screenshot(path=str(SHOTS / "12b-android-tablet-portrait-child-home.png"), full_page=True)
 
     page.evaluate("navigator.serviceWorker.ready.then((registration) => Boolean(registration.active))")
     page.reload(wait_until="networkidle")

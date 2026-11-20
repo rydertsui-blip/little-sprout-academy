@@ -5,9 +5,10 @@ export interface HandwritingCharacter {
   english: string;
   tip: string;
   audioText: string;
+  introAudioText: string;
 }
 
-export const HANDWRITING_CHARACTERS: HandwritingCharacter[] = [
+const HANDWRITING_SEED: Omit<HandwritingCharacter, "introAudioText">[] = [
   { character: "人", pinyin: "rén", word: "大人", english: "person", tip: "一撇一捺，像两条腿稳稳站住。", audioText: "人，大人" },
   { character: "口", pinyin: "kǒu", word: "开口", english: "mouth", tip: "方方的口，像张开的嘴巴。", audioText: "口，开口" },
   { character: "山", pinyin: "shān", word: "高山", english: "mountain", tip: "三座高低不同的山峰。", audioText: "山，高山" },
@@ -21,3 +22,8 @@ export const HANDWRITING_CHARACTERS: HandwritingCharacter[] = [
   { character: "目", pinyin: "mù", word: "目光", english: "eye", tip: "目字像竖起来的眼睛。", audioText: "目，目光" },
   { character: "足", pinyin: "zú", word: "足球", english: "foot", tip: "下面的足字，像迈开的脚步。", audioText: "足，足球" }
 ];
+
+export const HANDWRITING_CHARACTERS: HandwritingCharacter[] = HANDWRITING_SEED.map((entry) => ({
+  ...entry,
+  introAudioText: `${entry.character}。先看老师怎样写。`
+}));
