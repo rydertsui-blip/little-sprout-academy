@@ -218,6 +218,11 @@ export default function App() {
     if (screen !== "assessment" && screen !== "speaking") stopAudio();
   }, [screen]);
 
+  useEffect(() => {
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [screen]);
+
   const activeChild = household?.children.find((child) => child.id === activeChildId) ?? null;
   const storageBanner = storageError ? <div className="storage-banner" role="alert">{ui.storageError}</div> : null;
 
@@ -920,6 +925,11 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
   }, [question.id]);
 
   useEffect(() => {
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [question.id]);
+
+  useEffect(() => {
     if (!feedback || !feedbackRef.current || typeof feedbackRef.current.scrollIntoView !== "function") return;
     feedbackRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [feedback]);
@@ -962,7 +972,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
 
   const matchQuestion = question.kind === "match" ? question : null;
   return (
-    <main className={`quiz-layout quiz-${question.subject}`} lang={contentLanguage}>
+    <main className={`quiz-layout quiz-${question.subject}${question.passage ? " quiz-reading" : ""}`} lang={contentLanguage}>
       <section className="quiz-stage">
         <div className="quiz-skill-chip">{subjectName(question.subject, locale)}<span>{skillTitle(question.skillId, locale)}</span></div>
         <button className={`audio-button ${question.audioOnly ? "is-game-listen" : ""}`} type="button" onClick={() => playOrSpeak(preAnswerAudio(question), language)} aria-label={question.audioOnly ? copy.session.listenSound : copy.session.listenQuestion}><Headphones aria-hidden="true" /><span>{question.audioOnly ? copy.session.listenSound : copy.session.listenQuestion}</span></button>

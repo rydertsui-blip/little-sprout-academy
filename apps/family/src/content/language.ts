@@ -28,8 +28,8 @@ const LANGUAGE_DEPTH_TARGETS: Record<string, number> = {
   "english-a-an": 12,
   "english-plural": 12,
   "english-sentence-order": 17,
-  "english-reading": 18,
-  "english-reading-inference": 12,
+  "english-reading": 30,
+  "english-reading-inference": 24,
   "english-spelling": 12
 };
 
@@ -381,6 +381,19 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
     difficulty,
     ...(passage ? { passage, audioText: passage, audioLanguage: "en-US" as const } : {})
   });
+  const read = (prompt: string, answer: string, options: string[], explanation: string, template: string, difficulty: 1 | 2 | 3 | 4 | 5, passage: string, instruction = "Read and choose the answer."): LanguageDepthSeed => ({
+    prompt,
+    instruction,
+    options,
+    correctAnswer: answer,
+    explanation,
+    template,
+    difficulty,
+    passage,
+    audioText: prompt,
+    audioLanguage: "en-US" as const,
+    transferLevel: /sequence|inference|why|feeling/i.test(template) ? "near-transfer" : "same-context"
+  });
 
   switch (skillId) {
     case "k2-mandarin-vocabulary":
@@ -681,6 +694,33 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
         ,en("How many children are in the park?", "five", ["five", "three", "two"], "Two boys and three girls make five children.", "literal", 4, "Two boys and three girls are in the park.")
         ,en("Why does Ben smile?", "he gets a birthday card", ["he gets a birthday card", "he loses his bag", "he is hungry"], "Ben smiles because his friend gives him a birthday card.", "inference", 4, "Ben's friend gives him a birthday card. Ben smiles.")
         ,en("Which happens first?", "wash the apple", ["wash the apple", "eat the apple", "cut the apple"], "Ana washes the apple before she eats it.", "sequence", 3, "Ana washes the apple, then eats it.")
+        ,read("What color is Ben's cap?", "red", ["red", "blue", "green"], "The text says Ben has a red cap.", "literal", 2, "Ben is at the park with his dog. The wind blows his red cap under a bench. Ben looks under the bench and finds it. He puts the cap back on.")
+        ,read("Where does the cap go?", "under a bench", ["under a bench", "in a tree", "on a slide"], "The wind blows the cap under a bench.", "literal", 2, "Ben is at the park with his dog. The wind blows his red cap under a bench. Ben looks under the bench and finds it. He puts the cap back on.")
+        ,read("What does Ben do at the end?", "puts the cap back on", ["puts the cap back on", "feeds his dog", "goes home"], "Ben finds the cap and puts it back on.", "sequence", 3, "Ben is at the park with his dog. The wind blows his red cap under a bench. Ben looks under the bench and finds it. He puts the cap back on.")
+        ,read("What does Mia hear?", "rain", ["rain", "wind", "a bell"], "Mia wakes up and hears rain.", "literal", 2, "Mia wakes up and hears rain. She puts on her yellow boots. At school, she sees a big puddle. Mia and her friend jump in it.")
+        ,read("What color are Mia's boots?", "yellow", ["yellow", "blue", "red"], "The text says Mia puts on her yellow boots.", "literal", 2, "Mia wakes up and hears rain. She puts on her yellow boots. At school, she sees a big puddle. Mia and her friend jump in it.")
+        ,read("What do Mia and her friend jump in?", "a puddle", ["a puddle", "a box", "a river"], "Mia and her friend jump in a big puddle.", "literal", 2, "Mia wakes up and hears rain. She puts on her yellow boots. At school, she sees a big puddle. Mia and her friend jump in it.")
+        ,read("What fruit is in Lily's lunch?", "apple", ["apple", "banana", "orange"], "Lily finds a small apple in her lunch box.", "literal", 2, "Lily opens her lunch box. She finds rice, eggs and a small apple. She eats the rice and eggs. Then she saves the apple for later.")
+        ,read("What does Lily eat first?", "rice and eggs", ["rice and eggs", "apple and eggs", "a sandwich"], "Lily eats the rice and eggs before she saves the apple.", "literal", 3, "Lily opens her lunch box. She finds rice, eggs and a small apple. She eats the rice and eggs. Then she saves the apple for later.")
+        ,read("Why does Lily save the apple?", "for later", ["for later", "to give to a friend", "to put in her bag"], "Lily saves the apple to eat later.", "why", 3, "Lily opens her lunch box. She finds rice, eggs and a small apple. She eats the rice and eggs. Then she saves the apple for later.")
+        ,read("Where does Kim put the pot?", "near the window", ["near the window", "under the bed", "on the table"], "Kim puts the pot near the window.", "literal", 2, "Kim plants a seed in a pot. She puts the pot near the window. Every day she gives it water. After a week, a small green leaf appears.")
+        ,read("What does Kim do every day?", "gives it water", ["gives it water", "reads a book", "sings a song"], "Kim gives the plant water every day.", "literal", 2, "Kim plants a seed in a pot. She puts the pot near the window. Every day she gives it water. After a week, a small green leaf appears.")
+        ,read("What appears after a week?", "a small green leaf", ["a small green leaf", "a red flower", "a big tree"], "After a week, a small green leaf appears.", "sequence", 3, "Kim plants a seed in a pot. She puts the pot near the window. Every day she gives it water. After a week, a small green leaf appears.")
+      ];
+    case "english-reading-inference":
+      return [
+        read("Why will the children return to the garden?", "the tomatoes will be ready", ["the tomatoes will be ready", "the weeds will grow", "Mr Lim will read a book"], "Mr Lim says the tomatoes will be ready in two weeks.", "why", 4, "Every Friday, Class 2 visits the school garden. Ana waters the tomatoes. Ben pulls out the weeds. Their teacher, Mr Lim, says the tomatoes will be ready in two weeks. The children cannot wait to make tomato soup.", "Read the clues, then tap the best answer.")
+        ,read("How do the children feel about the soup?", "excited", ["excited", "sleepy", "angry"], "The children cannot wait, so they feel excited.", "feeling", 4, "Every Friday, Class 2 visits the school garden. Ana waters the tomatoes. Ben pulls out the weeds. Their teacher, Mr Lim, says the tomatoes will be ready in two weeks. The children cannot wait to make tomato soup.", "Read the clues, then tap the best answer.")
+        ,read("What will the children probably make?", "tomato soup", ["tomato soup", "apple pie", "rice"], "They talk about making tomato soup, so that is what they will probably make.", "inference", 4, "Every Friday, Class 2 visits the school garden. Ana waters the tomatoes. Ben pulls out the weeds. Their teacher, Mr Lim, says the tomatoes will be ready in two weeks. The children cannot wait to make tomato soup.", "Read the clues, then tap the best answer.")
+        ,read("Why does Sam look under his bed?", "he thinks the book is there", ["he thinks the book is there", "he wants to sleep", "he is looking for his bag"], "Sam cannot find the book, so he looks in places where it might be.", "inference", 4, "Sam borrows a book about sharks from the library. At home, he cannot find it. He looks under his bed and behind the sofa. Then he remembers: the book is in his school bag. He returns it the next day.", "Read the clues, then tap the best answer.")
+        ,read("How does Sam feel when he cannot find the book?", "worried", ["worried", "happy", "proud"], "Sam cannot find the library book, so he feels worried.", "feeling", 4, "Sam borrows a book about sharks from the library. At home, he cannot find it. He looks under his bed and behind the sofa. Then he remembers: the book is in his school bag. He returns it the next day.", "Read the clues, then tap the best answer.")
+        ,read("What will Sam do next?", "return the book", ["return the book", "buy a new book", "hide the book"], "Sam finds the book and returns it the next day.", "sequence", 4, "Sam borrows a book about sharks from the library. At home, he cannot find it. He looks under his bed and behind the sofa. Then he remembers: the book is in his school bag. He returns it the next day.", "Read the clues, then tap the best answer.")
+        ,read("Why is Mei alone at lunch?", "she is new", ["she is new", "she is angry", "she is sick"], "Mei is a new girl, so she sits alone at first.", "why", 3, "A new girl named Mei joins P2. She sits alone at lunch. Lily shares her sandwich and asks Mei to play. By the end of the day, Mei is smiling and has two new friends.", "Read the clues, then tap the best answer.")
+        ,read("How does Mei feel at the end of the day?", "happy", ["happy", "sad", "tired"], "Mei is smiling and has new friends, so she feels happy.", "feeling", 4, "A new girl named Mei joins P2. She sits alone at lunch. Lily shares her sandwich and asks Mei to play. By the end of the day, Mei is smiling and has two new friends.", "Read the clues, then tap the best answer.")
+        ,read("What did Lily do to help Mei?", "shared her sandwich and asked her to play", ["shared her sandwich and asked her to play", "took her bag", "told her to go home"], "Lily shares her sandwich and asks Mei to play.", "inference", 3, "A new girl named Mei joins P2. She sits alone at lunch. Lily shares her sandwich and asks Mei to play. By the end of the day, Mei is smiling and has two new friends.", "Read the clues, then tap the best answer.")
+        ,read("Why do Tom and his mother put the cake on the table?", "to cool", ["to cool", "to eat it", "to hide it"], "They put the cake on the table to cool.", "why", 3, "It is Grandma's birthday. Tom and his mother bake a cake. They put it on the table to cool. When they come back, the cake has one bite missing. Their cat is licking its paw.", "Read the clues, then tap the best answer.")
+        ,read("Who probably ate the cake?", "the cat", ["the cat", "Grandma", "Tom"], "The cat is licking its paw, so it probably ate the cake.", "inference", 4, "It is Grandma's birthday. Tom and his mother bake a cake. They put it on the table to cool. When they come back, the cake has one bite missing. Their cat is licking its paw.", "Read the clues, then tap the best answer.")
+        ,read("How does the cake look when they come back?", "one bite is missing", ["one bite is missing", "it is whole", "it is in the oven"], "The cake has one bite missing when they come back.", "inference", 3, "It is Grandma's birthday. Tom and his mother bake a cake. They put it on the table to cool. When they come back, the cake has one bite missing. Their cat is licking its paw.", "Read the clues, then tap the best answer.")
       ];
     case "english-spelling":
       return [

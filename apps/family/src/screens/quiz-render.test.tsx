@@ -4,8 +4,8 @@ import { QuizScreen } from "../App";
 import { QUESTIONS } from "../content/catalog";
 
 describe("all question render smoke", () => {
-  it("renders every one of the 775 questions without throwing", () => {
-    expect(QUESTIONS.length).toBe(775);
+  it("renders every one of the 799 questions without throwing", () => {
+    expect(QUESTIONS.length).toBe(799);
     for (const question of QUESTIONS) {
       const { container, unmount } = render(
         <QuizScreen

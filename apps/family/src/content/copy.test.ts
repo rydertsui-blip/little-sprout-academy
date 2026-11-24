@@ -22,9 +22,9 @@ describe("role-specific interface copy", () => {
   });
 
   it("describes the pilot scope honestly for parents", () => {
-    const summary = UI_COPY.parent.contentSummary(CONTENT_VERSION, 46, 775);
+    const summary = UI_COPY.parent.contentSummary(CONTENT_VERSION, 46, 799);
     expect(summary).toContain("46 个知识点");
-    expect(summary).toContain("775 道题");
+    expect(summary).toContain("799 道题");
     expect(summary).toContain("K2 准备");
     expect(summary).toContain("P1–P2");
     expect(summary).toContain("不是完整课程");

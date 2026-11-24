@@ -921,7 +921,7 @@ describe("family learning app", () => {
     await waitFor(() => expect(screen.getByText("今天谁来学习？")).toBeInTheDocument());
     await openParentSettings();
     expect(screen.getByText(/版本 0\.9\.0/)).toBeInTheDocument();
-    expect(screen.getByText(/内容 pilot-22/)).toBeInTheDocument();
+    expect(screen.getByText(/内容 pilot-23/)).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/本机家庭数据/)).toBeInTheDocument());
     fireEvent.click(screen.getByLabelText("高对比"));
     await waitFor(async () => expect((await savedHousehold()).children[0].settings.highContrast).toBe(true));
