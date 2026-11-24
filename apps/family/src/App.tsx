@@ -978,7 +978,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
         <button className={`audio-button ${question.audioOnly ? "is-game-listen" : ""}`} type="button" onClick={() => playOrSpeak(preAnswerAudio(question), language)} aria-label={question.audioOnly ? copy.session.listenSound : copy.session.listenQuestion}><Headphones aria-hidden="true" /><span>{question.audioOnly ? copy.session.listenSound : copy.session.listenQuestion}</span></button>
         {teach ? (
           <details className="skill-teach" open>
-            <summary>{copy.session.teachSummary}</summary>
+            <summary>{copy.session.teachSummary}<small className="skill-teach-toggle">{copy.session.teachToggle}</small></summary>
             <div className="skill-teach-body">
               <strong>{teach.title}</strong>
               <p>{teach.body}</p>

@@ -262,7 +262,8 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
 .retry-feedback { border-color: #d9a12a !important; background: #fffaf0 !important; }
 .retry-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .skill-teach { width: min(560px, 100%); text-align: left; border: 2px solid #d9a12a; border-radius: 8px; background: #fffaf0; }
-.skill-teach summary { min-height: 44px; display: flex; align-items: center; padding: 8px 12px; color: #6d521f; font-size: 13px; font-weight: 900; cursor: pointer; }
+.skill-teach summary { min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: #6d521f; font-size: 13px; font-weight: 900; cursor: pointer; }
+.skill-teach-toggle { margin-left: auto; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .skill-teach-body { display: grid; gap: 4px; padding: 0 12px 12px; }
 .skill-teach-body strong { font-size: 17px; }
 .skill-teach-body p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
@@ -762,6 +763,13 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
   .quiz-skill-chip span { min-width: 0; overflow: visible; font-size: 11px; line-height: 1.2; text-overflow: clip; white-space: normal; }
   .answer-panel { padding: 16px; }
   .answer-option { min-height: 58px; }
+  /* Single-column maths and language quizzes: after the first-time card is
+     collapsed, keep all three answers inside a 390×844 safe area. */
+  .quiz-layout:not(.quiz-reading) .quiz-stage { padding-bottom: 8px; }
+  .quiz-layout:not(.quiz-reading) .answer-panel { padding: 4px 16px 16px; gap: 10px; }
+  .quiz-layout:not(.quiz-reading) .answer-grid { gap: 4px; }
+  .quiz-layout:not(.quiz-reading) .answer-option { min-height: 54px; }
+  .quiz-layout:not(.quiz-reading) .math-tool-body { padding-bottom: 8px; }
   .match-columns { gap: 8px; }
   .match-card, .match-card-right { min-height: 58px; padding: 10px 34px 10px 10px; font-size: 17px; }
   .match-card svg { right: 8px; width: 18px; height: 18px; }
