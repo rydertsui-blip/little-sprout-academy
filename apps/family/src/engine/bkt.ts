@@ -1,9 +1,13 @@
-import type { MasteryLevel, SkillEvidence } from "../lib/types";
+import type { EvidenceDiversity, MasteryLevel, ResponseMode, SkillEvidence, TransferLevel } from "../lib/types";
 
 export interface BktObservation {
   correct: boolean;
   hintUsed: boolean;
   template: string;
+  templateFamily?: string;
+  responseMode?: ResponseMode;
+  transferLevel?: TransferLevel;
+  contextKey?: string;
   at?: Date;
   questionId?: string;
 }
@@ -14,6 +18,22 @@ const DEFAULT_PARAMS = {
   pSlip: 0.1,
   pTransit: 0.12
 };
+
+export function createEvidenceDiversity(): EvidenceDiversity {
+  return {
+    templateFamilies: {},
+    responseModes: { "tap-choice": 0, "tap-match": 0, "tap-order": 0, "voice-practice": 0 },
+    transferCorrect: 0,
+    farTransferCorrect: 0,
+    delayedIndependentCorrect: 0,
+    contextKeys: [],
+    lastIndependentWrongAt: null
+  };
+}
+
+function responseModeForQuestion(kind: "choice" | "match" | undefined): ResponseMode {
+  return kind === "match" ? "tap-match" : "tap-choice";
+}
 
 export function createSkillEvidence(skillId: string, at = new Date()): SkillEvidence {
   return {
@@ -34,7 +54,8 @@ export function createSkillEvidence(skillId: string, at = new Date()): SkillEvid
     delayedEvidence: false,
     reviewStage: 0,
     dueAt: new Date(at.getTime() + 24 * 60 * 60 * 1000).toISOString(),
-    wrongStreak: 0
+    wrongStreak: 0,
+    diversity: createEvidenceDiversity()
   };
 }
 
@@ -89,6 +110,28 @@ export function updateBktEvidence(evidence: SkillEvidence, observation: BktObser
   if (!observation.correct && independent) reviewStage = 0;
   if (!observation.correct && independent) scheduledDueAt = new Date(at.getTime() + 24 * 60 * 60 * 1000).toISOString();
 
+  const diversity: EvidenceDiversity = {
+    ...evidence.diversity,
+    templateFamilies: { ...evidence.diversity.templateFamilies },
+    responseModes: { ...evidence.diversity.responseModes },
+    contextKeys: [...evidence.diversity.contextKeys]
+  };
+  if (newQuestion) {
+    const family = observation.templateFamily ?? observation.template;
+    diversity.templateFamilies[family] = (diversity.templateFamilies[family] ?? 0) + 1;
+    const mode = observation.responseMode ?? responseModeForQuestion(undefined);
+    diversity.responseModes[mode] = (diversity.responseModes[mode] ?? 0) + 1;
+    const transfer = observation.transferLevel ?? "same-context";
+    if (observation.correct && (transfer === "near-transfer" || transfer === "far-transfer")) diversity.transferCorrect += 1;
+    if (observation.correct && transfer === "far-transfer") diversity.farTransferCorrect += 1;
+    if (observation.correct && evidence.firstEvidenceAt && at.getTime() - new Date(evidence.firstEvidenceAt).getTime() >= 24 * 60 * 60 * 1000) {
+      diversity.delayedIndependentCorrect += 1;
+    }
+    const contextKey = observation.contextKey ?? family;
+    if (!diversity.contextKeys.includes(contextKey)) diversity.contextKeys.push(contextKey);
+  }
+  if (!observation.correct && independent) diversity.lastIndependentWrongAt = at.toISOString();
+
   return {
     ...evidence,
     pKnown,
@@ -103,7 +146,8 @@ export function updateBktEvidence(evidence: SkillEvidence, observation: BktObser
     delayedEvidence,
     reviewStage,
     dueAt: scheduledDueAt,
-    wrongStreak: observation.correct ? 0 : evidence.wrongStreak + 1
+    wrongStreak: observation.correct ? 0 : evidence.wrongStreak + 1,
+    diversity
   };
 }
 
@@ -121,12 +165,20 @@ export function wilsonLowerBound(successes: number, trials: number, z = 1.645): 
 
 export function classifyMastery(evidence: SkillEvidence, now = new Date()): MasteryLevel {
   const lower = wilsonLowerBound(evidence.independentCorrect, evidence.nEff);
+  const families = Object.values(evidence.diversity.templateFamilies).filter((count) => count > 0).length;
+  const modes = (Object.entries(evidence.diversity.responseModes) as Array<[ResponseMode, number]>)
+    .filter(([mode, count]) => mode !== "voice-practice" && count > 0).length;
+  const lastWrong = evidence.diversity.lastIndependentWrongAt;
+  const recentWrong = Boolean(lastWrong && evidence.lastAttemptAt && lastWrong >= evidence.lastAttemptAt);
   const hasDelayedReview = evidence.delayedEvidence && evidence.lastAttemptAt
     && new Date(evidence.lastAttemptAt).getTime() >= new Date(evidence.firstEvidenceAt ?? evidence.lastAttemptAt).getTime() + 24 * 60 * 60 * 1000;
-  if (evidence.independentCorrect >= 4 && evidence.nEff >= 4 && evidence.questionIds.length >= 4 && lower >= 0.59 && hasDelayedReview) {
+  if (!recentWrong && evidence.independentCorrect >= 6 && evidence.nEff >= 6 && evidence.questionIds.length >= 5
+    && families >= 3 && modes >= 2 && evidence.diversity.transferCorrect >= 1
+    && evidence.diversity.delayedIndependentCorrect >= 1 && lower >= 0.60) {
     return "secure";
   }
-  if (evidence.independentCorrect >= 3 && evidence.nEff >= 3 && evidence.questionIds.length >= 3 && lower >= 0.5) {
+  if (!recentWrong && evidence.independentCorrect >= 4 && evidence.nEff >= 4 && evidence.questionIds.length >= 4
+    && families >= 2 && modes >= 2 && lower >= 0.50) {
     return "likely-secure";
   }
   if (evidence.independentCorrect >= 1 || evidence.pKnown >= 0.45) {

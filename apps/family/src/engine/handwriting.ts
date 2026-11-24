@@ -27,6 +27,10 @@ export function recordHandwritingPractice(
     correct,
     hintUsed: false,
     template: "handwriting-trace",
+    templateFamily: "handwriting-trace",
+    responseMode: "voice-practice",
+    transferLevel: "same-context",
+    contextKey: "handwriting",
     questionId,
     at
   });

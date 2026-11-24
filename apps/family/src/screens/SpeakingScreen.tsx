@@ -1,8 +1,7 @@
 import { ChevronLeft, ChevronRight, Lock, Mic, RotateCcw, Square, Volume2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { VOICE_LINES } from "../content/audioAssets";
 import { SPEAKING_PROMPTS } from "../content/speaking";
-import { playOrSpeak } from "../lib/audio";
+import { playOrSpeak, stopAudio } from "../lib/audio";
 import type { ChildProfile } from "../lib/types";
 
 type RecordingState = "idle" | "requesting" | "recording" | "recorded" | "playing" | "error";
@@ -30,15 +29,16 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
   const chunksRef = useRef<Blob[]>([]);
   const recordingUrlRef = useRef<string | null>(null);
   const playerRef = useRef<HTMLAudioElement | null>(null);
+  const requestTokenRef = useRef(0);
   const prompt = SPEAKING_PROMPTS[index];
   const category = prompt.category ?? "word";
   const categoryLabel = category === "organize" ? "看图说两句" : category === "read-aloud" ? "朗读小游戏" : category === "speaking-purpose" ? "情境开口" : prompt.language === "zh-CN" ? "词语跟读" : "English speaking";
   const longText = category === "read-aloud" || category === "speaking-purpose";
 
   useEffect(() => {
-    const timer = window.setTimeout(() => playOrSpeak(prompt.text, prompt.language), 500);
     return () => {
-      window.clearTimeout(timer);
+      requestTokenRef.current += 1;
+      stopAudio();
       if (recorderRef.current?.state === "recording") {
         recorderRef.current.onstop = null;
         recorderRef.current.stop();
@@ -48,6 +48,26 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
       revokeRecording();
     };
   }, [index, prompt.language, prompt.text]);
+
+  useEffect(() => {
+    const suspend = () => {
+      requestTokenRef.current += 1;
+      playerRef.current?.pause();
+      if (recorderRef.current?.state === "recording") {
+        recorderRef.current.onstop = null;
+        recorderRef.current.stop();
+      }
+      stopStream();
+      setState((current) => current === "recording" || current === "playing" ? "idle" : current);
+    };
+    const onVisibility = () => { if (document.hidden) suspend(); };
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", suspend);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", suspend);
+    };
+  }, []);
 
   function stopStream() {
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -62,7 +82,9 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
   }
 
   async function startRecording() {
+    stopAudio();
     revokeRecording();
+    const token = ++requestTokenRef.current;
     setError("");
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
       setState("error");
@@ -72,6 +94,10 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
     setState("requesting");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (token !== requestTokenRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       streamRef.current = stream;
       const preferredMime = ["audio/mp4", "audio/webm;codecs=opus", "audio/webm"].find((type) => MediaRecorder.isTypeSupported(type));
       const recorder = preferredMime ? new MediaRecorder(stream, { mimeType: preferredMime }) : new MediaRecorder(stream);
@@ -81,6 +107,10 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
         if (event.data.size > 0) chunksRef.current.push(event.data);
       };
       recorder.onstop = () => {
+        if (token !== requestTokenRef.current) {
+          stopStream();
+          return;
+        }
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/mp4" });
         stopStream();
         if (blob.size === 0) {
@@ -92,11 +122,11 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
         const player = new Audio(recordingUrlRef.current);
         playerRef.current = player;
         setState("recorded");
-        window.setTimeout(() => void playRecording(true), 450);
       };
       recorder.start();
       setState("recording");
     } catch {
+      if (token !== requestTokenRef.current) return;
       stopStream();
       setState("error");
       setError("没有麦克风权限。请家长允许麦克风，或者先只跟读示范。");
@@ -107,25 +137,30 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
     if (recorderRef.current?.state === "recording") recorderRef.current.stop();
   }
 
-  async function playRecording(automatic = false) {
+  function playDemonstration() {
+    if (state === "recording" || state === "requesting") return;
+    playerRef.current?.pause();
+    if (state === "playing") setState("recorded");
+    playOrSpeak(prompt.text, prompt.language);
+  }
+
+  async function playRecording() {
     const player = playerRef.current;
     if (!player) return;
+    stopAudio();
     player.currentTime = 0;
     setState("playing");
     try {
       await player.play();
       player.onended = () => setState("recorded");
     } catch {
-      if (automatic) setState("recorded");
-      else {
-        setState("error");
-        setError("录音无法回放，请再录一次。");
-      }
+      setState("error");
+      setError("录音无法回放，请再录一次。");
     }
   }
 
   function nextPrompt() {
-    playOrSpeak(VOICE_LINES.speakingNext, "zh-CN");
+    stopAudio();
     setIndex((value) => (value + 1) % SPEAKING_PROMPTS.length);
   }
 
@@ -155,12 +190,13 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
           ))}
         </nav>
         <section className={`teacher-command speaking-teacher ${state}`}>
-          <div className="teacher-mascot" aria-hidden="true"><img src="./assets/images/seedling.png" alt="" /><i /><i /><i /></div>
+          <div className="teacher-mascot" aria-hidden="true"><img src="./assets/images/sprout-teacher.png" alt="" /><i /><i /><i /></div>
           <div className="teacher-bubble">
             <small>小芽老师</small>
             <strong>{state === "recording" ? "我在录音，慢慢说。" : state === "recorded" ? "录好了，按一下听听自己的声音。" : state === "playing" ? "正在播放你的录音。" : state === "error" ? error : "先听一次，再跟着说。"}</strong>
-            <button className="audio-button" type="button" onClick={() => playOrSpeak(prompt.text, prompt.language)} aria-label={`听示范 ${prompt.display}`}><Volume2 aria-hidden="true" /></button>
+            <button className="audio-button" type="button" onClick={playDemonstration} aria-label={`听示范 ${prompt.display}`} disabled={state === "recording" || state === "requesting"}><Volume2 aria-hidden="true" /></button>
           </div>
+          <div className="speaking-teacher-art" aria-hidden="true"><img src="./assets/images/scene-speaking.png" alt="" /></div>
         </section>
 
         <section className={`speaking-card ${longText ? "is-long-text" : ""}`}>
@@ -175,7 +211,7 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
             className="primary-button speaking-main-button"
             type="button"
             disabled={state === "requesting" || state === "playing"}
-            onClick={() => state === "recording" ? stopRecording() : state === "recorded" ? void playRecording(false) : void startRecording()}
+            onClick={() => state === "recording" ? stopRecording() : state === "recorded" ? void playRecording() : void startRecording()}
           >
             {primaryLabel}
           </button>

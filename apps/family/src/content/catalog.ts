@@ -5,19 +5,61 @@ import { SKILLS } from "./skills";
 import type { Question, ContentIssue, Subject } from "../lib/types";
 import { CONTENT_PACK, CONTENT_VERSION } from "./release";
 import { OFFICIAL_OUTCOMES_BY_ID } from "./officialSources";
+import { getDepthBlueprint, missingDepthBlueprints } from "./depthBlueprint";
+import { buildFarTransferQuestions } from "./farTransfer";
+import { preAnswerAudio, speechRevealsAnswer } from "../lib/questionAudio";
 
 export { SKILLS };
 export { CONTENT_PACK, CONTENT_VERSION };
 
 const rawQuestions: Question[] = [
   ...SKILLS.flatMap((skill) => skill.subject === "math" ? buildMathQuestions(skill) : buildLanguageQuestions(skill)),
-  ...buildMatchingQuestions()
+  ...buildMatchingQuestions(),
+  ...buildFarTransferQuestions()
 ];
 
 const KNOWN_IMAGE_NAMES = new Set(["abc", "apple", "bear", "bird", "books", "cat", "compass", "dog", "fish", "flower", "house", "moon", "mountain", "music", "pencil", "rabbit", "rain", "seedling", "sparkles", "speech", "star", "sun", "trophy", "water", "tree"]);
+const FACTUAL_MATH_TEMPLATES = new Set([
+  "k2-count-dots",
+  "k2-compare-number",
+  "k2-number-sequence",
+  "k2-pattern",
+  "k2-shape-identify",
+  "k2-compare-groups",
+  "unit-fraction",
+  "fraction-words",
+  "shape-property",
+  "shape-identify",
+  "shape-classify",
+  "compose-decompose",
+  "fraction-add-sub",
+  "visual-bar",
+  "fraction-story",
+  "length-measure",
+  "length-compare",
+  "length-change",
+  "measurement-unit",
+  "unit-conversion",
+  "measurement-compare",
+  "measurement-change",
+  "unit-select",
+  "unit-convert",
+  "unit-compare"
+  ,"time-duration"
+  ,"time-change"
+  ,"time-convert"
+  ,"time-start"
+  ,"real-world-fraction"
+  ,"real-world-shape"
+]);
 
 rawQuestions.forEach((question) => {
   question.diagnostic = true;
+  if (!question.audioOnly) {
+    question.audioText = preAnswerAudio(question);
+  } else if (question.audioOnly) {
+    question.passage = undefined;
+  }
 });
 
 export const QUESTIONS = rawQuestions;
@@ -36,6 +78,9 @@ export function getSkillById(id: string) {
 
 export function validateContentCatalog(): ContentIssue[] {
   const issues: ContentIssue[] = [];
+  for (const skillId of missingDepthBlueprints()) {
+    issues.push({ code: "depth-blueprint-missing", message: `No depth blueprint for ${skillId}`, skillId });
+  }
   const skillIds = new Set<string>();
   const questionIds = new Set<string>();
 
@@ -111,6 +156,8 @@ export function validateContentCatalog(): ContentIssue[] {
         if (Object.keys(question.optionImages).some((option) => !expected.has(option))) issues.push({ code: "extra-option-image", message: `${question.id} has an image for an unknown option`, questionId: question.id, skillId: question.skillId });
       }
       if (question.audioOnly && !question.audioText) issues.push({ code: "audio-only-source", message: `${question.id} is audio-only without audioText`, questionId: question.id, skillId: question.skillId });
+      if (!question.audioOnly && question.audioText && speechRevealsAnswer(question, question.audioText)) issues.push({ code: "audio-answer-leak", message: `${question.id} audioText reveals the answer`, questionId: question.id, skillId: question.skillId });
+      if (question.audioOnly && question.passage && speechRevealsAnswer(question, question.passage)) issues.push({ code: "audio-passage-leak", message: `${question.id} audio-only passage reveals the answer`, questionId: question.id, skillId: question.skillId });
     } else {
       if (question.pairs.length !== 3) {
         issues.push({ code: "match-pair-count", message: `${question.id} must have exactly three match pairs`, questionId: question.id, skillId: question.skillId });
@@ -158,7 +205,7 @@ export function validateContentCatalog(): ContentIssue[] {
     if (CONTENT_PACK.releaseStatus === "approved" && (question.audit.humanLanguageReview !== "approved" || question.audit.humanPedagogyReview !== "approved")) {
       issues.push({ code: "human-review-required", message: `${question.id} lacks required human review`, questionId: question.id, skillId: question.skillId });
     }
-    if (question.kind === "choice" && question.subject === "math" && !["unit-fraction", "shape-property", "fraction-add-sub", "length-measure", "length-compare", "length-change", "measurement-unit", "unit-conversion", "measurement-compare", "measurement-change"].includes(question.template)) {
+    if (question.kind === "choice" && question.subject === "math" && !FACTUAL_MATH_TEMPLATES.has(question.template)) {
       const numeric = Number(question.correctAnswer);
       if (!Number.isFinite(numeric) || numeric < 0) {
         issues.push({ code: "math-range", message: `${question.id} has an invalid numeric answer`, questionId: question.id, skillId: question.skillId });
@@ -168,7 +215,27 @@ export function validateContentCatalog(): ContentIssue[] {
 
   for (const skill of SKILLS) {
     const count = QUESTIONS.filter((question) => question.skillId === skill.id).length;
-    if (count < 6) issues.push({ code: "too-few-questions", message: `${skill.id} has only ${count} questions`, skillId: skill.id });
+    const blueprint = missingDepthBlueprints().includes(skill.id) ? null : getDepthBlueprint(skill.id);
+    if (blueprint && count < blueprint.targetItemCount) {
+      issues.push({ code: "too-few-questions", message: `${skill.id} has ${count} questions; target ${blueprint.targetItemCount}`, skillId: skill.id });
+    }
+    if (blueprint) {
+      const skillQuestions = QUESTIONS.filter((question) => question.skillId === skill.id);
+      const families = new Set(skillQuestions.map((question) => question.template));
+      const modes = new Set(skillQuestions.map((question) => question.kind));
+      if (families.size < blueprint.minTemplateFamilies) {
+        issues.push({ code: "depth-template-families", message: `${skill.id} has ${families.size} template families; target ${blueprint.minTemplateFamilies}`, skillId: skill.id });
+      }
+      if (modes.size < blueprint.minResponseModes) {
+        issues.push({ code: "depth-response-modes", message: `${skill.id} has ${modes.size} response modes; target ${blueprint.minResponseModes}`, skillId: skill.id });
+      }
+      for (const required of blueprint.requiredTemplateFamilies) {
+        const familyCount = skillQuestions.filter((question) => question.template === required).length;
+        if (familyCount < 2) {
+          issues.push({ code: "depth-family-count", message: `${skill.id} has ${familyCount} ${required} items`, skillId: skill.id });
+        }
+      }
+    }
   }
 
   for (const subject of ["math", "mandarin", "english"] as const) {

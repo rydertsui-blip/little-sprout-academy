@@ -5,15 +5,15 @@ import type { ChoiceQuestion } from "../lib/types";
 const mathChoices = () => getQuestionsForSubject("math").filter((question): question is ChoiceQuestion => question.kind === "choice");
 
 describe("expanded P1/P2 mathematics content", () => {
-  it("provides six questions for each newly covered official mathematics skill", () => {
+  it("provides a full B-class depth set for each newly covered official mathematics skill", () => {
     for (const skillId of ["math-length-measure", "math-fractions-add-sub", "math-measurement-units"]) {
-      expect(mathChoices().filter((question) => question.skillId === skillId)).toHaveLength(6);
+      expect(mathChoices().filter((question) => question.skillId === skillId).length).toBeGreaterThanOrEqual(11);
     }
   });
 
   it("recalculates every like-fraction addition and subtraction", () => {
     const questions = mathChoices().filter((question) => question.template === "fraction-add-sub");
-    expect(questions).toHaveLength(6);
+    expect(questions.length).toBeGreaterThanOrEqual(7);
     for (const question of questions) {
       const match = question.prompt.match(/(\d+)\/(\d+)\s*([+−-])\s*(\d+)\/(\d+)/);
       expect(match).not.toBeNull();

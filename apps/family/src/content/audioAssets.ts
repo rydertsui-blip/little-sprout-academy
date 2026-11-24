@@ -1,3 +1,5 @@
+import { GENERATED_AUDIO_ASSETS } from "./audioAssets.generated";
+
 export const VOICE_LINES = {
   startMath: "今天先学数学。准备好了吗？",
   startMandarin: "今天先学华文。准备好了吗？",
@@ -17,7 +19,7 @@ export const VOICE_LINES = {
   wrongEn: "Not quite. Let us look at the answer together."
 } as const;
 
-export const AUDIO_ASSETS: Record<string, string> = {
+const REVIEWED_AUDIO_ASSETS: Record<string, string> = {
   [VOICE_LINES.startMath]: "zh-start-math",
   [VOICE_LINES.startMandarin]: "zh-start-mandarin",
   [VOICE_LINES.startEnglish]: "zh-start-english",
@@ -91,9 +93,65 @@ export const AUDIO_ASSETS: Record<string, string> = {
   "May I have some water, please?": "en-purpose-water",
   "Thank you for your help.": "en-purpose-thanks",
   "Let's play together.": "en-purpose-play",
-  "Can you help me, please?": "en-purpose-help"
+  "Can you help me, please?": "en-purpose-help",
+  "红色": "zh-k2-listen-red",
+  "蓝色": "zh-k2-listen-blue",
+  "三": "zh-k2-listen-three",
+  "五": "zh-k2-listen-five",
+  "拍手": "zh-k2-listen-clap",
+  "跳": "zh-k2-listen-jump",
+  "妈妈": "zh-k2-listen-mother",
+  "爸爸": "zh-k2-listen-father",
+  "苹果": "zh-k2-listen-apple",
+  "小明在操场上跑步。": "zh-listening-01",
+  "妈妈在厨房煮饭。": "zh-listening-02",
+  "小红抱着小猫。": "zh-listening-03",
+  "爸爸在客厅看书。": "zh-listening-04",
+  "弟弟把苹果放进书包。": "zh-listening-05",
+  "奶奶在花园浇花。": "zh-listening-06",
+  "小华先洗手，再吃饭。": "zh-listening-07",
+  "下雨了，姐姐带伞出门。": "zh-listening-08",
+  "小鸟在树上唱歌。": "zh-listening-09",
+  "妹妹把水杯放在桌上。": "zh-listening-10",
+  "哥哥在公园骑车。": "zh-listening-11",
+  "妈妈买了三个苹果。": "zh-listening-12",
+  "red": "en-k2-listen-red",
+  "blue": "en-k2-listen-blue",
+  "three": "en-k2-listen-three",
+  "five": "en-k2-listen-five",
+  "jump": "en-k2-listen-jump",
+  "clap": "en-k2-listen-clap",
+  "mother": "en-k2-listen-mother",
+  "father": "en-k2-listen-father",
+  "Lina puts her red bottle in her bag.": "en-listening-01",
+  "Ben wakes up at 7 o'clock. He eats breakfast, then goes to school.": "en-listening-02",
+  "Mia hears thunder. She closes the window.": "en-listening-03",
+  "Dad says: Please put the apples on the table.": "en-listening-04",
+  "Teacher says: We are going to the library. Bring your reading book.": "en-listening-05",
+  "Tom's hands are dirty before lunch.": "en-listening-06",
+  "Ana's shoes are wet. It is raining outside.": "en-listening-07",
+  "The teacher says: Line up at the door.": "en-listening-08",
+  "妈妈说：把苹果放在桌上。": "zh-far-k2-listen-apple-table",
+  "妈妈说：先把书放进书包，再穿鞋。": "zh-far-mandarin-listen-pack-bag",
+  "Lina has a red bag. She puts two books in it.": "en-far-k2-listen-red-bag",
+  "A child says: The cat is on the mat.": "en-far-listening-cat-mat",
+  "The cup is empty. Kim wants water.": "en-listening-09",
+  "The baby is sleeping.": "en-listening-10",
+  "Sara sees dark clouds in the sky.": "en-listening-11",
+  "Ben wants to read a book in a quiet place.": "en-listening-12",
+  "The bus is full. Tom waits for the next bus.": "en-listening-13",
+  "Lily's pencil is broken. She asks the teacher for a new pencil.": "en-listening-14",
+  "The sign says no food in the library. Ben has a sandwich.": "en-listening-15",
+  "It is sports day. The children wear shorts and trainers.": "en-listening-16"
+};
+
+export const AUDIO_ASSETS: Record<string, string> = {
+  ...REVIEWED_AUDIO_ASSETS,
+  ...GENERATED_AUDIO_ASSETS
 };
 
 export function getAudioAsset(text: string): string | undefined {
   return AUDIO_ASSETS[text];
 }
+
+export type AudioAssetMap = Record<string, string>;

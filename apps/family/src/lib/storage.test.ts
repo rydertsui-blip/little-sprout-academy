@@ -84,7 +84,7 @@ describe("household storage", () => {
     const result = readHousehold();
     expect(result.status).toBe("ok");
     if (result.status !== "ok") return;
-    expect(result.household.version).toBe(2);
+    expect(result.household.version).toBe(4);
     expect(result.household.children[0].activeSessions).toEqual({});
     expect(result.household.children[0].settings.enabledSkills).toEqual(SKILLS.map((skill) => skill.id));
     expect(result.household.children[0].evidence["math-count-100"].questionIds).toEqual([]);
@@ -109,13 +109,37 @@ describe("household storage", () => {
     expect(result.status).toBe("ok");
     if (result.status !== "ok") return;
     expect(result.household.children[0].handwriting).toEqual({});
+    expect(result.household.children[0].rewards.lifetimeStars).toBe(0);
+    expect(result.household.children[0].settings.rewardsEnabled).toBe(true);
+    expect(result.household.children[0].settings.companionAnimationsEnabled).toBe(true);
+  });
+
+  it("adds a birth year and level confirmation date when migrating older records", () => {
+    const child = createChildProfile("旧版年龄", "star", new Date("2026-11-20T00:00:00Z")) as unknown as Record<string, unknown>;
+    delete child.birthYear;
+    delete child.levelConfirmedOn;
+    localStorage.setItem(KEY, JSON.stringify({
+      version: 3,
+      householdName: "旧家庭",
+      parentName: "妈妈",
+      pinHash: "hash",
+      pinSalt: "salt",
+      createdAt: "2026-11-20T00:00:00.000Z",
+      children: [child]
+    }));
+    const result = readHousehold();
+    expect(result.status).toBe("ok");
+    if (result.status !== "ok") return;
+    expect(result.household.children[0].birthYear).toBe(2020);
+    expect(result.household.children[0].levelConfirmedOn).toBe("2026-11-20");
   });
 
   it("reports a write failure instead of throwing into the UI", () => {
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new DOMException("Quota exceeded", "QuotaExceededError"); });
     const child = createChildProfile("小安", "star");
     const result = saveHousehold({
-      version: 2,
+      version: 4,
+    uiLocale: "zh",
       householdName: "测试",
       parentName: "妈妈",
       pinHash: "hash",
@@ -127,12 +151,33 @@ describe("household storage", () => {
     if (!result.ok) expect(result.error).toContain("Quota");
   });
 
+  it("keeps a narrowed enabled-skill scope for current household data", () => {
+    const child = createChildProfile("小范围", "star", new Date("2026-11-20T00:00:00Z"));
+    const p1Skills = SKILLS.filter((skill) => skill.gradeBand !== "P2").map((skill) => skill.id);
+    child.settings.enabledSkills = p1Skills;
+    saveHousehold({
+      version: 4,
+    uiLocale: "zh",
+      householdName: "测试家庭",
+      parentName: "妈妈",
+      pinHash: "hash",
+      pinSalt: "salt",
+      createdAt: "2026-11-20T00:00:00.000Z",
+      children: [child]
+    });
+    const result = readHousehold();
+    expect(result.status).toBe("ok");
+    if (result.status !== "ok") return;
+    expect(result.household.children[0].settings.enabledSkills).toEqual(p1Skills);
+  });
+
   it("encrypts child names and records at rest and unlocks only with the correct PIN", async () => {
     const child = createChildProfile("小树", "leaf", new Date("2026-11-20T00:00:00Z"));
     const household = {
-      version: 2 as const,
+      version: 4 as const,
       householdName: "测试家庭",
       parentName: "妈妈",
+      uiLocale: "zh" as const,
       pinHash: "hash",
       pinSalt: "fixed-salt",
       createdAt: "2026-11-20T00:00:00.000Z",
@@ -154,7 +199,8 @@ describe("household storage", () => {
   it("validates a portable household backup before import", () => {
     const child = createChildProfile("备份孩子", "star", new Date("2026-11-20T00:00:00Z"));
     const backup = JSON.stringify({
-      version: 2,
+      version: 4,
+    uiLocale: "zh",
       householdName: "备份家庭",
       parentName: "妈妈",
       pinHash: "hash",

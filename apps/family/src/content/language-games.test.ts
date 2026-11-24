@@ -7,9 +7,9 @@ import { SPEAKING_PROMPTS } from "./speaking";
 import type { ChoiceQuestion } from "../lib/types";
 
 describe("tap and voice language games", () => {
-  it("provides six audio-only listening questions with three picture choices", () => {
-    const questions = getQuestionsForSubject("english").filter((question): question is ChoiceQuestion => question.kind === "choice" && question.skillId === "english-listening");
-    expect(questions).toHaveLength(6);
+  it("provides eighteen audio-only listening questions with three picture choices", () => {
+    const questions = getQuestionsForSubject("english").filter((question): question is ChoiceQuestion => question.kind === "choice" && question.skillId === "english-listening" && question.template === "listen-find");
+    expect(questions).toHaveLength(18);
     for (const question of questions) {
       expect(question.audioOnly).toBe(true);
       expect(question.audioText).toBeTruthy();
@@ -20,7 +20,7 @@ describe("tap and voice language games", () => {
   });
 
   it("bundles local audio for every audio-only listening prompt", () => {
-    const questions = getQuestionsForSubject("english").filter((question): question is ChoiceQuestion => question.kind === "choice" && question.skillId === "english-listening");
+    const questions = getQuestionsForSubject("english").filter((question): question is ChoiceQuestion => question.kind === "choice" && question.skillId === "english-listening" && question.template === "listen-find");
     for (const question of questions) {
       const asset = AUDIO_ASSETS[question.audioText!];
       expect(asset).toBeTruthy();

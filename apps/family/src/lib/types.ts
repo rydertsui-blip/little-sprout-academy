@@ -1,4 +1,6 @@
 export type Subject = "math" | "mandarin" | "english";
+export type Locale = "zh" | "en";
+export type LearningLevel = "K2" | "P1" | "P2";
 export type MasteryLevel = "unknown" | "developing" | "likely-secure" | "secure";
 
 export interface ContentAudit {
@@ -16,7 +18,7 @@ export interface Skill {
   subject: Subject;
   title: string;
   shortTitle: string;
-  gradeBand: "P1" | "P2" | "P1-P2";
+  gradeBand: "K2" | "P1" | "P2" | "P1-P2";
   description: string;
   prerequisites: string[];
   sourceDocument: string;
@@ -36,6 +38,8 @@ interface QuestionBase {
   explanation: string;
   difficulty: 1 | 2 | 3 | 4 | 5;
   template: string;
+  transferLevel: TransferLevel;
+  contextKey: string;
   diagnostic: boolean;
   reviewStatus: "verified";
   audit: ContentAudit;
@@ -71,6 +75,19 @@ export interface MatchQuestion extends QuestionBase {
 
 export type Question = ChoiceQuestion | MatchQuestion;
 
+export type ResponseMode = "tap-choice" | "tap-match" | "tap-order" | "voice-practice";
+export type TransferLevel = "same-context" | "near-transfer" | "far-transfer";
+
+export interface EvidenceDiversity {
+  templateFamilies: Record<string, number>;
+  responseModes: Record<ResponseMode, number>;
+  transferCorrect: number;
+  farTransferCorrect: number;
+  delayedIndependentCorrect: number;
+  contextKeys: string[];
+  lastIndependentWrongAt: string | null;
+}
+
 export interface SkillEvidence {
   skillId: string;
   pKnown: number;
@@ -90,6 +107,7 @@ export interface SkillEvidence {
   reviewStage: number;
   dueAt: string | null;
   wrongStreak: number;
+  diversity: EvidenceDiversity;
 }
 
 export interface Attempt {
@@ -119,6 +137,24 @@ export interface SessionSummaryRow {
   evidenceCount: number;
 }
 
+export type DailyPlanItemKind = "review" | "current" | "transfer";
+
+export interface DailyPlanItem {
+  kind: DailyPlanItemKind;
+  skillId: string;
+  questionId: string;
+  template: string;
+}
+
+export interface DailyPlan {
+  dateKey: string;
+  timezone: "Asia/Singapore";
+  subject: Subject;
+  questionCount: number;
+  estimatedMinutes: number;
+  items: DailyPlanItem[];
+}
+
 export interface SessionRecord {
   id: string;
   childId: string;
@@ -128,14 +164,29 @@ export interface SessionRecord {
   startedAt: string;
   completedAt: string | null;
   plannedQuestionIds: string[];
+  dailyPlan?: DailyPlan;
   attempts: Attempt[];
   summary: SessionSummaryRow[];
+}
+
+export interface GrowthRewardState {
+  lifetimeStars: number;
+  awardedEventKeys: string[];
+  redeemedCompanionIds: string[];
+  redeemedAtByCompanionId: Record<string, string>;
+  activeCompanionId: string | null;
+  dailyAwardKey: string | null;
+  dailyStars: number;
 }
 
 export interface ChildProfile {
   id: string;
   name: string;
   avatar: string;
+  ageYears: number;
+  birthYear?: number;
+  gradeLevel: LearningLevel;
+  levelConfirmedOn?: string;
   createdAt: string;
   diagnostics: Partial<Record<Subject, { completedAt: string; sessionId: string }>>;
   evidence: Record<string, SkillEvidence>;
@@ -143,16 +194,20 @@ export interface ChildProfile {
   sessions: SessionRecord[];
   activeSessions: Partial<Record<Subject, SessionRecord>>;
   handwriting: Record<string, HandwritingRecord>;
+  rewards: GrowthRewardState;
   settings: {
     sessionLength: number;
     enabledSkills: string[];
     highContrast: boolean;
     largeText: boolean;
+    rewardsEnabled: boolean;
+    companionAnimationsEnabled: boolean;
   };
 }
 
 export interface HouseholdState {
-  version: 2;
+  version: 4;
+  uiLocale: Locale;
   householdName: string;
   parentName: string;
   pinHash: string;

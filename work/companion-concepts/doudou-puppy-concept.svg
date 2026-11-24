@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="768" viewBox="0 0 768 768" fill="none">
+  <title>陪伴小狗豆豆造型稿</title>
+  <defs>
+    <style>
+      .outline { stroke: #17324d; stroke-width: 14; stroke-linejoin: round; stroke-linecap: round; }
+      .detail { stroke: #17324d; stroke-width: 10; stroke-linejoin: round; stroke-linecap: round; }
+      .fur { fill: #f4a63a; }
+      .fur-light { fill: #ffc765; }
+      .cream { fill: #fff2d8; }
+      .scarf { fill: #7ed1c3; }
+      .coral { fill: #f26d5e; }
+    </style>
+  </defs>
+
+  <ellipse cx="384" cy="672" rx="220" ry="42" fill="#dceff0" opacity="0.9"/>
+
+  <g id="tail">
+    <path fill="#f4a63a" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M536 452 C610 425 676 436 681 488 C684 526 657 552 627 545 C650 522 644 486 607 477 C578 471 557 484 546 501 Z"/>
+    <path d="M615 465 C639 472 650 488 645 508" fill="none" stroke="#17324d" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <g id="body">
+    <ellipse fill="#f4a63a" stroke="#17324d" stroke-width="14" cx="384" cy="486" rx="204" ry="178"/>
+    <ellipse fill="#fff2d8" cx="384" cy="520" rx="118" ry="112"/>
+  </g>
+
+  <g id="back-legs">
+    <path fill="#f4a63a" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M229 552 C219 610 226 650 270 657 C309 663 334 636 321 604 C313 582 294 568 270 568 Z"/>
+    <path fill="#fff2d8" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M239 624 C271 608 308 614 317 642 C323 663 302 681 270 680 C239 680 224 655 239 624 Z"/>
+    <path fill="#f4a63a" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M539 552 C549 610 542 650 498 657 C459 663 434 636 447 604 C455 582 474 568 498 568 Z"/>
+    <path fill="#fff2d8" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M529 624 C497 608 460 614 451 642 C445 663 466 681 498 680 C529 680 544 655 529 624 Z"/>
+  </g>
+
+  <g id="front-legs">
+    <path fill="#f4a63a" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M316 552 C302 607 307 646 345 656 C383 666 414 644 408 607 L401 553 Z"/>
+    <path fill="#fff2d8" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M317 625 C347 609 390 613 403 640 C415 664 393 684 356 684 C321 684 300 656 317 625 Z"/>
+    <path fill="#f4a63a" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M452 552 C466 607 461 646 423 656 C385 666 354 644 360 607 L367 553 Z"/>
+    <path fill="#fff2d8" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M451 625 C421 609 378 613 365 640 C353 664 375 684 412 684 C447 684 468 656 451 625 Z"/>
+  </g>
+
+  <g id="scarf">
+    <path fill="#7ed1c3" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M235 355 C266 405 324 425 384 426 C444 425 502 405 533 355 C512 424 469 465 384 469 C299 465 256 424 235 355 Z"/>
+    <path fill="#7ed1c3" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M464 428 C501 441 525 466 539 510 L491 501 C486 476 476 453 451 445 Z"/>
+    <path d="M251 367 C291 395 333 405 384 405 C435 405 477 395 517 367" fill="none" stroke="#4b9f93" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <g id="ears-left">
+    <path fill="#f4a63a" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M245 201 C205 157 147 176 138 238 C126 320 157 397 224 405 C274 410 303 378 300 330 C269 344 231 331 214 294 C196 254 214 222 249 242 Z"/>
+    <path d="M171 250 C195 235 218 249 227 279" fill="none" stroke="#d77f25" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <g id="ears-right">
+    <path fill="#f4a63a" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M523 201 C563 157 621 176 630 238 C642 320 611 397 544 405 C494 410 465 378 468 330 C499 344 537 331 554 294 C572 254 554 222 519 242 Z"/>
+    <path d="M597 250 C573 235 550 249 541 279" fill="none" stroke="#d77f25" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <g id="head">
+    <circle fill="#f4a63a" stroke="#17324d" stroke-width="14" cx="384" cy="270" r="178"/>
+    <path fill="#ffc765" d="M384 98 C407 66 446 78 445 115 C444 141 420 155 392 151 C405 137 407 119 384 98 Z"/>
+  </g>
+
+  <g id="face">
+    <g id="eyes">
+      <circle cx="314" cy="255" r="22" fill="#17324d"/>
+      <circle cx="454" cy="255" r="22" fill="#17324d"/>
+      <circle cx="306" cy="247" r="7" fill="#ffffff"/>
+      <circle cx="446" cy="247" r="7" fill="#ffffff"/>
+    </g>
+
+    <path fill="#fff2d8" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M297 319 C310 285 350 278 384 305 C418 278 458 285 471 319 C483 350 452 399 384 407 C316 399 285 350 297 319 Z"/>
+
+    <path d="M384 314 C401 298 426 303 425 325 C424 343 403 351 384 336 C365 351 344 343 343 325 C342 303 367 298 384 314 Z" fill="#17324d"/>
+    <ellipse cx="374" cy="319" rx="8" ry="4" fill="#45627a" opacity="0.65"/>
+
+    <path fill="#f26d5e" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M384 339 C383 359 369 370 350 369 C329 368 319 346 330 326 C345 336 365 335 384 339 Z"/>
+    <path fill="#f26d5e" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M384 339 C385 359 399 370 418 369 C439 368 449 346 438 326 C423 336 403 335 384 339 Z"/>
+    <path d="M384 339 L384 370" fill="none" stroke="#17324d" stroke-width="8" stroke-linecap="round"/>
+
+    <path d="M286 298 C268 286 250 290 242 303" fill="none" stroke="#17324d" stroke-width="7" stroke-linecap="round"/>
+    <path d="M482 298 C500 286 518 290 526 303" fill="none" stroke="#17324d" stroke-width="7" stroke-linecap="round"/>
+    <ellipse cx="273" cy="327" rx="18" ry="12" fill="#f27e56" opacity="0.35"/>
+    <ellipse cx="495" cy="327" rx="18" ry="12" fill="#f27e56" opacity="0.35"/>
+  </g>
+
+  <g id="tuft">
+    <path fill="#ffc765" stroke="#17324d" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M383 101 C365 78 375 48 402 48 C427 48 438 72 425 94 C414 88 402 88 383 101 Z"/>
+  </g>
+</svg>

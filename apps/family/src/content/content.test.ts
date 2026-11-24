@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import {
   CONTENT_PACK,
   CONTENT_VERSION,
+  QUESTIONS,
   SKILLS,
   getQuestionById,
   getQuestionsForSubject,
@@ -49,18 +50,41 @@ describe("curriculum content catalog", () => {
     expect(choiceQuestions.every((question) => question.options.length === 3)).toBe(true);
   });
 
+  it("contains far-transfer items in more than one subject", () => {
+    const far = ["math", "mandarin", "english"].flatMap((subject) => getQuestionsForSubject(subject as "math" | "mandarin" | "english")).filter((question) => question.transferLevel === "far-transfer");
+    expect(far.length).toBeGreaterThanOrEqual(46);
+    expect(new Set(far.map((question) => question.subject)).size).toBe(3);
+    for (const skill of SKILLS) expect(far.some((question) => question.skillId === skill.id), skill.id).toBe(true);
+  });
+
   it("independently recalculates arithmetic answers", () => {
     const arithmeticTemplates = new Set(["addition", "subtraction", "regrouping", "three-digit", "multiplication", "division"]);
     const arithmetic = getQuestionsForSubject("math").filter(isChoiceQuestion).filter((question) => arithmeticTemplates.has(question.template));
     expect(arithmetic.length).toBeGreaterThan(0);
     for (const question of arithmetic) {
-      const operators = question.prompt.match(/(\d+)\s*([+×÷\-])\s*(\d+)\s*=/);
-      expect(operators).not.toBeNull();
-      const left = Number(operators![1]);
-      const right = Number(operators![3]);
-      const operator = operators![2];
-      const expected = operator === "+" ? left + right : operator === "-" ? left - right : operator === "×" ? left * right : left / right;
-      expect(Number(question.correctAnswer)).toBe(expected);
+      const triple = question.prompt.match(/(\d+)\s*([+×÷−-])\s*(\d+)\s*([+×÷−-])\s*(\d+)\s*=/);
+      const pair = question.prompt.match(/(\d+)\s*([+×÷−-])\s*(\d+)\s*=/);
+      const apply = (left: number, operator: string, right: number) => operator === "+" ? left + right : operator === "-" || operator === "−" ? left - right : operator === "×" ? left * right : left / right;
+      if (triple) {
+        const first = apply(Number(triple[1]), triple[2], Number(triple[3]));
+        expect(Number(question.correctAnswer)).toBe(apply(first, triple[4], Number(triple[5])));
+      } else {
+        expect(pair).not.toBeNull();
+        expect(Number(question.correctAnswer)).toBe(apply(Number(pair![1]), pair![2], Number(pair![3])));
+      }
+    }
+  });
+
+  it("keeps every child answer tap-based without a typing task", () => {
+    const forbiddenEnglish = /\b(type|enter|fill in|write your|write the answer|input|keyboard)\b/i;
+    const forbiddenChinese = /打字|输入答案|填写答案|写出答案/;
+    const tapCue = /tap|choose|select|match|read|点|选择|选|读/i;
+    for (const question of QUESTIONS) {
+      expect(["choice", "match"], question.id).toContain(question.kind);
+      const childText = `${question.instruction ?? ""} ${question.prompt}`;
+      expect(childText, question.id).not.toMatch(forbiddenEnglish);
+      expect(childText, question.id).not.toMatch(forbiddenChinese);
+      expect(question.instruction ?? "", question.id).toMatch(tapCue);
     }
   });
 
@@ -70,20 +94,30 @@ describe("curriculum content catalog", () => {
     }
   });
 
-  it("can reach secure mastery using the actual question ids of every skill", () => {
+  it("can reach likely-secure using diverse evidence from actual question ids", () => {
     for (const skill of SKILLS) {
-      const questions = getQuestionsForSubject(skill.subject).filter((question) => question.skillId === skill.id).slice(0, 4);
+      const skillQuestions = getQuestionsForSubject(skill.subject).filter((question) => question.skillId === skill.id);
+      const byTemplate = new Map<string, typeof skillQuestions[number]>();
+      for (const question of skillQuestions) if (!byTemplate.has(question.template)) byTemplate.set(question.template, question);
+      const questions = [...byTemplate.values()].slice(0, 4);
+      while (questions.length < 4 && skillQuestions.length > questions.length) questions.push(skillQuestions[questions.length]);
+      const responses: Array<"tap-choice" | "tap-match"> = ["tap-choice", "tap-match"];
       let evidence = createSkillEvidence(skill.id, new Date("2026-11-20T08:00:00Z"));
       for (const [index, question] of questions.entries()) {
         evidence = updateBktEvidence(evidence, {
           correct: true,
           hintUsed: false,
           template: question.template,
+          templateFamily: question.template,
+          responseMode: index === 0 || index === 1 ? responses[index] : (question.kind === "match" ? "tap-match" : "tap-choice"),
+          transferLevel: "same-context",
+          contextKey: question.template,
           questionId: question.id,
-          at: new Date(index === 3 ? "2026-11-21T08:00:00Z" : "2026-11-20T08:00:00Z")
+          at: new Date("2026-11-20T08:00:00Z")
         });
       }
-      expect(classifyMastery(evidence, new Date("2026-11-21T08:01:00Z"))).toBe("secure");
+      expect(questions.length, skill.id).toBeGreaterThanOrEqual(4);
+      expect(classifyMastery(evidence, new Date("2026-11-20T08:01:00Z")), skill.id).toBe("likely-secure");
     }
   });
 
@@ -96,9 +130,9 @@ describe("curriculum content catalog", () => {
     }
   });
 
-  it("contains thirty valid matching questions with stable pair identifiers", () => {
+  it("contains forty-eight valid matching questions with stable pair identifiers", () => {
     const matching = ["math", "mandarin", "english"].flatMap((subject) => getQuestionsForSubject(subject as "math" | "mandarin" | "english")).filter((question) => question.kind === "match");
-    expect(matching).toHaveLength(30);
+    expect(matching).toHaveLength(48);
     const issues = validateContentCatalog();
     expect(issues.filter((issue) => issue.code.startsWith("match-") || issue.code.startsWith("duplicate-match") || issue.code === "empty-match-label")).toEqual([]);
     for (const question of matching) {

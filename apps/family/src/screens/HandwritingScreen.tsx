@@ -138,7 +138,7 @@ export default function HandwritingScreen({ child, onBack, onLock, onRecord }: H
 
       <main className="handwriting-screen teacher-handwriting">
         <section className={`teacher-command handwriting-teacher ${stage}`}>
-          <div className="teacher-mascot" aria-hidden="true"><img src="./assets/images/seedling.png" alt="" /><i /><i /><i /></div>
+          <div className="teacher-mascot" aria-hidden="true"><img src="./assets/images/sprout-teacher.png" alt="" /><i /><i /><i /></div>
           <div className="teacher-bubble">
             <small>小芽老师</small>
             <strong>{teacherText}</strong>

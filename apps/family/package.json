@@ -10,9 +10,10 @@
     "verify:sources": "tsx scripts/verify-sources.ts",
     "coverage:sources": "tsx scripts/verify-sources.ts --summary",
     "verify:content": "tsx scripts/verify-content.ts",
+    "verify:depth": "tsx scripts/verify-content.ts --depth",
     "update:content": "tsx scripts/verify-content.ts --update",
     "update:question-ids": "tsx scripts/update-question-ids.ts",
-    "build": "npm run verify:sources && npm run verify:content && tsc -b && vite build && cp src/manual-sw.js ../../family/sw.js && node scripts/postbuild.mjs"
+    "build": "npm run verify:sources && npm run verify:content && npm run verify:depth && tsc -b && vite build && cp src/manual-sw.js ../../family/sw.js && node scripts/postbuild.mjs"
   },
   "dependencies": {
     "hanzi-writer": "^3.7.3",

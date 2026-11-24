@@ -34,7 +34,15 @@ export default defineConfig({
   ],
   build: {
     outDir: resolve(import.meta.dirname, "../../family"),
-    emptyOutDir: true
+    emptyOutDir: true,
+    rolldownOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("/src/content/")) return "content";
+          return undefined;
+        }
+      }
+    }
   },
   test: {
     environment: "jsdom",

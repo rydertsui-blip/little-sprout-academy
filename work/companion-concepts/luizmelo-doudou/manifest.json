@@ -1,0 +1,30 @@
+{
+  "id": "doudou-golden-retriever",
+  "name": "豆豆",
+  "source": {
+    "assetPack": "Pet Dogs Pack",
+    "author": "LuizMelo",
+    "url": "https://luizmelo.itch.io/pet-dogs-pack",
+    "license": "CC0-1.0",
+    "licenseFile": "LICENSE.txt",
+    "mirrorUrl": "https://github.com/OmniTender-Systems/DrivingMeNuts/tree/63bfda07b4e03dda87353645c6db30032673cd76/assets/dogs/luizmelo-pet-dogs/Pet%20Dogs%20Pack"
+  },
+  "frame": {
+    "width": 100,
+    "height": 100,
+    "crop": { "x": 24, "y": 30, "width": 52, "height": 40 }
+  },
+  "animations": {
+    "idle": { "file": "idle.png", "frames": 10, "frameMs": 130, "sha256": "50225c29efb452785590151c1c7cd6263dabe66cdb5e03e9592d4f554e6cf3a7" },
+    "walk": { "file": "walk.png", "frames": 8, "frameMs": 100, "sha256": "5aaf0076b608cd19430090c537353360403f781b9513e8ce4c22c4da936222f6" },
+    "run": { "file": "run.png", "frames": 8, "frameMs": 75, "sha256": "50eddadfc51dead0be977772f1c463bb3b87109fa322d8032d85f85b207a5989" },
+    "bark": { "file": "bark.png", "frames": 3, "frameMs": 110, "sha256": "ee19deba9fb23fd8a99879fa7fcf4b7d9a2968ba0034f845ff7f487150e03940" },
+    "lying-down": { "file": "lying-down.png", "frames": 7, "frameMs": 140, "sha256": "a92ff1babb28892c502c227d6da8ecd2686c3b9ab9cafc50d95a14153c1fa12a" },
+    "itching": { "file": "itching.png", "frames": 2, "frameMs": 240, "sha256": "0eccc2961998217a7add1b6ae3bed2c581a3da7be1f503e19aacb1f637b134c7" },
+    "sleeping": { "file": "sleeping.png", "frames": 1, "frameMs": 1000, "sha256": "072010c61cef667665e10725e6680203a709143dc75df0f820f1f1ee8ad5f4ff" },
+    "sitting": { "file": "sitting.png", "frames": 1, "frameMs": 1000, "sha256": "100d19b6b57e5db9dec7fde72e8b474ef860ce0ce8c667b07b2aee1d72a87322" },
+    "licking1": { "file": "licking1.png", "frames": 4, "frameMs": 150, "sha256": "38e56da3e67512e47a732464871f2544c238993a74bd30f6d62f08c532add541" },
+    "licking2": { "file": "licking2.png", "frames": 4, "frameMs": 150, "sha256": "ddafc0669ee41b7c28b505fab62491da8987d6a32ad4a1fd776004af11562237" },
+    "stretching": { "file": "stretching.png", "frames": 10, "frameMs": 120, "sha256": "0fcc2f385a6912355534c7555188a5fda6b21cb64217dfb612da6be6d58e18db" }
+  }
+}

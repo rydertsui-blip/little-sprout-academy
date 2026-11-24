@@ -8,6 +8,10 @@ The learning illustrations under `assets/images/` are from [OpenMoji](https://op
 
 Stroke-order animation and character practice are powered by [Hanzi Writer](https://hanziwriter.org/), licensed MIT. Character data comes from `hanzi-writer-data`, used under the ARPHIC Public License. License texts are included in `licenses/`.
 
+## Gemini-generated companion artwork
+
+The first companion sprite sheet was generated in the user's Gemini app from a user-approved brief, then locally cropped and chroma-keyed into transparent animation strips. The original source image path and SHA-256 are recorded in `apps/family/public/assets/companions/gemini-doudou/manifest.json`. No third-party sprite pack is used at runtime.
+
 ## Lucide
 
 Interface icons are from [Lucide](https://lucide.dev/), licensed ISC. The license text is included at `licenses/lucide-ISC.txt`.

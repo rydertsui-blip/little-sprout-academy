@@ -8,9 +8,9 @@ export const CONTENT_PACK: {
   requiredReviewRoles: string[];
 } = {
   id: "sg-primary-p1-p2",
-  version: "pilot-9",
+  version: "pilot-22",
   schemaVersion: 4,
-  publishedAt: "2026-11-20",
+  publishedAt: "2026-11-24",
   releaseStatus: "pilot",
   humanReviewStatus: "pending",
   requiredReviewRoles: [

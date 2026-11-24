@@ -13,6 +13,8 @@ const question: MatchQuestion = {
   explanation: "The pairs are 2 and two, 3 and three, 4 and four.",
   difficulty: 1,
   template: "test-match",
+  transferLevel: "same-context",
+  contextKey: "test-match",
   diagnostic: false,
   reviewStatus: "verified",
   audit: {
@@ -49,7 +51,7 @@ describe("tap matching board", () => {
     fireEvent.click(left("pair-2"));
     await waitFor(() => expect(right("pair-3")).not.toBeDisabled());
     fireEvent.click(right("pair-3"));
-    expect(screen.getByRole("status")).toHaveTextContent("这两张不相配");
+    expect(screen.getByRole("status")).toHaveTextContent("These two do not match");
     expect(onComplete).not.toHaveBeenCalled();
 
     fireEvent.click(right("pair-2"));
@@ -84,9 +86,9 @@ describe("tap matching board", () => {
       await waitFor(() => expect(right(pair.id)).not.toBeDisabled());
       fireEvent.click(right(pair.id));
     }
-    await waitFor(() => expect(screen.getByRole("button", { name: "重新保存" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Save again" })).toBeInTheDocument());
     expect(onComplete).toHaveBeenCalledTimes(1);
-    fireEvent.click(screen.getByRole("button", { name: "重新保存" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save again" }));
     await waitFor(() => expect(onComplete).toHaveBeenCalledTimes(2));
   });
 });

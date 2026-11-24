@@ -20,7 +20,7 @@ export interface SubjectInsight {
 
 const REASON_TEXT: Record<RecommendationReason, string> = {
   "review-due": "到了复习时间",
-  "prerequisite-gap": "先补先修概念",
+  "prerequisite-gap": "先补一个基础点",
   "weak-skill": "这一项还需要再练",
   "new-skill": "可以开始新内容"
 };
@@ -28,7 +28,7 @@ const REASON_TEXT: Record<RecommendationReason, string> = {
 export function buildSubjectInsight(child: ChildProfile, subject: Subject, now = new Date()): SubjectInsight {
   const weekStart = now.getTime() - 7 * 24 * 60 * 60 * 1000;
   const subjectEvidence = SKILLS
-    .filter((skill) => skill.subject === subject)
+    .filter((skill) => skill.subject === subject && child.settings.enabledSkills.includes(skill.id))
     .map((skill) => child.evidence[skill.id])
     .filter(Boolean);
   const next = recommendedNextSkills(child, subject, now)[0];

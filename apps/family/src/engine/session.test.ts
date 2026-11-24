@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createChildProfile } from "../lib/profile";
+import { getQuestionsForSubject } from "../content/catalog";
+import { classifyMastery } from "./bkt";
+import type { Question } from "../lib/types";
 import {
   completeSession,
+  correctCountsForSession,
   createAdaptiveSession,
   recordSessionAnswer,
   recommendedNextSkills,
@@ -14,9 +18,28 @@ describe("adaptive session engine", () => {
       ...child.evidence[skillId],
       independentCorrect: 2,
       nEff: 2,
+      questionIds: ["q1", "q2"],
       pKnown: 0.62
     };
+    child.evidence[skillId].diversity.templateFamilies = { "place-value": 1, "compare-order": 1 };
+    child.evidence[skillId].diversity.responseModes["tap-choice"] = 1;
+    child.evidence[skillId].diversity.responseModes["tap-match"] = 1;
   }
+
+  it("counts independent and hinted correct answers separately", () => {
+    const child = createChildProfile("小星", "star", new Date("2026-11-20T10:00:00Z"));
+    let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
+    const answers = [
+      { correct: true, hintUsed: false },
+      { correct: true, hintUsed: true },
+      { correct: false, hintUsed: false }
+    ];
+    for (const answer of answers) {
+      const question = selectNextQuestion(child, session)!;
+      session = recordSessionAnswer(child, session, { ...answer, questionId: question.id, at: new Date("2026-11-20T10:00:00Z") });
+    }
+    expect(correctCountsForSession(session)).toEqual({ independent: 1, hinted: 1 });
+  });
 
   it("creates a diagnostic session and selects eight distinct questions dynamically", () => {
     const child = createChildProfile("小星", "star");
@@ -49,6 +72,30 @@ describe("adaptive session engine", () => {
       const session = createAdaptiveSession(child, subject, new Date("2026-11-20T10:00:00Z"));
       expect(selectNextQuestion(child, session)?.kind).toBe("match");
     }
+  });
+
+  it("keeps diagnostic questions inside the enabled learning scope", () => {
+    const child = createChildProfile("小星", "star", new Date("2026-11-20T10:00:00Z"));
+    child.settings.enabledSkills = ["math-count-100"];
+    let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
+    for (let index = 0; index < 8; index += 1) {
+      const question = selectNextQuestion(child, session)!;
+      expect(question.skillId).toBe("math-count-100");
+      session = recordSessionAnswer(child, session, { questionId: question.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
+    }
+  });
+
+  it("mixes matching and choice items instead of making the whole diagnostic matching", () => {
+    const child = createChildProfile("小星", "star", new Date("2026-11-20T10:00:00Z"));
+    let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
+    const kinds: string[] = [];
+    for (let index = 0; index < 8; index += 1) {
+      const question = selectNextQuestion(child, session)!;
+      kinds.push(question.kind);
+      session = recordSessionAnswer(child, session, { questionId: question.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
+    }
+    expect(kinds).toContain("match");
+    expect(kinds).toContain("choice");
   });
 
   it("does not repeat an already answered item in the same session", () => {
@@ -107,5 +154,28 @@ describe("adaptive session engine", () => {
     markPrerequisiteReady(child, "math-count-100");
     const after = recommendedNextSkills(child, "math", new Date("2026-11-20T10:00:00Z"));
     expect(after.map((item) => item.skill.id)).toContain("math-add-sub-100");
+  });
+
+  it("can reach secure through the real answer path using transfer-tagged question content", () => {
+    const child = createChildProfile("小安", "star", new Date("2026-11-20T08:00:00Z"));
+    const skillQuestions = getQuestionsForSubject("math").filter((question) => question.skillId === "math-add-sub-100");
+    const families = new Map<string, Question>();
+    for (const question of skillQuestions) if (!families.has(question.template)) families.set(question.template, question);
+    const transfer = skillQuestions.find((question) => question.transferLevel !== "same-context");
+    expect(families.size).toBeGreaterThanOrEqual(3);
+    expect(transfer).toBeDefined();
+    const chosen = [...families.values()].slice(0, 6);
+    const matchQuestion = skillQuestions.find((question) => question.kind === "match");
+    if (matchQuestion && !chosen.some((question) => question.id === matchQuestion.id)) chosen[3] = matchQuestion;
+    if (transfer && !chosen.some((question) => question.id === transfer.id)) chosen[4] = transfer;
+    const session = createAdaptiveSession(child, "math", new Date("2026-11-20T08:00:00Z"), { kind: "practice", length: chosen.length });
+    const observationDays = [0, 0, 0, 0, 0, 1];
+    chosen.forEach((question, index) => {
+      const at = new Date(`2026-11-2${1 + observationDays[index]}T08:00:00Z`);
+      const next = recordSessionAnswer(child, session, { questionId: question.id, correct: true, hintUsed: false, at });
+      session.attempts = next.attempts;
+    });
+    expect(child.evidence["math-add-sub-100"].diversity.transferCorrect).toBeGreaterThanOrEqual(1);
+    expect(classifyMastery(child.evidence["math-add-sub-100"], new Date("2026-11-22T09:00:00Z"))).toBe("secure");
   });
 });

@@ -16,11 +16,12 @@ function orderRightPairs(question: MatchQuestion) {
 
 export default function MatchingBoard({ question, disabled, onComplete }: Props) {
   const rightPairs = useMemo(() => orderRightPairs(question), [question]);
+  const isEnglishBoard = question.subject !== "mandarin";
   const [selectedLeftId, setSelectedLeftId] = useState<string | null>(null);
   const [completedPairIds, setCompletedPairIds] = useState<string[]>([]);
   const [mismatchCount, setMismatchCount] = useState(0);
   const [wrongPairId, setWrongPairId] = useState<string | null>(null);
-  const [status, setStatus] = useState("先点左边的一张，再点右边配对的卡片。");
+  const [status, setStatus] = useState(isEnglishBoard ? "Tap a card on the left, then its match on the right." : "先点左边的一张，再点右边配对的卡片。");
   const [saving, setSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const savingRef = useRef(false);
@@ -31,7 +32,7 @@ export default function MatchingBoard({ question, disabled, onComplete }: Props)
     savingRef.current = true;
     setSaving(true);
     setSaveFailed(false);
-    setStatus("正在保存这一次配对…");
+    setStatus(isEnglishBoard ? "Saving this match…" : "正在保存这一次配对…");
     let saved = false;
     try {
       saved = await onComplete(wasFirstTry, mismatchCount);
@@ -42,10 +43,14 @@ export default function MatchingBoard({ question, disabled, onComplete }: Props)
       setSaving(false);
     }
     if (saved) {
-      setStatus(wasFirstTry ? "三对都配好了。" : `三对都配好了，中间配错 ${mismatchCount} 次。`);
+      setStatus(isEnglishBoard
+        ? wasFirstTry
+          ? `All ${question.pairs.length} pairs matched.`
+          : `All ${question.pairs.length} pairs matched with ${mismatchCount} mistake${mismatchCount === 1 ? "" : "s"}.`
+        : wasFirstTry ? "三对都配好了。" : `三对都配好了，中间配错 ${mismatchCount} 次。`);
     } else {
       setSaveFailed(true);
-      setStatus("这一次没有保存成功，请再试一次。");
+      setStatus(isEnglishBoard ? "This match was not saved. Please try again." : "这一次没有保存成功，请再试一次。");
     }
   }
 
@@ -55,7 +60,7 @@ export default function MatchingBoard({ question, disabled, onComplete }: Props)
     if (!pair) return;
     setSelectedLeftId(pairId);
     setWrongPairId(null);
-    setStatus(`已选 ${pair.left}，现在点右边配对的卡片。`);
+    setStatus(isEnglishBoard ? `Selected ${pair.left}. Now tap its match on the right.` : `已选 ${pair.left}，现在点右边配对的卡片。`);
   }
 
   function selectRight(pairId: string) {
@@ -71,13 +76,13 @@ export default function MatchingBoard({ question, disabled, onComplete }: Props)
         const wasFirstTry = mismatchCount === 0;
         void submitCompletion(wasFirstTry);
       } else {
-        setStatus(`配对成功。还剩 ${question.pairs.length - nextCompleted.length} 对。`);
+        setStatus(isEnglishBoard ? `Matched! ${question.pairs.length - nextCompleted.length} pairs left.` : `配对成功。还剩 ${question.pairs.length - nextCompleted.length} 对。`);
       }
       return;
     }
     setMismatchCount((count) => count + 1);
     setWrongPairId(pairId);
-    setStatus("这两张不相配，再试一次。");
+    setStatus(isEnglishBoard ? "These two do not match. Try again." : "这两张不相配，再试一次。");
   }
 
   return (
@@ -97,7 +102,7 @@ export default function MatchingBoard({ question, disabled, onComplete }: Props)
                   data-match-side="left"
                   data-pair-id={pair.id}
                   aria-pressed={selected}
-                  aria-label={`${complete ? "已完成，" : ""}选择 ${pair.left}`}
+                  aria-label={isEnglishBoard ? `${complete ? "Completed, " : ""}choose ${pair.left}` : `${complete ? "已完成，" : ""}选择 ${pair.left}`}
                   onClick={() => selectLeft(pair.id)}
                   disabled={disabled || complete}
                 >
@@ -121,7 +126,9 @@ export default function MatchingBoard({ question, disabled, onComplete }: Props)
                   type="button"
                   data-match-side="right"
                   data-pair-id={pair.id}
-                  aria-label={`${complete ? "已完成，" : wrong ? "刚才配错了，" : ""}选择 ${pair.right}`}
+                  aria-label={isEnglishBoard
+                    ? `${complete ? "Completed, " : wrong ? "Wrong just now, " : ""}choose ${pair.right}`
+                    : `${complete ? "已完成，" : wrong ? "刚才配错了，" : ""}选择 ${pair.right}`}
                   onClick={() => selectRight(pair.id)}
                   disabled={disabled || !selectedPair || complete}
                 >
@@ -134,10 +141,16 @@ export default function MatchingBoard({ question, disabled, onComplete }: Props)
         </section>
       </div>
       <div className={`match-status ${wrongPairId ? "is-wrong" : ""}`} id="match-status" role="status" aria-live="polite">
-        <strong>{completedPairIds.length} / {question.pairs.length} 对完成</strong>
+        <strong>{isEnglishBoard
+          ? `${completedPairIds.length} / ${question.pairs.length} pairs matched`
+          : `${completedPairIds.length} / ${question.pairs.length} 对完成`}</strong>
         <span>{status}</span>
-        {mismatchCount > 0 && completedPairIds.length < question.pairs.length ? <small>配错 {mismatchCount} 次，可以继续试。</small> : null}
-        {saveFailed ? <button className="quiet-button match-retry-button" type="button" onClick={() => void submitCompletion(mismatchCount === 0)} disabled={saving}>重新保存</button> : null}
+        {mismatchCount > 0 && completedPairIds.length < question.pairs.length ? (
+          <small>{isEnglishBoard
+            ? `${mismatchCount} mistake${mismatchCount === 1 ? "" : "s"} so far. Keep trying.`
+            : `配错 ${mismatchCount} 次，可以继续试。`}</small>
+        ) : null}
+        {saveFailed ? <button className="quiet-button match-retry-button" type="button" onClick={() => void submitCompletion(mismatchCount === 0)} disabled={saving}>{isEnglishBoard ? "Save again" : "重新保存"}</button> : null}
       </div>
     </div>
   );

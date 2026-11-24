@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { canonicalContentPayload } from "../src/content/identity";
-import { QUESTIONS, validateContentCatalog } from "../src/content/catalog";
+import { QUESTIONS, SKILLS, validateContentCatalog } from "../src/content/catalog";
 
 const signaturePath = resolve(import.meta.dirname, "../src/content/content.sha256");
 const issues = validateContentCatalog();
@@ -10,8 +10,12 @@ if (issues.length > 0) {
   console.error("Content validation failed:", issues);
   process.exit(1);
 }
-if (QUESTIONS.length !== 234) {
-  console.error(`Expected 234 questions, found ${QUESTIONS.length}`);
+if (process.argv.includes("--depth")) {
+  console.log(`Depth verified for ${SKILLS.length} skills and ${QUESTIONS.length} questions.`);
+  if (!process.argv.includes("--update")) process.exit(0);
+}
+if (QUESTIONS.length !== 775) {
+  console.error(`Expected 775 questions, found ${QUESTIONS.length}`);
   process.exit(1);
 }
 

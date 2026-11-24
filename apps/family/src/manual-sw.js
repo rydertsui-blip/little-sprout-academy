@@ -1,4 +1,4 @@
-const CACHE_NAME = "little-sprout-family-v4";
+const CACHE_NAME = "little-sprout-family-v6";
 const CORE = [
   "./",
   "./index.html",
@@ -46,6 +46,16 @@ self.addEventListener("install", (event) => {
       .map((match) => match[1])
       .filter((path) => path.includes("assets/"));
     await Promise.all(linkedAssets.map((path) => cache.add(path)));
+    try {
+      const manifestResponse = await fetch("./precache-manifest.json", { cache: "reload" });
+      if (manifestResponse.ok) {
+        const manifest = await manifestResponse.json();
+        const audioPaths = Array.isArray(manifest.audio) ? manifest.audio : [];
+        await Promise.allSettled(audioPaths.map((path) => cache.add(path)));
+      }
+    } catch {
+      // Audio precache is best-effort; the app can still work online.
+    }
     const cssAssets = linkedAssets.filter((path) => path.endsWith(".css"));
     for (const cssPath of cssAssets) {
       const response = await fetch(cssPath, { cache: "reload" });

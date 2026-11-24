@@ -37,6 +37,8 @@ export function canonicalContentPayload(): string {
       explanation: question.explanation,
       difficulty: question.difficulty,
       template: question.template,
+      transferLevel: question.transferLevel,
+      contextKey: question.contextKey,
       audit: question.audit,
       audioText: question.audioText ?? null,
       audioLanguage: question.audioLanguage ?? null,

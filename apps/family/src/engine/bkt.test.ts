@@ -2,12 +2,52 @@ import { describe, expect, it } from "vitest";
 import {
   classifyMastery,
   createSkillEvidence,
+  createEvidenceDiversity,
   predictedSuccess,
   updateBktEvidence,
   wilsonLowerBound
 } from "./bkt";
 
 describe("BKT knowledge tracking", () => {
+  it("records template family, response mode and transfer diversity", () => {
+    const start = new Date("2026-11-20T08:00:00Z");
+    let evidence = createSkillEvidence("math-add-sub-100", start);
+    evidence = updateBktEvidence(evidence, {
+      correct: true, hintUsed: false, questionId: "q1", template: "number-bond",
+      templateFamily: "number-bond", responseMode: "tap-choice", transferLevel: "near-transfer",
+      contextKey: "bare-number", at: start
+    });
+    evidence = updateBktEvidence(evidence, {
+      correct: true, hintUsed: false, questionId: "q2", template: "story-change",
+      templateFamily: "story-change", responseMode: "tap-match", transferLevel: "far-transfer",
+      contextKey: "story", at: new Date("2026-11-21T08:00:00Z")
+    });
+    expect(evidence.diversity.templateFamilies["number-bond"]).toBe(1);
+    expect(evidence.diversity.responseModes["tap-choice"]).toBe(1);
+    expect(evidence.diversity.responseModes["tap-match"]).toBe(1);
+    expect(evidence.diversity.transferCorrect).toBe(2);
+    expect(evidence.diversity.farTransferCorrect).toBe(1);
+    expect(evidence.diversity.delayedIndependentCorrect).toBe(1);
+    expect(evidence.diversity.contextKeys).toEqual(["bare-number", "story"]);
+  });
+
+  it("does not count repeated same-family answers as breadth", () => {
+    let evidence = createSkillEvidence("english-phonics", new Date("2026-11-20T08:00:00Z"));
+    for (const [index, questionId] of ["a", "b", "c"].entries()) {
+      evidence = updateBktEvidence(evidence, {
+        correct: true, hintUsed: false, questionId, template: "initial-sound",
+        templateFamily: "initial-sound", responseMode: "tap-choice", transferLevel: "same-context",
+        contextKey: "word", at: new Date(`2026-11-20T0${index}:00:00Z`)
+      });
+    }
+    expect(Object.keys(evidence.diversity.templateFamilies)).toEqual(["initial-sound"]);
+    expect(evidence.diversity.contextKeys).toEqual(["word"]);
+  });
+
+  it("starts migrated evidence with an empty diversity record", () => {
+    expect(createEvidenceDiversity().templateFamilies).toEqual({});
+    expect(createEvidenceDiversity().transferCorrect).toBe(0);
+  });
   it("raises mastery after an independent correct answer using the BKT update", () => {
     const initial = createSkillEvidence("math-count-100");
     const updated = updateBktEvidence(initial, { correct: true, hintUsed: false, template: "count" });
@@ -30,13 +70,35 @@ describe("BKT knowledge tracking", () => {
     expect(classifyMastery(oneCorrect, new Date("2026-11-20T10:00:00Z"))).toBe("developing");
   });
 
-  it("requires independent evidence, template breadth and delayed review for secure", () => {
-    let evidence = createSkillEvidence("math-add-sub-100", new Date("2026-11-20T10:00:00Z"));
-    for (const [index, template] of ["number-bond", "vertical", "word"].entries()) {
-      evidence = updateBktEvidence(evidence, { correct: true, hintUsed: false, template, at: new Date("2026-11-20T10:00:00Z"), questionId: `q${index + 1}` });
+  it("does not mark four same-family answers as secure", () => {
+    let evidence = createSkillEvidence("math-count-100", new Date("2026-11-20T00:00:00Z"));
+    for (const questionId of ["q1", "q2", "q3", "q4"]) {
+      evidence = updateBktEvidence(evidence, {
+        correct: true, hintUsed: false, questionId, template: "place-value",
+        templateFamily: "place-value", responseMode: "tap-choice", transferLevel: "same-context",
+        contextKey: "bare-number", at: new Date("2026-11-21T00:00:00Z")
+      });
     }
-    evidence = updateBktEvidence(evidence, { correct: true, hintUsed: false, template: "word", at: new Date("2026-11-21T10:00:00Z"), questionId: "q4" });
-    expect(classifyMastery(evidence, new Date("2026-11-21T10:01:00Z"))).toBe("secure");
+    expect(classifyMastery(evidence, new Date("2026-11-21T01:00:00Z"))).not.toBe("secure");
+  });
+
+  it("marks secure only after three families, two modes, transfer and delayed evidence", () => {
+    let evidence = createSkillEvidence("math-count-100", new Date("2026-11-20T00:00:00Z"));
+    const observations = [
+      ["q1", "number-sequence", "tap-choice", "same-context", "2026-11-20T01:00:00Z"],
+      ["q2", "place-value-tens-ones", "tap-match", "same-context", "2026-11-20T02:00:00Z"],
+      ["q3", "compare-order", "tap-choice", "same-context", "2026-11-20T03:00:00Z"],
+      ["q4", "number-sequence", "tap-order", "same-context", "2026-11-20T04:00:00Z"],
+      ["q5", "place-value-tens-ones", "tap-match", "near-transfer", "2026-11-20T05:00:00Z"],
+      ["q6", "compare-order", "tap-choice", "far-transfer", "2026-11-21T05:00:00Z"]
+    ] as const;
+    for (const [questionId, family, responseMode, transferLevel, at] of observations) {
+      evidence = updateBktEvidence(evidence, {
+        correct: true, hintUsed: false, questionId, template: family, templateFamily: family,
+        responseMode, transferLevel, contextKey: family, at: new Date(at)
+      });
+    }
+    expect(classifyMastery(evidence, new Date("2026-11-21T06:00:00Z"))).toBe("secure");
   });
 
   it("resets review progress after an incorrect independent answer", () => {
@@ -47,13 +109,28 @@ describe("BKT knowledge tracking", () => {
     expect(evidence.independentCorrect).toBe(1);
   });
 
-  it("counts distinct questions rather than fake template breadth", () => {
-    let evidence = createSkillEvidence("math-count-100", new Date("2026-11-20T08:00:00Z"));
-    for (const questionId of ["q1", "q2", "q3"]) {
-      evidence = updateBktEvidence(evidence, { correct: true, hintUsed: false, template: "place-value", at: new Date("2026-11-20T08:00:00Z"), questionId });
+  it("drops secure after the most recent independent answer is wrong", () => {
+    let evidence = createSkillEvidence("math-count-100", new Date("2026-11-20T00:00:00Z"));
+    const observations = [
+      ["q1", "number-sequence", "tap-choice", "same-context", "2026-11-20T01:00:00Z"],
+      ["q2", "place-value-tens-ones", "tap-match", "same-context", "2026-11-20T02:00:00Z"],
+      ["q3", "compare-order", "tap-choice", "same-context", "2026-11-20T03:00:00Z"],
+      ["q4", "number-sequence", "tap-order", "same-context", "2026-11-20T04:00:00Z"],
+      ["q5", "place-value-tens-ones", "tap-match", "near-transfer", "2026-11-20T05:00:00Z"],
+      ["q6", "compare-order", "tap-choice", "far-transfer", "2026-11-21T05:00:00Z"]
+    ] as const;
+    for (const [questionId, family, responseMode, transferLevel, at] of observations) {
+      evidence = updateBktEvidence(evidence, {
+        correct: true, hintUsed: false, questionId, template: family, templateFamily: family,
+        responseMode, transferLevel, contextKey: family, at: new Date(at)
+      });
     }
-    evidence = updateBktEvidence(evidence, { correct: true, hintUsed: false, template: "place-value", at: new Date("2026-11-21T08:00:00Z"), questionId: "q4" });
-    expect(classifyMastery(evidence, new Date("2026-11-21T08:01:00Z"))).toBe("secure");
+    evidence = updateBktEvidence(evidence, {
+      correct: false, hintUsed: false, questionId: "q7", template: "compare-order",
+      templateFamily: "compare-order", responseMode: "tap-choice", transferLevel: "same-context",
+      contextKey: "compare-order", at: new Date("2026-11-22T05:00:00Z")
+    });
+    expect(classifyMastery(evidence, new Date("2026-11-22T06:00:00Z"))).not.toBe("secure");
   });
 
   it("does not add mastery evidence when the same question is repeated", () => {
