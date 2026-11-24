@@ -209,7 +209,7 @@ function fillEvidence(raw: unknown, skillId: string, attempts: unknown[]): Skill
     ...value,
     templates: Array.isArray(value.templates) ? value.templates.map(String) : [],
     questionIds: Array.isArray(value.questionIds) ? value.questionIds.map(String) : inferredQuestionIds,
-    diversity: createEvidenceDiversity(),
+    diversity: value.diversity === undefined || value.diversity === null ? createEvidenceDiversity() : diversitySchema.parse(value.diversity),
     lastStageAdvanceAt: typeof value.lastStageAdvanceAt === "string" ? value.lastStageAdvanceAt : null
   } as SkillEvidence;
 }

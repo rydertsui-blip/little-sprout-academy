@@ -21,6 +21,7 @@ describe("all question render smoke", () => {
       expect(prompt?.textContent, question.id).toBe(question.prompt);
       if (question.kind === "choice") {
         expect(container.querySelectorAll(".answer-option").length, question.id).toBe(3);
+        expect(container.querySelector("[data-correct]"), question.id).toBeNull();
       }
       if (question.kind === "match") {
         expect(container.querySelectorAll('[data-match-side="left"]').length, question.id).toBe(question.pairs.length);

@@ -151,6 +151,33 @@ describe("household storage", () => {
     if (!result.ok) expect(result.error).toContain("Quota");
   });
 
+  it("keeps mastery diversity across a storage reload", () => {
+    const child = createChildProfile("小果", "star", new Date("2026-11-20T00:00:00Z"));
+    const evidence = child.evidence["math-count-100"];
+    evidence.diversity.templateFamilies = { "number-bond": 2, "count-on": 1 };
+    evidence.diversity.responseModes["tap-choice"] = 3;
+    evidence.diversity.responseModes["tap-match"] = 1;
+    evidence.diversity.transferCorrect = 2;
+    evidence.diversity.farTransferCorrect = 1;
+    evidence.diversity.delayedIndependentCorrect = 1;
+    evidence.diversity.contextKeys = ["bare-number", "story"];
+    evidence.diversity.lastIndependentWrongAt = "2026-11-20T10:00:00.000Z";
+    saveHousehold({
+      version: 4,
+      uiLocale: "zh",
+      householdName: "测试家庭",
+      parentName: "妈妈",
+      pinHash: "hash",
+      pinSalt: "salt",
+      createdAt: "2026-11-20T00:00:00.000Z",
+      children: [child]
+    });
+    const result = readHousehold();
+    expect(result.status).toBe("ok");
+    if (result.status !== "ok") return;
+    expect(result.household.children[0].evidence["math-count-100"].diversity).toEqual(evidence.diversity);
+  });
+
   it("keeps a narrowed enabled-skill scope for current household data", () => {
     const child = createChildProfile("小范围", "star", new Date("2026-11-20T00:00:00Z"));
     const p1Skills = SKILLS.filter((skill) => skill.gradeBand !== "P2").map((skill) => skill.id);

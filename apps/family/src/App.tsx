@@ -1012,7 +1012,6 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
               <button
                 key={option}
                 className={`answer-option ${question.optionImages ? "image-answer" : ""} ${feedback && option === feedback.answer ? (correct ? "is-correct" : "is-wrong") : ""} ${!feedback && pendingWrong === option ? "is-wrong" : ""} ${feedback && !correct && option === question.correctAnswer ? "is-correct-answer" : ""}`}
-                data-correct={option === question.correctAnswer ? "true" : "false"}
                 type="button"
                 onClick={() => choose(option)}
                 disabled={Boolean(feedback)}

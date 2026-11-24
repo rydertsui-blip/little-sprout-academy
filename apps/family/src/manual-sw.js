@@ -1,4 +1,4 @@
-const CACHE_NAME = "little-sprout-family-v6";
+const CACHE_NAME = "little-sprout-family-build";
 const CORE = [
   "./",
   "./index.html",
@@ -39,6 +39,7 @@ self.addEventListener("install", (event) => {
     const cache = await caches.open(CACHE_NAME);
     await Promise.all(CORE.map((path) => cache.add(path)));
     const indexResponse = await fetch("./index.html", { cache: "reload" });
+    if (!indexResponse.ok) throw new Error(`index precache failed: ${indexResponse.status}`);
     const indexCopy = indexResponse.clone();
     const indexHtml = await indexResponse.text();
     await cache.put("./index.html", indexCopy);
@@ -46,22 +47,21 @@ self.addEventListener("install", (event) => {
       .map((match) => match[1])
       .filter((path) => path.includes("assets/"));
     await Promise.all(linkedAssets.map((path) => cache.add(path)));
-    try {
-      const manifestResponse = await fetch("./precache-manifest.json", { cache: "reload" });
-      if (manifestResponse.ok) {
-        const manifest = await manifestResponse.json();
-        const audioPaths = Array.isArray(manifest.audio) ? manifest.audio : [];
-        await Promise.allSettled(audioPaths.map((path) => cache.add(path)));
-      }
-    } catch {
-      // Audio precache is best-effort; the app can still work online.
-    }
+    const manifestResponse = await fetch("./precache-manifest.json", { cache: "reload" });
+    if (!manifestResponse.ok) throw new Error(`precache manifest failed: ${manifestResponse.status}`);
+    const manifest = await manifestResponse.json();
+    const assetPaths = ["audio", "images", "companions"]
+      .flatMap((key) => Array.isArray(manifest[key]) ? manifest[key] : [])
+      .filter((path) => typeof path === "string" && path.startsWith("./"));
+    if (assetPaths.length === 0) throw new Error("precache manifest has no media assets");
+    await Promise.all(Array.from(new Set(assetPaths)).map((path) => cache.add(path)));
     const cssAssets = linkedAssets.filter((path) => path.endsWith(".css"));
     for (const cssPath of cssAssets) {
       const response = await fetch(cssPath, { cache: "reload" });
+      if (!response.ok) throw new Error(`css precache failed: ${response.status}`);
       const cssText = await response.text();
       const fontUrls = Array.from(cssText.matchAll(/url\(([^)]+)\)/g))
-        .map((match) => match[1].replace(/^['\"]|['\"]$/g, ""))
+        .map((match) => match[1].replace(/^['"]|['"]$/g, ""))
         .filter((path) => !path.startsWith("data:"))
         .map((path) => new URL(path, new URL(cssPath, self.location.href)).href);
       await Promise.all(fontUrls.map((path) => cache.add(path)));
