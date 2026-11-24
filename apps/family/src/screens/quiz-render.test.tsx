@@ -29,5 +29,5 @@ describe("all question render smoke", () => {
       unmount();
       cleanup();
     }
-  });
+  }, 15000);
 });

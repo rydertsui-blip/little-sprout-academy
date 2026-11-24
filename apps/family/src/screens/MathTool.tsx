@@ -167,7 +167,7 @@ function questionNumbers(prompt: string) {
 
 function BarModel({ question }: { question: Question }) {
   const { a, b } = questionNumbers(question.prompt);
-  const subtract = /[−-]|taken away|remain|lost|left|fewer/i.test(question.prompt);
+  const subtract = /[−-]|taken away|remain|lost|left|fewer|used|empty/i.test(question.prompt);
   return (
     <div className="bar-model-visual">
       <div className="bar-model-whole"><small>whole</small><strong>{subtract ? a : "?"}</strong></div>
@@ -176,6 +176,69 @@ function BarModel({ question }: { question: Question }) {
         <div className="bar-model-part"><small>part</small><strong>{subtract ? "?" : b}</strong></div>
       </div>
       <p>{subtract ? "whole − part = part" : "part + part = whole"}</p>
+    </div>
+  );
+}
+
+function twoStepSign(prompt: string, value: string): "+" | "−" | null {
+  const index = prompt.indexOf(value);
+  if (index < 0) return null;
+  const before = prompt.slice(Math.max(0, index - 24), index);
+  const after = prompt.slice(index + value.length, index + value.length + 24);
+  const candidates: Array<{ sign: "+" | "−"; distance: number }> = [];
+  const collect = (text: string, scope: "before" | "after", pattern: RegExp, sign: "+" | "−") => {
+    for (const match of text.matchAll(pattern)) {
+      const distance = scope === "before"
+        ? before.length - ((match.index ?? 0) + match[0].length)
+        : match.index ?? 0;
+      candidates.push({ sign, distance });
+    }
+  };
+  collect(before, "before", /sell|sold|give|gave|away|off|take|taken|eaten|eat|break|broken|used|lose|lost|spend|spent|cost|costs|pay|fewer|remove/gi, "−");
+  collect(before, "before", /gets|got|get on|get more|receive|receives|earn|earns|collect|collects|buy|buys|more|add|adds|altogether|in all|total/gi, "+");
+  collect(after, "after", /sell|sold|give|gave|away|off|take|taken|eaten|eat|break|broken|used|lose|lost|spend|spent|cost|costs|pay|fewer|remove/gi, "−");
+  collect(after, "after", /gets|got|get on|get more|receive|receives|earn|earns|collect|collects|buy|buys|more|add|adds|altogether|in all|total/gi, "+");
+  if (!candidates.length) return null;
+  return candidates.sort((left, right) => left.distance - right.distance)[0].sign;
+}
+
+function TwoStepBar({ question }: { question: Question }) {
+  const numbers = question.prompt.match(/\d+/g)?.map(Number) ?? [];
+  if (numbers.length < 3) return <BarModel question={question} />;
+  const [start, changeOne, changeTwo] = numbers;
+  const firstSign = twoStepSign(question.prompt, String(changeOne));
+  const secondSign = twoStepSign(question.prompt, String(changeTwo));
+  return (
+    <div className="two-step-model" data-testid="two-step-model">
+      <div className="two-step-row">
+        <span className="two-step-node"><small>start</small><strong>{start}</strong></span>
+        <i aria-hidden="true">→</i>
+        <span className="two-step-node"><small>change 1</small><strong>{firstSign ? `${firstSign} ${changeOne}` : changeOne}</strong></span>
+        <i aria-hidden="true">→</i>
+        <span className="two-step-node"><small>change 2</small><strong>{secondSign ? `${secondSign} ${changeTwo}` : changeTwo}</strong></span>
+        <i aria-hidden="true">→</i>
+        <span className="two-step-node is-answer"><small>now</small><strong>?</strong></span>
+      </div>
+      <p>Work through both changes in order.</p>
+    </div>
+  );
+}
+
+function TwoStepArray({ question }: { question: Question }) {
+  const groups = question.prompt.match(/(\d+)\s+(?:boxes|bags|trays|rows)\s+with\s+(\d+)/i);
+  const rows = Number(groups?.[1] ?? 0);
+  const columns = Number(groups?.[2] ?? 0);
+  const removed = Number(question.prompt.match(/(\d+)\s+(?:books|oranges|eggs)\s+(?:are\s+)?(?:taken out|eaten|break|broken|sold)/i)?.[1] ?? 0);
+  if (!rows || !columns) return null;
+  const total = rows * columns;
+  return (
+    <div className="two-step-array" data-testid="two-step-array">
+      <div className="two-step-array-grid" style={{ gridTemplateColumns: `repeat(${columns}, 16px)` }} aria-hidden="true">
+        {Array.from({ length: total }, (_, index) => (
+          <span className={index >= total - removed ? "is-removed" : ""} key={index} />
+        ))}
+      </div>
+      <small>{rows} × {columns} = {total}; {removed} removed</small>
     </div>
   );
 }
@@ -339,22 +402,41 @@ function formatMoney(cents: number): string {
   return `$${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
 }
 
+function formatCents(cents: number): string {
+  return `${cents}¢`;
+}
+
 function moneyAmounts(prompt: string): number[] {
-  return [...prompt.matchAll(/\$(\d+)(?:\.(\d{2}))?/g)].map((match) => Number(match[1]) * 100 + Number(match[2] ?? 0));
+  const dollarAmounts = [...prompt.matchAll(/\$(\d+)(?:\.(\d{2}))?/g)].map((match) => Number(match[1]) * 100 + Number(match[2] ?? 0));
+  if (dollarAmounts.length) return dollarAmounts;
+  return [...prompt.matchAll(/(\d+)\s*cents?/gi)].map((match) => Number(match[1]));
 }
 
 function MoneyBoard({ question }: { question: Question }) {
   const amounts = moneyAmounts(question.prompt);
   const asksForCents = /how many cents|in cents|cents/i.test(question.prompt);
+  const centsOnly = asksForCents && !question.prompt.includes("$");
+  const showAmount = centsOnly ? formatCents : formatMoney;
   const comparesOrChanges = /change|more|less|than/i.test(question.prompt);
+  const total = /altogether|in all|total/i.test(question.prompt);
+  if (amounts.length >= 2 && total && !comparesOrChanges) {
+    return (
+      <div className="money-equation" data-testid="money-tool" aria-hidden="true">
+        <span><small>First</small><strong>{showAmount(amounts[0])}</strong></span>
+        <i>+</i>
+        <span><small>Second</small><strong>{showAmount(amounts[1])}</strong></span>
+        <i>=</i><b>?</b>
+      </div>
+    );
+  }
   if (amounts.length >= 2 && comparesOrChanges) {
     const larger = Math.max(...amounts);
     const smaller = Math.min(...amounts);
     return (
       <div className="money-equation" data-testid="money-tool" aria-hidden="true">
-        <span><small>{/change/i.test(question.prompt) ? "Pay" : "Larger"}</small><strong>{formatMoney(larger)}</strong></span>
+        <span><small>{/change/i.test(question.prompt) ? "Pay" : "Larger"}</small><strong>{showAmount(larger)}</strong></span>
         <i>−</i>
-        <span><small>{/change/i.test(question.prompt) ? "Cost" : "Smaller"}</small><strong>{formatMoney(smaller)}</strong></span>
+        <span><small>{/change/i.test(question.prompt) ? "Cost" : "Smaller"}</small><strong>{showAmount(smaller)}</strong></span>
         <i>=</i><b>?</b>
       </div>
     );
@@ -363,7 +445,7 @@ function MoneyBoard({ question }: { question: Question }) {
     return (
       <div className="money-amount" data-testid="money-tool" aria-hidden="true">
         <small>Amount</small>
-        <strong>{formatMoney(amounts[0])}</strong>
+        <strong>{showAmount(amounts[0])}</strong>
         <span>? cents</span>
       </div>
     );
@@ -372,7 +454,7 @@ function MoneyBoard({ question }: { question: Question }) {
     return (
       <div className="money-amount" data-testid="money-tool" aria-hidden="true">
         <small>Amount</small>
-        <strong>{formatMoney(amounts[0])}</strong>
+        <strong>{showAmount(amounts[0])}</strong>
       </div>
     );
   }
@@ -640,6 +722,33 @@ function Units({ question }: { question: Question }) {
   );
 }
 
+function TwoStepTool({ question }: { question: Question }) {
+  const numbers = question.prompt.match(/\d+/g) ?? [];
+  const kind = question.template === "match-two-step"
+    ? "Two-step model"
+    : question.template === "two-step-money"
+      ? "Money model"
+      : question.template === "two-step-multiply"
+        ? "Array model"
+        : numbers.length >= 3
+          ? "Two-step model"
+          : "Bar model";
+  return (
+    <details className="math-tool" aria-label={`Math tool: ${kind}`} open>
+      <summary><span>Math tool</span><strong>{kind}</strong><small>Open or close</small></summary>
+      <div className="math-tool-body">
+        {question.template === "match-two-step"
+          ? <div className="two-step-strategy" data-testid="two-step-strategy"><p>Work from left to right. Use the first operation, then the second.</p></div>
+          : question.template === "two-step-money"
+            ? <MoneyBoard question={question} />
+            : question.template === "two-step-multiply"
+              ? <TwoStepArray question={question} />
+              : <TwoStepBar question={question} />}
+      </div>
+    </details>
+  );
+}
+
 function ToolVisual({ kind, max, question }: { kind: ToolKind; max: number; question: Question }) {
   if (kind === "place-value") return <PlaceValue question={question} />;
   if (kind === "number-line") return <NumberLine max={max} question={question} />;
@@ -661,6 +770,7 @@ const TOOL_CAPTION: Partial<Record<ToolKind, string>> = {
 };
 
 export function MathTool({ question }: { question: Question }) {
+  if (question.skillId === "math-two-step-problems") return <TwoStepTool question={question} />;
   const skillKind = TOOL_BY_SKILL[question.skillId];
   if (!skillKind) return null;
   const visualKind: ToolKind = skillKind === "number-line" && question.template === "number-bond"
