@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { Question } from "../lib/types";
 
 type ToolKind =
@@ -247,10 +248,46 @@ function TwoStepArray({ question }: { question: Question }) {
   );
 }
 
+function TenFrame({ total, initialFilled }: { total: number; initialFilled: number }) {
+  const frameSize = total <= 10 ? 10 : 20;
+  const [extra, setExtra] = useState<number[]>([]);
+  useEffect(() => {
+    setExtra([]);
+  }, [total, initialFilled]);
+  const toggle = (idx: number) => {
+    if (idx < initialFilled) return;
+    setExtra((prev) => (prev.includes(idx) ? prev.filter((item) => item !== idx) : [...prev, idx]));
+  };
+  return (
+    <div className="interactive-ten-frame" data-testid="interactive-ten-frame">
+      <div className="ten-frame-grid">
+        {Array.from({ length: frameSize }, (_, idx) => {
+          const isGiven = idx < initialFilled;
+          const isAdded = extra.includes(idx);
+          return (
+            <button
+              key={idx}
+              type="button"
+              className={`ten-frame-cell ${isGiven ? "is-given" : isAdded ? "is-added" : ""}`}
+              onClick={() => toggle(idx)}
+              aria-label={`Cell ${idx + 1}`}
+            >
+              {isGiven || isAdded ? <span /> : null}
+            </button>
+          );
+        })}
+      </div>
+      <small>Tap empty squares to count on ({initialFilled} + {extra.length} = {initialFilled + extra.length})</small>
+    </div>
+  );
+}
+
 function NumberBond({ question }: { question: Question }) {
   const target = question.prompt.match(/makes?\s+(\d+)/i)?.[1];
   const given = question.prompt.match(/(\d+)\s*\+\s*_{2,}/)?.[1];
   if (target && given) {
+    const wholeNum = Number(target);
+    const givenNum = Number(given);
     return (
       <div className="number-bond-visual" data-testid="number-bond-visual">
         <div className="number-bond-whole"><small>whole</small><strong>{target}</strong></div>
@@ -259,6 +296,7 @@ function NumberBond({ question }: { question: Question }) {
           <span><small>part</small><strong>{given}</strong></span>
           <span><small>part</small><strong>?</strong></span>
         </div>
+        {wholeNum <= 20 ? <TenFrame total={wholeNum} initialFilled={givenNum} /> : null}
         <p>part + part = whole</p>
       </div>
     );
@@ -354,6 +392,11 @@ function fractionParts(prompt: string): Array<[number, number]> {
 function FractionModel({ question }: { question: Question }) {
   const cut = question.prompt.match(/cut into (\d+) equal (parts|slices)/i);
   const set = question.prompt.match(/What is (\d+)\/(\d+) of (\d+)/);
+  const [toggledSlices, setToggledSlices] = useState<number[]>([]);
+  useEffect(() => {
+    setToggledSlices([]);
+  }, [question.id]);
+
   if (set) {
     const numerator = Number(set[1]);
     const groups = Number(set[2]);
@@ -379,14 +422,32 @@ function FractionModel({ question }: { question: Question }) {
     const eaten = Number(question.prompt.match(/(\d+)\s+(?:slices|parts)\s+are\s+eaten/i)?.[1] ?? 0);
     const askParts = /How many equal parts/i.test(question.prompt);
     const shaded = eaten ? 0 : askParts ? 0 : 1;
+    const toggleSlice = (idx: number) => {
+      setToggledSlices((prev) => (prev.includes(idx) ? prev.filter((item) => item !== idx) : [...prev, idx]));
+    };
     return (
-      <div className="fraction-whole-board" data-testid="fraction-whole-board" aria-hidden="true">
+      <div className="fraction-whole-board" data-testid="fraction-whole-board">
         <svg viewBox="0 0 520 64" role="img" aria-label="Equal parts">
-          {Array.from({ length: denominator }, (_, section) => (
-            <rect key={section} x={section * (520 / denominator)} y="8" width={520 / denominator} height="48" fill={eaten && section < eaten ? "#f4a7a0" : section < shaded ? "#f4b84b" : "#fffdf8"} stroke="#17324d" strokeWidth="2" />
-          ))}
+          {Array.from({ length: denominator }, (_, section) => {
+            const baseShaded = eaten ? section < eaten : section < shaded;
+            const active = toggledSlices.includes(section) ? !baseShaded : baseShaded;
+            return (
+              <rect
+                key={section}
+                x={section * (520 / denominator)}
+                y="8"
+                width={520 / denominator}
+                height="48"
+                fill={active ? (eaten ? "#f4a7a0" : "#f4b84b") : "#fffdf8"}
+                stroke="#17324d"
+                strokeWidth="2"
+                style={{ cursor: "pointer" }}
+                onClick={() => toggleSlice(section)}
+              />
+            );
+          })}
         </svg>
-        <small>{askParts ? "How many equal parts?" : eaten ? `${eaten} of ${denominator} slices eaten` : "One part is shaded."}</small>
+        <small>{askParts ? "How many equal parts? Tap slices to count." : eaten ? `${eaten} of ${denominator} slices eaten (tap slices to shade)` : "One part is shaded. Tap slices to explore."}</small>
       </div>
     );
   }
@@ -402,14 +463,37 @@ function FractionPairBars({ question }: { question: Question }) {
   const parts = fractionParts(question.prompt).slice(0, 2);
   const shown = parts.length ? parts : [[1, 5] as [number, number]];
   const takeAway = /[−-]/.test(question.prompt) || (/used|removed|poured out|cut off/i.test(question.prompt) && !/more/i.test(question.prompt));
+  const [toggled, setToggled] = useState<string[]>([]);
+  useEffect(() => {
+    setToggled([]);
+  }, [question.id]);
+  const toggleSection = (key: string) => {
+    setToggled((prev) => (prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]));
+  };
   return (
-    <div className="fraction-pairs" data-testid="fraction-pairs" aria-hidden="true">
+    <div className="fraction-pairs" data-testid="fraction-pairs">
       {shown.map(([numerator, denominator], index) => (
         <div className="fraction-card" data-testid="fraction-card" data-fraction={`${numerator}/${denominator}`} key={`${numerator}-${denominator}-${index}`}>
           <svg viewBox="0 0 520 64" role="img" aria-label={`${numerator} out of ${denominator} shaded`}>
-            {Array.from({ length: denominator }, (_, section) => (
-              <rect key={section} x={section * (520 / denominator)} y="8" width={520 / denominator} height="48" fill={section < numerator ? (takeAway && index === 1 ? "#f4a7a0" : "#f4b84b") : "#fffdf8"} stroke="#17324d" strokeWidth="2" />
-            ))}
+            {Array.from({ length: denominator }, (_, section) => {
+              const key = `${index}-${section}`;
+              const base = section < numerator;
+              const active = toggled.includes(key) ? !base : base;
+              return (
+                <rect
+                  key={section}
+                  x={section * (520 / denominator)}
+                  y="8"
+                  width={520 / denominator}
+                  height="48"
+                  fill={active ? (takeAway && index === 1 ? "#f4a7a0" : "#f4b84b") : "#fffdf8"}
+                  stroke="#17324d"
+                  strokeWidth="2"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => toggleSection(key)}
+                />
+              );
+            })}
           </svg>
           <small>{numerator}/{denominator}{takeAway && index === 1 ? " · take away" : ""}</small>
         </div>
@@ -602,6 +686,10 @@ function DurationVisual({ question }: { question: Question }) {
 function CountingPictures({ question }: { question: Question }) {
   const prompt = question.prompt;
   const symbol = prompt.includes("★") ? "★" : prompt.includes("●") ? "●" : "";
+  const [tapped, setTapped] = useState<string[]>([]);
+  useEffect(() => {
+    setTapped([]);
+  }, [question.id]);
   if (!symbol) return null;
   const compare = /which group has more/i.test(prompt);
   const separators = compare ? /\s+or\s+/i : /[+−]/;
@@ -609,22 +697,46 @@ function CountingPictures({ question }: { question: Question }) {
   const counts = segments.map((segment) => Array.from(segment).filter((character) => character === symbol).length);
   const operator = compare ? "or" : /[+＋]/.test(prompt) ? "+" : "−";
   const caption = compare
-    ? "Which group has more?"
+    ? "Tap each dot to count and compare."
     : /[+＋]/.test(prompt)
-      ? "Put the two groups together."
+      ? "Put the two groups together. Tap to count."
       : /[−]/.test(prompt)
-        ? "Take away the second group."
-        : symbol === "★" ? "Count the stars." : "Count the dots.";
+        ? "Take away the second group. Tap to count."
+        : symbol === "★" ? "Tap each star to count." : "Tap each dot to count.";
+  const toggleItem = (key: string) => {
+    setTapped((prev) => (prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]));
+  };
   return (
-    <div className="counting-pictures" data-testid="counting-pictures" data-groups={counts.join(",")} aria-hidden="true">
-      {segments.map((segment, index) => (
-        <span className="counting-group" key={index}>
-          {index > 0 ? <i>{operator}</i> : null}
-          {compare ? <small>{index === 0 ? "Group A" : "Group B"}</small> : null}
-          <strong className={`counting-symbol counting-${symbol === "★" ? "star" : "dot"}`}>{segment.replace(/[^●★]/g, "").trim()}</strong>
-        </span>
-      ))}
-      <small className="counting-caption">{caption}</small>
+    <div className="counting-pictures" data-testid="counting-pictures" data-groups={counts.join(",")}>
+      {segments.map((segment, index) => {
+        const items = Array.from(segment).filter((character) => character === symbol);
+        return (
+          <span className="counting-group" key={index}>
+            {index > 0 ? <i>{operator}</i> : null}
+            {compare ? <small>{index === 0 ? "Group A" : "Group B"}</small> : null}
+            <span className={`counting-symbol counting-${symbol === "★" ? "star" : "dot"}`}>
+              {items.map((item, itemIdx) => {
+                const key = `${index}-${itemIdx}`;
+                const order = tapped.indexOf(key);
+                const isTapped = order >= 0;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`counting-tap-item ${isTapped ? "is-counted" : ""}`}
+                    onClick={() => toggleItem(key)}
+                    aria-label={`Count ${itemIdx + 1}`}
+                  >
+                    <span>{item}</span>
+                    {isTapped ? <em>{order + 1}</em> : null}
+                  </button>
+                );
+              })}
+            </span>
+          </span>
+        );
+      })}
+      <small className="counting-caption">{caption}{tapped.length > 0 ? ` (${tapped.length})` : ""}</small>
     </div>
   );
 }

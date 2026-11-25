@@ -38,6 +38,7 @@ import { DailyMissionCard } from "./screens/DailyMissionCard";
 import { MathTool } from "./screens/MathTool";
 import { LanguageTool } from "./screens/LanguageTool";
 import MatchingBoard from "./screens/MatchingBoard";
+import OrderBoard from "./screens/OrderBoard";
 import HandwritingScreen from "./screens/HandwritingScreen";
 import SpeakingScreen from "./screens/SpeakingScreen";
 import { HANDWRITING_CHARACTERS, type HandwritingCharacter } from "./content/handwriting";
@@ -997,6 +998,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
   }
 
   const matchQuestion = question.kind === "match" ? question : null;
+  const orderQuestion = question.kind === "order" ? question : null;
   const questionAudioStatus = audioStateFor("question");
   const teachAudioStatus = audioStateFor("teach");
   const hintAudioStatus = audioStateFor("hint");
@@ -1054,6 +1056,8 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
           </div>
         ) : matchQuestion ? (
           <MatchingBoard key={matchQuestion.id} question={matchQuestion} disabled={Boolean(feedback)} onComplete={(matchCorrect, mismatchCount) => onAnswer(matchCorrect, "match", mismatchCount, hintUsed || Boolean(teach))} />
+        ) : orderQuestion ? (
+          <OrderBoard key={orderQuestion.id} question={orderQuestion} disabled={Boolean(feedback)} onComplete={(orderCorrect, assembled) => onAnswer(orderCorrect, assembled, 0, hintUsed || Boolean(teach))} />
         ) : null}
         {feedback ? (
           <div ref={feedbackRef} className={`answer-feedback ${correct ? "correct-feedback" : "wrong-feedback"}`} data-testid="answer-feedback" aria-live="polite">

@@ -275,6 +275,15 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
 .answer-option.is-wrong { background: #ffd4c7; border-color: #a43b2e; box-shadow: 0 5px 0 #a43b2e; }
 .answer-option.is-correct-answer { background: #edf7e9; border-color: #2d7147; box-shadow: 0 5px 0 #2d7147; }
 .match-board { position: relative; display: grid; gap: 14px; }
+.order-board { display: grid; gap: 14px; }
+.order-slots { min-height: 68px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px; border: 2px dashed rgba(23, 50, 77, 0.3); border-radius: 10px; background: #fffdf8; }
+.order-slot { min-width: 52px; min-height: 48px; padding: 8px 14px; border: var(--border); border-radius: 8px; font-family: "Andika", "HanziPen SC", sans-serif; font-size: clamp(18px, 2.2vw, 24px); font-weight: 900; }
+.order-slot.is-empty { border-style: dashed; border-color: rgba(23, 50, 77, 0.28); background: var(--paper); color: var(--muted); font-size: 14px; }
+.order-slot.is-filled { background: #ffe3a4; box-shadow: 0 4px 0 #b87918; }
+.order-bank { display: flex; flex-wrap: wrap; gap: 10px; }
+.order-token { min-width: 56px; min-height: 52px; padding: 10px 16px; border: var(--border); border-radius: 8px; background: #d8e2f7; box-shadow: 0 5px 0 rgba(23, 50, 77, 0.12); font-family: "Andika", "HanziPen SC", sans-serif; font-size: clamp(18px, 2.2vw, 24px); font-weight: 800; }
+.order-token.is-used { opacity: 0.35; box-shadow: none; transform: translateY(2px); }
+.order-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
 .match-connectors { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .match-connector-line { fill: none; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 1px 0 rgba(255, 253, 247, 0.9)); animation: match-line-draw 480ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 .match-connector-endpoint { opacity: 0; transform-box: fill-box; transform-origin: center; animation: match-endpoint-pop 260ms 360ms ease-out forwards; }
@@ -381,6 +390,15 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
 .counting-symbol { color: var(--ink); font-size: 24px; line-height: 1.2; letter-spacing: 4px; }
 .counting-star { color: #d9a12a; }
 .counting-caption { flex-basis: 100%; text-align: center; color: var(--muted); font-size: 11px; font-weight: 800; }
+.counting-tap-item { position: relative; min-width: 34px; min-height: 34px; display: inline-grid; place-items: center; margin: 2px; padding: 2px 5px; border: 2px solid rgba(23, 50, 77, 0.25); border-radius: 50%; background: #fffdf8; font-size: 20px; line-height: 1; }
+.counting-tap-item.is-counted { border-color: var(--coral); background: #ffe3a4; }
+.counting-tap-item em { position: absolute; top: -7px; right: -7px; min-width: 18px; height: 18px; display: grid; place-items: center; padding: 0 3px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--coral); color: #fff; font-size: 10px; font-style: normal; font-weight: 900; }
+.interactive-ten-frame { width: 100%; display: grid; justify-items: center; gap: 6px; margin-top: 6px; }
+.ten-frame-grid { display: grid; grid-template-columns: repeat(5, 36px); gap: 5px; padding: 6px; border: 2px solid rgba(23, 50, 77, 0.35); border-radius: 8px; background: #fffdf8; }
+.ten-frame-cell { width: 36px; height: 36px; display: grid; place-items: center; border: 1.5px solid rgba(23, 50, 77, 0.28); border-radius: 6px; background: var(--paper); padding: 0; }
+.ten-frame-cell span { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--ink); background: #6b8bcc; }
+.ten-frame-cell.is-added span { background: var(--coral); }
+.interactive-ten-frame small { color: var(--muted); font-size: 11px; font-weight: 800; }
 .pattern-tool { width: 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; }
 .pattern-dot { width: 22px; height: 22px; border: 2px solid #17324d; border-radius: 50%; background: #fffdf8; }
 .pattern-dot[data-color="red"] { background: #e85c47; }

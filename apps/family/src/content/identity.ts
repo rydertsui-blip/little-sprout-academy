@@ -34,6 +34,9 @@ export function canonicalContentPayload(): string {
       pairs: question.kind === "match"
         ? question.pairs.map((pair) => ({ id: pair.id, left: pair.left, right: pair.right, audioText: pair.audioText ?? null, audioLanguage: pair.audioLanguage ?? null }))
         : null,
+      tokens: question.kind === "order" ? question.tokens : null,
+      correctOrder: question.kind === "order" ? question.correctOrder : null,
+      separator: question.kind === "order" ? (question.separator ?? null) : null,
       explanation: question.explanation,
       difficulty: question.difficulty,
       template: question.template,

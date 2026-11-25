@@ -80,7 +80,7 @@ describe("curriculum content catalog", () => {
     const forbiddenChinese = /打字|输入答案|填写答案|写出答案/;
     const tapCue = /tap|choose|select|match|read|点|选择|选|读/i;
     for (const question of QUESTIONS) {
-      expect(["choice", "match"], question.id).toContain(question.kind);
+      expect(["choice", "match", "order"], question.id).toContain(question.kind);
       const childText = `${question.instruction ?? ""} ${question.prompt}`;
       expect(childText, question.id).not.toMatch(forbiddenEnglish);
       expect(childText, question.id).not.toMatch(forbiddenChinese);

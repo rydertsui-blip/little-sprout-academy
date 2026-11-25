@@ -1,5 +1,5 @@
 import { getQuestionById, getQuestionsForSubject, getSkillById, SKILLS } from "../content/catalog";
-import { classifyMastery, predictedSuccess, updateBktEvidence } from "./bkt";
+import { classifyMastery, predictedSuccess, responseModeForQuestion, updateBktEvidence } from "./bkt";
 import { startingDifficultyForLevel } from "../lib/levels";
 import { selectDiverseQuestion } from "./itemSelector";
 import type { Attempt, ChildProfile, MasteryLevel, Question, ResponseMode, SessionRecord, Skill, Subject } from "../lib/types";
@@ -139,7 +139,7 @@ export function selectNextQuestion(child: ChildProfile, session: SessionRecord):
       candidates,
       evidence: skillEvidence,
       recentFamilies: recentAttempts.map((item) => item.template),
-      recentModes: recentAttempts.map((item) => item.kind === "match" ? "tap-match" : "tap-choice"),
+      recentModes: recentAttempts.map((item) => responseModeForQuestion(item.kind)),
       targetDifficulty,
       predictedSuccess: predictedSuccess(skillEvidence),
       tieKey: `${child.id}:${session.id}`
@@ -174,7 +174,7 @@ export function recordSessionAnswer(
     hintUsed: answer.hintUsed,
     template: question.template,
     templateFamily: question.template,
-    responseMode: question.kind === "match" ? "tap-match" : "tap-choice",
+    responseMode: responseModeForQuestion(question.kind),
     transferLevel: question.transferLevel,
     contextKey: question.contextKey,
     at,

@@ -74,7 +74,14 @@ export interface MatchQuestion extends QuestionBase {
   pairs: MatchPair[];
 }
 
-export type Question = ChoiceQuestion | MatchQuestion;
+export interface OrderQuestion extends QuestionBase {
+  kind: "order";
+  tokens: string[];
+  correctOrder: string[];
+  separator?: string;
+}
+
+export type Question = ChoiceQuestion | MatchQuestion | OrderQuestion;
 
 export type ResponseMode = "tap-choice" | "tap-match" | "tap-order" | "voice-practice";
 export type TransferLevel = "same-context" | "near-transfer" | "far-transfer";

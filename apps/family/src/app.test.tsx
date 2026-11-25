@@ -87,6 +87,15 @@ describe("family learning app", () => {
     if (question.kind === "choice") {
       const answer = correct ? question.correctAnswer : question.options.find((option) => option !== question.correctAnswer)!;
       fireEvent.click(screen.getByRole("button", { name: answer }));
+    } else if (question.kind === "order") {
+      const bank = screen.getByTestId("order-board").querySelector(".order-bank")!;
+      const sequence = correct ? question.correctOrder : [...question.correctOrder].reverse();
+      for (const token of sequence) {
+        const btn = Array.from(bank.querySelectorAll("button")).find((item) => item.textContent === token && !item.disabled);
+        expect(btn).toBeDefined();
+        fireEvent.click(btn!);
+      }
+      fireEvent.click(screen.getByRole("button", { name: /Check|检查答案/ }));
     } else {
       if (!correct) {
         const first = question.pairs[0];
@@ -489,7 +498,7 @@ describe("family learning app", () => {
     expect(farQuestion).toBeDefined();
     const { unmount } = render(<MathTool question={unitQuestion!} />);
     expect(screen.getByTestId("fraction-whole-board")).toBeInTheDocument();
-    expect(screen.getByText("One part is shaded.")).toBeInTheDocument();
+    expect(screen.getByText(/One part is shaded\./)).toBeInTheDocument();
     unmount();
     const { unmount: unmountSet } = render(<MathTool question={setQuestion!} />);
     expect(screen.getByTestId("fraction-set-board")).toBeInTheDocument();
@@ -497,7 +506,7 @@ describe("family learning app", () => {
     unmountSet();
     render(<MathTool question={farQuestion!} />);
     expect(screen.getByTestId("fraction-whole-board")).toBeInTheDocument();
-    expect(screen.getByText("2 of 8 slices eaten")).toBeInTheDocument();
+    expect(screen.getByText(/2 of 8 slices eaten/)).toBeInTheDocument();
   });
 
   it("highlights the measured segment on the centimetre ruler without printing the length", () => {
@@ -1059,7 +1068,7 @@ describe("family learning app", () => {
     });
     if (question.kind === "choice") {
       fireEvent.click(screen.getByRole("button", { name: question.correctAnswer }));
-    } else {
+    } else if (question.kind === "match") {
       for (const pair of question.pairs) await tapMatchPair(pair.id);
     }
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("没有保存成功"));

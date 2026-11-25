@@ -289,12 +289,12 @@ function buildEnglishQuestions(skill: Skill): ChoiceQuestion[] {
       ]);
     case "english-plural":
       return build([
-        { prompt: "One cat, two ___.", instruction: "Choose the plural word.", correctAnswer: "cats", options: ["cats", "cat", "catss"], explanation: "Add -s to make cats.", template: "plural", audioText: "one cat, two cats", audioLanguage: "en-US" },
-        { prompt: "One dog, two ___.", instruction: "Choose the plural word.", correctAnswer: "dogs", options: ["dogs", "dog", "doges"], explanation: "Add -s to make dogs.", template: "plural", audioText: "one dog, two dogs", audioLanguage: "en-US" },
-        { prompt: "One book, three ___.", instruction: "Choose the plural word.", correctAnswer: "books", options: ["books", "book", "bookes"], explanation: "Add -s to make books.", template: "plural", audioText: "one book, three books", audioLanguage: "en-US" },
-        { prompt: "One star, four ___.", instruction: "Choose the plural word.", correctAnswer: "stars", options: ["stars", "star", "starss"], explanation: "Add -s to make stars.", template: "plural", audioText: "one star, four stars", audioLanguage: "en-US" },
-        { prompt: "One tree, five ___.", instruction: "Choose the plural word.", correctAnswer: "trees", options: ["trees", "tree", "treees"], explanation: "Add -s to make trees.", template: "plural", audioText: "one tree, five trees", audioLanguage: "en-US" },
-        { prompt: "One bird, six ___.", instruction: "Choose the plural word.", correctAnswer: "birds", options: ["birds", "bird", "birdes"], explanation: "Add -s to make birds.", template: "plural", audioText: "one bird, six birds", audioLanguage: "en-US" }
+        { prompt: "One cat, two ___.", instruction: "Choose the plural word.", correctAnswer: "cats", options: ["cats", "cat", "dogs"], explanation: "Add -s to make cats.", template: "plural", audioText: "one cat, two cats", audioLanguage: "en-US" },
+        { prompt: "One dog, two ___.", instruction: "Choose the plural word.", correctAnswer: "dogs", options: ["dogs", "dog", "cats"], explanation: "Add -s to make dogs.", template: "plural", audioText: "one dog, two dogs", audioLanguage: "en-US" },
+        { prompt: "One book, three ___.", instruction: "Choose the plural word.", correctAnswer: "books", options: ["books", "book", "pens"], explanation: "Add -s to make books.", template: "plural", audioText: "one book, three books", audioLanguage: "en-US" },
+        { prompt: "One star, four ___.", instruction: "Choose the plural word.", correctAnswer: "stars", options: ["stars", "star", "moons"], explanation: "Add -s to make stars.", template: "plural", audioText: "one star, four stars", audioLanguage: "en-US" },
+        { prompt: "One tree, five ___.", instruction: "Choose the plural word.", correctAnswer: "trees", options: ["trees", "tree", "birds"], explanation: "Add -s to make trees.", template: "plural", audioText: "one tree, five trees", audioLanguage: "en-US" },
+        { prompt: "One bird, six ___.", instruction: "Choose the plural word.", correctAnswer: "birds", options: ["birds", "bird", "trees"], explanation: "Add -s to make birds.", template: "plural", audioText: "one bird, six birds", audioLanguage: "en-US" }
       ]);
     case "english-sentence-order":
       return build([
@@ -307,7 +307,7 @@ function buildEnglishQuestions(skill: Skill): ChoiceQuestion[] {
       ]);
     case "english-reading":
       return build([
-        { prompt: "What color is the ball?", instruction: "Read and choose the answer.", correctAnswer: "red", options: ["red", "blue", "green"], explanation: "The text says Tom has a red ball.", template: "literal", passage: "Tom has a red ball.", audioText: "Tom has a red ball.", audioLanguage: "en-US" },
+        { prompt: "What colour is the ball?", instruction: "Read and choose the answer.", correctAnswer: "red", options: ["red", "blue", "green"], explanation: "The text says Tom has a red ball.", template: "literal", passage: "Tom has a red ball.", audioText: "Tom has a red ball.", audioLanguage: "en-US" },
         { prompt: "Where is the cat?", instruction: "Read and choose the answer.", correctAnswer: "on the mat", options: ["on the mat", "in the box", "under the tree"], explanation: "The text says the cat is on the mat.", template: "literal", passage: "The cat is on the mat.", audioText: "The cat is on the mat.", audioLanguage: "en-US" },
         { prompt: "What does Mia like?", instruction: "Read and choose the answer.", correctAnswer: "apples", options: ["apples", "fish", "books"], explanation: "The text says Mia likes apples.", template: "literal", passage: "Mia likes apples.", audioText: "Mia likes apples.", audioLanguage: "en-US" },
         { prompt: "How many stars are there?", instruction: "Read and choose the answer.", correctAnswer: "three", options: ["three", "two", "four"], explanation: "The text says there are three stars.", template: "literal", passage: "There are three stars in the sky.", audioText: "There are three stars in the sky.", audioLanguage: "en-US" },
@@ -331,12 +331,12 @@ function buildEnglishQuestions(skill: Skill): ChoiceQuestion[] {
       ]);
     case "english-spelling":
       return build([
-        { prompt: "Which spelling is correct?", instruction: "Tap the correctly spelled word.", correctAnswer: "apple", options: ["apple", "aple", "appel"], explanation: "The correct spelling is apple.", template: "spelling", audioText: "apple", audioLanguage: "en-US" },
-        { prompt: "Which spelling is correct?", instruction: "Tap the correctly spelled word.", correctAnswer: "bear", options: ["bear", "bere", "baar"], explanation: "The correct spelling is bear.", template: "spelling", audioText: "bear", audioLanguage: "en-US" },
-        { prompt: "Which spelling is correct?", instruction: "Tap the correctly spelled word.", correctAnswer: "fish", options: ["fish", "fihs", "fih"], explanation: "The correct spelling is fish.", template: "spelling", audioText: "fish", audioLanguage: "en-US" },
-        { prompt: "Which spelling is correct?", instruction: "Tap the correctly spelled word.", correctAnswer: "moon", options: ["moon", "mune", "mone"], explanation: "The correct spelling is moon.", template: "spelling", audioText: "moon", audioLanguage: "en-US" },
-        { prompt: "Which spelling is correct?", instruction: "Tap the correctly spelled word.", correctAnswer: "tree", options: ["tree", "trea", "tre"], explanation: "The correct spelling is tree.", template: "spelling", audioText: "tree", audioLanguage: "en-US" },
-        { prompt: "Which spelling is correct?", instruction: "Tap the correctly spelled word.", correctAnswer: "water", options: ["water", "watter", "watr"], explanation: "The correct spelling is water.", template: "spelling", audioText: "water", audioLanguage: "en-US" }
+        { prompt: "Listen and tap the correct word.", instruction: "Listen, then tap the matching spelling.", correctAnswer: "apple", options: ["apple", "apply", "ankle"], explanation: "The correct spelling is apple.", template: "spelling", audioText: "apple", audioLanguage: "en-US", audioOnly: true },
+        { prompt: "Listen and tap the correct word.", instruction: "Listen, then tap the matching spelling.", correctAnswer: "bear", options: ["bear", "pear", "bean"], explanation: "The correct spelling is bear.", template: "spelling", audioText: "bear", audioLanguage: "en-US", audioOnly: true },
+        { prompt: "Listen and tap the correct word.", instruction: "Listen, then tap the matching spelling.", correctAnswer: "fish", options: ["fish", "dish", "wish"], explanation: "The correct spelling is fish.", template: "spelling", audioText: "fish", audioLanguage: "en-US", audioOnly: true },
+        { prompt: "Listen and tap the correct word.", instruction: "Listen, then tap the matching spelling.", correctAnswer: "moon", options: ["moon", "soon", "noon"], explanation: "The correct spelling is moon.", template: "spelling", audioText: "moon", audioLanguage: "en-US", audioOnly: true },
+        { prompt: "Listen and tap the correct word.", instruction: "Listen, then tap the matching spelling.", correctAnswer: "tree", options: ["tree", "free", "three"], explanation: "The correct spelling is tree.", template: "spelling", audioText: "tree", audioLanguage: "en-US", audioOnly: true },
+        { prompt: "Listen and tap the correct word.", instruction: "Listen, then tap the matching spelling.", correctAnswer: "water", options: ["water", "later", "paper"], explanation: "The correct spelling is water.", template: "spelling", audioText: "water", audioLanguage: "en-US", audioOnly: true }
       ]);
     default:
       return [];
@@ -659,12 +659,12 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
       ];
     case "english-plural":
       return [
-        en("One pen, two ___.", "pens", ["pens", "pen", "peness"], "Add -s to make pens.", "plural"),
-        en("One bag, two ___.", "bags", ["bags", "bag", "bagss"], "Add -s to make bags.", "plural"),
-        en("One egg, three ___.", "eggs", ["eggs", "egg", "eges"], "Add -s to make eggs.", "plural"),
-        en("One apple, two ___.", "apples", ["apples", "apple", "appless"], "Add -s to make apples.", "plural"),
-        en("One flower, four ___.", "flowers", ["flowers", "flower", "flowerz"], "Add -s to make flowers.", "plural", 3)
-        ,en("One star, two ___.", "stars", ["stars", "star", "starss"], "Add -s to make stars.", "plural")
+        en("One pen, two ___.", "pens", ["pens", "pen", "books"], "Add -s to make pens.", "plural"),
+        en("One bag, two ___.", "bags", ["bags", "bag", "pens"], "Add -s to make bags.", "plural"),
+        en("One egg, three ___.", "eggs", ["eggs", "egg", "apples"], "Add -s to make eggs.", "plural"),
+        en("One apple, two ___.", "apples", ["apples", "apple", "eggs"], "Add -s to make apples.", "plural"),
+        en("One flower, four ___.", "flowers", ["flowers", "flower", "trees"], "Add -s to make flowers.", "plural", 3)
+        ,en("One star, two ___.", "stars", ["stars", "star", "birds"], "Add -s to make stars.", "plural")
       ];
     case "english-sentence-order":
       return [
@@ -682,7 +682,7 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
       ];
     case "english-reading":
       return [
-        en("What color is Ben's bag?", "blue", ["blue", "red", "green"], "The text says Ben has a blue bag.", "literal", 2, "Ben has a blue bag."),
+        en("What colour is Ben's bag?", "blue", ["blue", "red", "green"], "The text says Ben has a blue bag.", "literal", 2, "Ben has a blue bag."),
         en("Where is the cat?", "under the table", ["under the table", "on the mat", "in the box"], "The text says the cat is under the table.", "literal", 2, "The cat sits under the table."),
         en("What does Mia see?", "a bird", ["a bird", "a cat", "a book"], "Mia opens the door, then sees a bird.", "sequence", 3, "Mia opens the door, then sees a bird."),
         en("How many books are on the desk?", "two", ["two", "three", "four"], "The text says there are two books.", "literal", 2, "There are two books on the desk."),
@@ -694,11 +694,11 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
         ,en("How many children are in the park?", "five", ["five", "three", "two"], "Two boys and three girls make five children.", "literal", 4, "Two boys and three girls are in the park.")
         ,en("Why does Ben smile?", "he gets a birthday card", ["he gets a birthday card", "he loses his bag", "he is hungry"], "Ben smiles because his friend gives him a birthday card.", "inference", 4, "Ben's friend gives him a birthday card. Ben smiles.")
         ,en("Which happens first?", "wash the apple", ["wash the apple", "eat the apple", "cut the apple"], "Ana washes the apple before she eats it.", "sequence", 3, "Ana washes the apple, then eats it.")
-        ,read("What color is Ben's cap?", "red", ["red", "blue", "green"], "The text says Ben has a red cap.", "literal", 2, "Ben is at the park with his dog. The wind blows his red cap under a bench. Ben looks under the bench and finds it. He puts the cap back on.")
+        ,read("What colour is Ben's cap?", "red", ["red", "blue", "green"], "The text says Ben has a red cap.", "literal", 2, "Ben is at the park with his dog. The wind blows his red cap under a bench. Ben looks under the bench and finds it. He puts the cap back on.")
         ,read("Where does the cap go?", "under a bench", ["under a bench", "in a tree", "on a slide"], "The wind blows the cap under a bench.", "literal", 2, "Ben is at the park with his dog. The wind blows his red cap under a bench. Ben looks under the bench and finds it. He puts the cap back on.")
         ,read("What does Ben do at the end?", "puts the cap back on", ["puts the cap back on", "feeds his dog", "goes home"], "Ben finds the cap and puts it back on.", "sequence", 3, "Ben is at the park with his dog. The wind blows his red cap under a bench. Ben looks under the bench and finds it. He puts the cap back on.")
         ,read("What does Mia hear?", "rain", ["rain", "wind", "a bell"], "Mia wakes up and hears rain.", "literal", 2, "Mia wakes up and hears rain. She puts on her yellow boots. At school, she sees a big puddle. Mia and her friend jump in it.")
-        ,read("What color are Mia's boots?", "yellow", ["yellow", "blue", "red"], "The text says Mia puts on her yellow boots.", "literal", 2, "Mia wakes up and hears rain. She puts on her yellow boots. At school, she sees a big puddle. Mia and her friend jump in it.")
+        ,read("What colour are Mia's boots?", "yellow", ["yellow", "blue", "red"], "The text says Mia puts on her yellow boots.", "literal", 2, "Mia wakes up and hears rain. She puts on her yellow boots. At school, she sees a big puddle. Mia and her friend jump in it.")
         ,read("What do Mia and her friend jump in?", "a puddle", ["a puddle", "a box", "a river"], "Mia and her friend jump in a big puddle.", "literal", 2, "Mia wakes up and hears rain. She puts on her yellow boots. At school, she sees a big puddle. Mia and her friend jump in it.")
         ,read("What fruit is in Lily's lunch?", "apple", ["apple", "banana", "orange"], "Lily finds a small apple in her lunch box.", "literal", 2, "Lily opens her lunch box. She finds rice, eggs and a small apple. She eats the rice and eggs. Then she saves the apple for later.")
         ,read("What does Lily eat first?", "rice and eggs", ["rice and eggs", "apple and eggs", "a sandwich"], "Lily eats the rice and eggs before she saves the apple.", "literal", 3, "Lily opens her lunch box. She finds rice, eggs and a small apple. She eats the rice and eggs. Then she saves the apple for later.")
@@ -719,17 +719,17 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
         ,read("How does Mei feel at the end of the day?", "happy", ["happy", "sad", "tired"], "Mei is smiling and has new friends, so she feels happy.", "feeling", 4, "A new girl named Mei joins P2. She sits alone at lunch. Lily shares her sandwich and asks Mei to play. By the end of the day, Mei is smiling and has two new friends.", "Read the clues, then tap the best answer.")
         ,read("What did Lily do to help Mei?", "shared her sandwich and asked her to play", ["shared her sandwich and asked her to play", "took her bag", "told her to go home"], "Lily shares her sandwich and asks Mei to play.", "inference", 3, "A new girl named Mei joins P2. She sits alone at lunch. Lily shares her sandwich and asks Mei to play. By the end of the day, Mei is smiling and has two new friends.", "Read the clues, then tap the best answer.")
         ,read("Why do Tom and his mother put the cake on the table?", "to cool", ["to cool", "to eat it", "to hide it"], "They put the cake on the table to cool.", "why", 3, "It is Grandma's birthday. Tom and his mother bake a cake. They put it on the table to cool. When they come back, the cake has one bite missing. Their cat is licking its paw.", "Read the clues, then tap the best answer.")
-        ,read("Who probably ate the cake?", "two cat", ["two cat", "Grandma", "Tom"], "The cat is licking its paw, so it probably ate the cake.", "inference", 4, "It is Grandma's birthday. Tom and his mother bake a cake. They put it on the table to cool. When they come back, the cake has one bite missing. Their cat is licking its paw.", "Read the clues, then tap the best answer.")
+        ,read("Who probably ate the cake?", "the cat", ["the cat", "Grandma", "Tom"], "The cat is licking its paw, so it probably ate the cake.", "inference", 4, "It is Grandma's birthday. Tom and his mother bake a cake. They put it on the table to cool. When they come back, the cake has one bite missing. Their cat is licking its paw.", "Read the clues, then tap the best answer.")
         ,read("How does the cake look when they come back?", "one bite is missing", ["one bite is missing", "it is whole", "it is in the oven"], "The cake has one bite missing when they come back.", "inference", 3, "It is Grandma's birthday. Tom and his mother bake a cake. They put it on the table to cool. When they come back, the cake has one bite missing. Their cat is licking its paw.", "Read the clues, then tap the best answer.")
       ];
     case "english-spelling":
       return [
-        en("Which spelling is correct?", "book", ["book", "boook", "bok"], "The correct spelling is book.", "spelling"),
-        en("Which spelling is correct?", "bag", ["bag", "bgg", "bga"], "The correct spelling is bag.", "spelling"),
-        en("Which spelling is correct?", "pen", ["pen", "pne", "penn"], "The correct spelling is pen.", "spelling"),
-        en("Which spelling is correct?", "egg", ["egg", "eg", "egghe"], "The correct spelling is egg.", "spelling"),
-        en("Which spelling is correct?", "star", ["star", "starr", "satr"], "The correct spelling is star.", "spelling", 3)
-        ,en("Which spelling is correct?", "sun", ["sun", "sunn", "snu"], "The correct spelling is sun.", "spelling")
+        { ...en("Listen and tap the correct word.", "book", ["book", "look", "cook"], "The correct spelling is book.", "spelling"), audioText: "book", audioLanguage: "en-US", audioOnly: true },
+        { ...en("Listen and tap the correct word.", "bag", ["bag", "bat", "bad"], "The correct spelling is bag.", "spelling"), audioText: "bag", audioLanguage: "en-US", audioOnly: true },
+        { ...en("Listen and tap the correct word.", "pen", ["pen", "pet", "peg"], "The correct spelling is pen.", "spelling"), audioText: "pen", audioLanguage: "en-US", audioOnly: true },
+        { ...en("Listen and tap the correct word.", "egg", ["egg", "leg", "beg"], "The correct spelling is egg.", "spelling"), audioText: "egg", audioLanguage: "en-US", audioOnly: true },
+        { ...en("Listen and tap the correct word.", "star", ["star", "stay", "step"], "The correct spelling is star.", "spelling", 3), audioText: "star", audioLanguage: "en-US", audioOnly: true },
+        { ...en("Listen and tap the correct word.", "sun", ["sun", "run", "fun"], "The correct spelling is sun.", "spelling"), audioText: "sun", audioLanguage: "en-US", audioOnly: true }
       ];
     default:
       return [];

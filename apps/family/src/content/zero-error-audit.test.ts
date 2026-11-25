@@ -16,11 +16,13 @@ const toneFromMark = (value: string): string => {
 };
 
 describe("zero-error content audit gate", () => {
-  it("ensures all 799 questions have unique options (case-insensitive), no placeholders, and valid audio assets", () => {
+  it("ensures all 817 questions have unique options (case-insensitive), no placeholders, and valid audio assets", () => {
     for (const q of QUESTIONS) {
       const texts = q.kind === "choice"
         ? [q.prompt, q.instruction, q.explanation, q.passage ?? "", ...q.options]
-        : [q.prompt, q.instruction, q.explanation, ...q.pairs.flatMap((p) => [p.left, p.right])];
+        : q.kind === "match"
+          ? [q.prompt, q.instruction, q.explanation, ...q.pairs.flatMap((p) => [p.left, p.right])]
+          : [q.prompt, q.instruction, q.explanation, ...q.tokens, ...q.correctOrder];
       const joined = texts.join(" ");
       expect(joined, `${q.id} contains placeholder`).not.toMatch(/\b(TODO|TBD|FIXME)\b|\?\?\?/);
 
@@ -29,12 +31,15 @@ describe("zero-error content audit gate", () => {
         expect(lower.size, `${q.id} has case-duplicate options`).toBe(q.options.length);
         expect(q.audioText, `${q.id} missing audioText`).toBeTruthy();
         expect(getAudioAsset(q.audioText!), `${q.id} missing packaged m4a for audioText`).toBeTruthy();
-      } else {
+      } else if (q.kind === "match") {
         for (const pair of q.pairs) {
           if (pair.audioText) {
             expect(getAudioAsset(pair.audioText), `${q.id} pair ${pair.id} missing m4a`).toBeTruthy();
           }
         }
+      } else {
+        expect(q.audioText, `${q.id} missing audioText`).toBeTruthy();
+        expect(getAudioAsset(q.audioText!), `${q.id} missing packaged m4a for audioText`).toBeTruthy();
       }
     }
   });

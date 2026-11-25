@@ -1,6 +1,7 @@
 import { buildMathQuestions } from "./math";
 import { buildLanguageQuestions } from "./language";
 import { buildMatchingQuestions } from "./matching";
+import { buildOrderQuestions } from "./ordering";
 import { SKILLS } from "./skills";
 import type { Question, ContentIssue, Subject } from "../lib/types";
 import { CONTENT_PACK, CONTENT_VERSION } from "./release";
@@ -15,6 +16,7 @@ export { CONTENT_PACK, CONTENT_VERSION };
 const rawQuestions: Question[] = [
   ...SKILLS.flatMap((skill) => skill.subject === "math" ? buildMathQuestions(skill) : buildLanguageQuestions(skill)),
   ...buildMatchingQuestions(),
+  ...buildOrderQuestions(),
   ...buildFarTransferQuestions()
 ];
 
@@ -158,7 +160,7 @@ export function validateContentCatalog(): ContentIssue[] {
       if (question.audioOnly && !question.audioText) issues.push({ code: "audio-only-source", message: `${question.id} is audio-only without audioText`, questionId: question.id, skillId: question.skillId });
       if (!question.audioOnly && question.audioText && speechRevealsAnswer(question, question.audioText)) issues.push({ code: "audio-answer-leak", message: `${question.id} audioText reveals the answer`, questionId: question.id, skillId: question.skillId });
       if (question.audioOnly && question.passage && speechRevealsAnswer(question, question.passage)) issues.push({ code: "audio-passage-leak", message: `${question.id} audio-only passage reveals the answer`, questionId: question.id, skillId: question.skillId });
-    } else {
+    } else if (question.kind === "match") {
       if (question.pairs.length !== 3) {
         issues.push({ code: "match-pair-count", message: `${question.id} must have exactly three match pairs`, questionId: question.id, skillId: question.skillId });
       }
@@ -192,6 +194,13 @@ export function validateContentCatalog(): ContentIssue[] {
       }
       if (!question.leftLabel.trim() || !question.rightLabel.trim()) {
         issues.push({ code: "missing-match-column-label", message: `${question.id} has no column label`, questionId: question.id, skillId: question.skillId });
+      }
+    } else {
+      if (question.correctOrder.length < 3 || question.tokens.length < question.correctOrder.length) {
+        issues.push({ code: "order-token-count", message: `${question.id} must have at least 3 ordered tokens`, questionId: question.id, skillId: question.skillId });
+      }
+      if (question.correctOrder.some((token) => !question.tokens.includes(token))) {
+        issues.push({ code: "order-missing-token", message: `${question.id} correctOrder contains token missing from tokens`, questionId: question.id, skillId: question.skillId });
       }
     }
     if (!question.explanation.trim()) {

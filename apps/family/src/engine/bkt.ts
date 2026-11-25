@@ -31,8 +31,10 @@ export function createEvidenceDiversity(): EvidenceDiversity {
   };
 }
 
-function responseModeForQuestion(kind: "choice" | "match" | undefined): ResponseMode {
-  return kind === "match" ? "tap-match" : "tap-choice";
+export function responseModeForQuestion(kind: "choice" | "match" | "order" | undefined): ResponseMode {
+  if (kind === "match") return "tap-match";
+  if (kind === "order") return "tap-order";
+  return "tap-choice";
 }
 
 export function createSkillEvidence(skillId: string, at = new Date()): SkillEvidence {

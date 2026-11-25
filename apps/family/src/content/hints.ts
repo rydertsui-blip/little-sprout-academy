@@ -142,6 +142,61 @@ const SKILL_TEACH: Record<string, SkillTeach> = {
     title: "声音和字母",
     body: "先把单词拆成几个声音，再看每个声音由哪些字母写出来。",
     example: "慢慢说出每个声音，再合起来读。"
+  },
+  "k2-math-count-20": {
+    title: "一个一个数",
+    body: "用手指点一点图里的圆点或星星，每点一个数一个数，不容易漏掉。",
+    example: "1, 2, 3, 4, 5..."
+  },
+  "k2-math-add-within-10": {
+    title: "合起来和拿走",
+    body: "加法是把两堆合起来，减法是从里面拿走几个。",
+    example: "可以用十格阵点一点来帮忙。"
+  },
+  "math-fractions": {
+    title: "平均分成几份",
+    body: "分数一定要每一份一样大。分母是总共分几份，分子是涂了或拿了几份。",
+    example: "切成 4 份里的 1 份，就是 1/4。"
+  },
+  "math-fractions-add-sub": {
+    title: "同分母加减",
+    body: "下面（分母）一样大时，只要把上面（分子）加起来或减掉。",
+    example: "2/6 + 3/6 = 5/6"
+  },
+  "math-two-step-problems": {
+    title: "先算第一步，再算第二步",
+    body: "两步应用题先把第一件事算清楚，再用算出的结果去算第二件事。",
+    example: "看图里从左到右的两个变化。"
+  },
+  "mandarin-initials": {
+    title: "声母在最前面",
+    body: "每个拼音开头的声母，就像字词的第一个声音。",
+    example: "猫 māo 的开头声母是 m。"
+  },
+  "mandarin-finals": {
+    title: "韵母在后面",
+    body: "把字慢慢拉长读，后面的响亮部分就是韵母。",
+    example: "猫 māo 的韵母是 ao。"
+  },
+  "mandarin-syllables": {
+    title: "声母 + 韵母 + 声调",
+    body: "把开头的声母和后面的韵母合起来，再加上准确的声调。",
+    example: "m + āo = māo"
+  },
+  "mandarin-characters": {
+    title: "字形和意思",
+    body: "很多汉字像画画一样，偏旁也能提示意思（比如“艹”常和花草有关）。",
+    example: "日、月、山、水、火、木。"
+  },
+  "mandarin-classifiers": {
+    title: "搭配对的量词",
+    body: "不同的东西用不同的量词，大声念出来听听顺不顺口。",
+    example: "一只猫、一朵花、一本书。"
+  },
+  "mandarin-word-order": {
+    title: "谁 + 在做什么",
+    body: "组句子时，先找“谁”，再找“做什么”或“在哪里”。",
+    example: "我 + 喜欢 + 小猫。"
   }
 };
 
@@ -210,16 +265,69 @@ const SKILL_TEACH_EN: Record<string, SkillTeach> = {
     title: "Sounds and letters",
     body: "Break the word into sounds, then look at the letters that spell each sound.",
     example: "Say each sound slowly, then blend them together."
+  },
+  "k2-math-count-20": {
+    title: "Count one by one",
+    body: "Tap each dot or star once as you count so you do not skip any.",
+    example: "1, 2, 3, 4, 5..."
+  },
+  "k2-math-add-within-10": {
+    title: "Put together and take away",
+    body: "Adding puts two groups together; subtracting takes some away.",
+    example: "Tap the ten-frame squares to see the numbers."
+  },
+  "math-fractions": {
+    title: "Equal parts of a whole",
+    body: "Fractions must have equal parts. The bottom number counts all parts; the top number counts the shaded parts.",
+    example: "1 out of 4 equal parts is 1/4."
+  },
+  "math-fractions-add-sub": {
+    title: "Same bottom number",
+    body: "When the denominators match, add or subtract only the top numbers.",
+    example: "2/6 + 3/6 = 5/6"
+  },
+  "math-two-step-problems": {
+    title: "One step at a time",
+    body: "Solve the first change first, then use that answer for the second change.",
+    example: "Follow the arrows from left to right."
+  },
+  "english-letters": {
+    title: "First letter sound",
+    body: "Say the word out loud and listen to its very first sound.",
+    example: "Apple starts with /a/ -> A."
+  },
+  "english-a-an": {
+    title: "Using a and an",
+    body: "Use 'an' before vowel sounds (a, e, i, o, u) and 'a' before consonant sounds.",
+    example: "an apple, a cat"
+  },
+  "english-plural": {
+    title: "More than one",
+    body: "When there are two or more, add -s to most nouns.",
+    example: "one cat -> two cats"
+  },
+  "english-sentence-order": {
+    title: "Who + action",
+    body: "Start with who the sentence is about, then add the action word.",
+    example: "I + like + apples."
+  },
+  "english-spelling": {
+    title: "Listen and match sounds",
+    body: "Listen to the word carefully and match each sound to the right letters.",
+    example: "c - a - t -> cat"
   }
 };
 
 const MATCH_HINT = "先配对最有把握的一对，再用剩下的排除。";
+const ORDER_HINT = "先点最前面的一块，如果不对可以点一下上面退回。";
 const FALLBACK_HINT = "先把题目读一遍，再排掉明显不对的选项。";
 const MATCH_HINT_EN = "Match the pair you are most sure of first, then use the remaining cards to narrow it down.";
+const ORDER_HINT_EN = "Tap the first piece in order. Tap any placed piece to send it back.";
 const FALLBACK_HINT_EN = "Read the question once, then rule out the options that clearly do not fit.";
 
 export function hintForQuestion(question: Question, locale: Locale = "zh"): string {
   if (question.kind === "match") return locale === "en" ? MATCH_HINT_EN : MATCH_HINT;
+  if (question.kind === "order") return locale === "en" ? ORDER_HINT_EN : ORDER_HINT;
   const map = locale === "en" ? { ...SKILL_HINTS, ...SKILL_HINTS_EN } : SKILL_HINTS;
   return map[question.skillId] ?? (locale === "en" ? FALLBACK_HINT_EN : FALLBACK_HINT);
 }

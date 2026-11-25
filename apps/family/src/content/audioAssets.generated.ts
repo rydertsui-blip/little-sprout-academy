@@ -562,4 +562,13 @@ export const GENERATED_AUDIO_ASSETS: AudioAssetMap = {
   "Why do Tom and his mother put the cake on the table?": "auto-59441c2e249a",
   "Who probably ate the cake?": "auto-abebd980f471",
   "How does the cake look when they come back?": "auto-21c094cb7d88",
+  "What colour is Ben's cap?": "auto-bdff190efb62",
+  "What colour are Mia's boots?": "auto-16d10a2d028b",
+  "bag": "auto-87860f088f76",
+  "pen": "auto-50785c9d9302",
+  "egg": "auto-0010811ae17f",
+  "按顺序点词语，排成一句通顺的话。": "auto-c4482cfc84a2",
+  "Tap the words in order to make a sentence.": "auto-05d575c3d28f",
+  "hat": "auto-9174a1f02fd4",
+  "Tap the numbers from smallest to largest.": "auto-e4f0c86c3d6c",
 };

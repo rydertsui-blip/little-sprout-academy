@@ -14,7 +14,7 @@ describe("P1/P2 mathematics depth", () => {
       const target = A_SKILLS.has(skill.id) ? 18 : 12;
       expect(questions.length, skill.id).toBeGreaterThanOrEqual(target);
       expect(new Set(questions.map((question) => question.template)).size, skill.id).toBeGreaterThanOrEqual(A_SKILLS.has(skill.id) ? 4 : 3);
-      expect(new Set(questions.map((question) => question.kind)).size, skill.id).toBe(2);
+      expect(new Set(questions.map((question) => question.kind)).size, skill.id).toBeGreaterThanOrEqual(2);
     }
   });
 
@@ -24,7 +24,9 @@ describe("P1/P2 mathematics depth", () => {
         .filter((question) => question.skillId === skill.id)
         .map((question) => question.kind === "choice"
           ? `${question.prompt}|${[...question.options].sort().join("|")}`
-          : `${question.prompt}|${question.pairs.map((pair) => `${pair.left}:${pair.right}`).sort().join("|")}`);
+          : question.kind === "match"
+            ? `${question.prompt}|${question.pairs.map((pair) => `${pair.left}:${pair.right}`).sort().join("|")}`
+            : `${question.prompt}|${question.correctOrder.join("|")}`);
       expect(new Set(signatures).size, skill.id).toBe(signatures.length);
     }
   });

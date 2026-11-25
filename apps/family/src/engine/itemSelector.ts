@@ -1,4 +1,5 @@
 import type { Question, ResponseMode, SkillEvidence } from "../lib/types";
+import { responseModeForQuestion } from "./bkt";
 
 export interface DiverseItemInput {
   candidates: Question[];
@@ -25,9 +26,9 @@ function transferBonus(level: Question["transferLevel"]): number {
 
 function itemScore(input: DiverseItemInput, question: Question): number {
   const familySeen = input.evidence.diversity.templateFamilies[question.template] ?? 0;
-  const modeSeen = input.evidence.diversity.responseModes[question.kind === "match" ? "tap-match" : "tap-choice"] ?? 0;
+  const mode = responseModeForQuestion(question.kind);
+  const modeSeen = input.evidence.diversity.responseModes[mode] ?? 0;
   const recentFamilyHits = input.recentFamilies.filter((family) => family === question.template).length;
-  const mode = question.kind === "match" ? "tap-match" : "tap-choice";
   const recentModeHits = input.recentModes.filter((recentMode) => recentMode === mode).length;
   const contextSeen = input.evidence.diversity.contextKeys.includes(question.contextKey);
   return -familySeen * 3
