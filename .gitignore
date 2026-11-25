@@ -3,4 +3,5 @@ node_modules/
 .DS_Store
 /family/
 work/family-audit/
+work/whisper-models/
 apps/family/sources/official/cache/

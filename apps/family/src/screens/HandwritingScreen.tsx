@@ -23,6 +23,7 @@ export default function HandwritingScreen({ child, onBack, onLock, onRecord }: H
   const [cycle, setCycle] = useState(0);
   const [stage, setStage] = useState<Stage>("listening");
   const [result, setResult] = useState<TraceResult | null>(null);
+  const [readingState, setReadingState] = useState<"playing" | "error" | null>(null);
   const targetRef = useRef<HTMLDivElement | null>(null);
   const writerRef = useRef<HanziWriter | null>(null);
   const recordRef = useRef(false);
@@ -35,6 +36,7 @@ export default function HandwritingScreen({ child, onBack, onLock, onRecord }: H
     let followUpTimer = 0;
     target.innerHTML = "";
     setResult(null);
+    setReadingState(null);
     setStage("listening");
 
     const writer = HanziWriter.create(target, entry.character, {
@@ -113,8 +115,17 @@ export default function HandwritingScreen({ child, onBack, onLock, onRecord }: H
   function selectIndex(nextIndex: number) {
     if (nextIndex < 0 || nextIndex >= HANDWRITING_CHARACTERS.length) return;
     writerRef.current?.cancelQuiz();
+    setReadingState(null);
     if (nextIndex === index) setCycle((value) => value + 1);
     else setIndex(nextIndex);
+  }
+
+  function readCurrentEntry() {
+    setReadingState("playing");
+    playOrSpeak(stage === "done" ? entry.audioText : entry.introAudioText, "zh-CN", (status) => {
+      if (status === "ended") setReadingState(null);
+      else if (status === "error") setReadingState("error");
+    });
   }
 
   const completedCount = HANDWRITING_CHARACTERS.filter((item) => child.handwriting[item.character]).length;
@@ -142,7 +153,7 @@ export default function HandwritingScreen({ child, onBack, onLock, onRecord }: H
           <div className="teacher-bubble">
             <small>小芽老师</small>
             <strong>{teacherText}</strong>
-            <button className="audio-button" type="button" onClick={() => playOrSpeak(stage === "done" ? entry.audioText : entry.introAudioText, "zh-CN")} aria-label={`朗读 ${entry.character}`}><Volume2 aria-hidden="true" /></button>
+            <button className={`audio-button ${readingState ? `is-${readingState}` : ""}`} type="button" onClick={readCurrentEntry} aria-label={readingState === "playing" ? "播放中" : readingState === "error" ? "再点一次" : `朗读 ${entry.character}`}><Volume2 aria-hidden="true" /></button>
           </div>
         </section>
 

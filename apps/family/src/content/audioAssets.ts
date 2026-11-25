@@ -58,7 +58,7 @@ const REVIEWED_AUDIO_ASSETS: Record<string, string> = {
   "水，喝水": "zh-shui",
   "火，火苗": "zh-huo",
   "田，田地": "zh-tian",
-  "目，目光": "zh-mu",
+  "目，目光": "zh-mu-eye",
   "足，足球": "zh-zu",
   "猫": "zh-mao",
   "狗": "zh-gou",
@@ -145,9 +145,61 @@ const REVIEWED_AUDIO_ASSETS: Record<string, string> = {
   "It is sports day. The children wear shorts and trainers.": "en-listening-16"
 };
 
+const MATCH_AUDIO_ASSETS: Record<string, string> = {
+  "口": "match-zh-1e7b07e7",
+  "大小": "match-zh-fd20702c",
+  "上下": "match-zh-ad07983e",
+  "多少": "match-zh-6c999d48",
+  "book": "match-en-e7e694c5",
+  "water": "match-en-6d5a4592",
+  "一只猫": "match-zh-d3d4ff2c",
+  "一朵花": "match-zh-e04cc410",
+  "一座山": "match-zh-cc1462e1",
+  "我每天去学校。": "match-zh-715ed060",
+  "bird": "match-en-cd92815b",
+  "A, a": "match-en-fae10250",
+  "B, b": "match-en-373eb723",
+  "C, c": "match-en-05512aa0",
+  "ball": "match-en-8bec0406",
+  "I": "match-en-ca73ab65",
+  "you": "match-en-8af56de6",
+  "we": "match-en-676e6f35",
+  "one": "match-en-fe05bcdc",
+  "two": "match-en-ad782ecd",
+};
+
+const LISTENING_ANSWER_AUDIO_ASSETS: Record<string, string> = {
+  "小明": "zh-xiaoming",
+  "厨房": "zh-chufang",
+  "看书": "zh-kanshu",
+};
+
+const PROMPT_AUDIO_ASSETS: Record<string, string> = {
+  "A whole is cut into 4 equal parts. Which fraction of the whole is one part? Choose the words.": "prompt-en-fc3e7e7c",
+  "A whole is cut into 3 equal parts. Which fraction of the whole is one part? Choose the words.": "prompt-en-a92e9eea",
+  "A whole is cut into 5 equal parts. Which fraction of the whole is one part? Choose the words.": "prompt-en-c850654c",
+  "A whole is cut into 6 equal parts. Which fraction of the whole is one part? Choose the words.": "prompt-en-908807d4",
+  "A whole is cut into 2 equal parts. Which fraction of the whole is one part? Choose the words.": "prompt-en-6ea990d6",
+  "A whole is cut into 8 equal parts. Which fraction of the whole is one part? Choose the words.": "prompt-en-aade2dae",
+  "A whole is cut into 5 equal parts. Which fraction of the whole is one part? Write it as a fraction.": "prompt-en-19046ddb",
+  "A whole is cut into 8 equal parts. Which fraction of the whole is one part? Write it as a fraction.": "prompt-en-65f7846c",
+  "A whole is cut into 10 equal parts. Which fraction of the whole is one part? Choose the words.": "prompt-en-7232ac15",
+  "A whole is cut into 4 equal parts. Which fraction of the whole is one part? Write it as a fraction.": "prompt-en-8b8f10dc",
+  "A whole is cut into 10 equal parts. Which fraction of the whole is one part? Write it as a fraction.": "prompt-en-a3be04c5",
+  "把词语和它的类别配成一对。": "prompt-zh-18ca7557",
+  "把句子和它能回答的问题配成一对。": "prompt-zh-4f3fc2a7",
+  "把动物和它的本领配成一对。": "prompt-zh-8dc325a7",
+  "Match each word with the sentence where it fits.": "prompt-en-85b66465",
+  "Match each word with its meaning.": "prompt-en-58988237",
+  "Match each word with the letters that complete it.": "prompt-en-84aa0f55",
+};
+
 export const AUDIO_ASSETS: Record<string, string> = {
   ...REVIEWED_AUDIO_ASSETS,
-  ...GENERATED_AUDIO_ASSETS
+  ...GENERATED_AUDIO_ASSETS,
+  ...MATCH_AUDIO_ASSETS,
+  ...LISTENING_ANSWER_AUDIO_ASSETS,
+  ...PROMPT_AUDIO_ASSETS
 };
 
 export function getAudioAsset(text: string): string | undefined {

@@ -33,15 +33,15 @@ const SPECS: MatchSeed[] = [
   {
     skillId: "mandarin-listening",
     prompt: "把问题和听到的答案连起来。",
-    instruction: "先点左边的问题，再点右边对应的答案。",
-    explanation: "谁对应小明，哪里对应厨房，做什么对应看书。",
+    instruction: "先听左边的答案，再点右边对应的问题。",
+    explanation: "听到“小明”点“谁”，听到“厨房”点“哪里”，听到“看书”点“做什么”。",
     template: "match-listen-wh",
-    leftLabel: "问题",
-    rightLabel: "答案",
+    leftLabel: "听到的答案",
+    rightLabel: "问题",
     pairs: [
-      { left: "谁", right: "小明" },
-      { left: "哪里", right: "厨房" },
-      { left: "做什么", right: "看书" }
+      { left: "小明", right: "谁", audioText: "小明", audioLanguage: "zh-CN" },
+      { left: "厨房", right: "哪里", audioText: "厨房", audioLanguage: "zh-CN" },
+      { left: "看书", right: "做什么", audioText: "看书", audioLanguage: "zh-CN" }
     ]
   },
   {
@@ -75,15 +75,15 @@ const SPECS: MatchSeed[] = [
   {
     skillId: "k2-mandarin-listen",
     prompt: "把听到的词语和对应的图片词语连起来。",
-    instruction: "先点左边的词语，再点右边对应的图片词语。",
-    explanation: "猫配小猫，狗配小狗，鸟配小鸟。",
-    template: "match-k2-word",
-    leftLabel: "词语",
+    instruction: "先听左边的词语，再点右边对应的图片词语。",
+    explanation: "猫、狗、鸟和它们的图片配对。",
+    template: "match-listen-word",
+    leftLabel: "听到的词语",
     rightLabel: "图片词语",
     pairs: [
-      { left: "猫", right: "小猫" },
-      { left: "狗", right: "小狗" },
-      { left: "鸟", right: "小鸟" }
+      { left: "猫", right: "猫", audioText: "猫", audioLanguage: "zh-CN", rightImage: "cat" },
+      { left: "狗", right: "狗", audioText: "狗", audioLanguage: "zh-CN", rightImage: "dog" },
+      { left: "鸟", right: "鸟", audioText: "鸟", audioLanguage: "zh-CN", rightImage: "bird" }
     ]
   },
   {
@@ -102,7 +102,7 @@ const SPECS: MatchSeed[] = [
   },
   {
     skillId: "k2-math-add-within-10",
-    prompt: "Match each picture story with the total.",
+    prompt: "Match each number sentence with its answer.",
     instruction: "Tap a number sentence on the left, then its answer on the right.",
     explanation: "3 + 2 = 5, 6 − 2 = 4, and 4 + 4 = 8.",
     template: "match-k2-add-sub",
@@ -396,30 +396,30 @@ const SPECS: MatchSeed[] = [
   },
   {
     skillId: "mandarin-vocabulary",
-    prompt: "把词语和英文意思配成一对。",
-    instruction: "先点词语，再点英文。",
-    explanation: "苹果是 apple，书是 book，水是 water。",
-    template: "match-word-meaning",
+    prompt: "把词语和它的类别配成一对。",
+    instruction: "先点词语，再点类别。",
+    explanation: "苹果是水果，书是学习用品，水是饮品。",
+    template: "match-word-category",
     leftLabel: "词语",
-    rightLabel: "English",
+    rightLabel: "类别",
     pairs: [
-      { left: "苹果", right: "apple", audioText: "apple", audioLanguage: "en-US" },
-      { left: "书", right: "book", audioText: "book", audioLanguage: "en-US" },
-      { left: "水", right: "water", audioText: "water", audioLanguage: "en-US" }
+      { left: "苹果", right: "水果" },
+      { left: "书", right: "学习用品" },
+      { left: "水", right: "饮品" }
     ]
   },
   {
     skillId: "mandarin-reading",
-    prompt: "把华文句子和英文意思配成一对。",
-    instruction: "先读华文句子，再点英文意思。",
-    explanation: "我爱妈妈。是 I love Mum.；这是我的书。是 This is my book.；弟弟在睡觉。是 My younger brother is sleeping.",
-    template: "match-sentence-meaning",
-    leftLabel: "华文句子",
-    rightLabel: "English",
+    prompt: "把句子和它能回答的问题配成一对。",
+    instruction: "先读句子，再点它回答的问题。",
+    explanation: "“我爱妈妈”回答“你爱谁？”；“这是我的书”回答“这是谁的书？”；“弟弟在睡觉”回答“弟弟在做什么？”。",
+    template: "match-sentence-question",
+    leftLabel: "句子",
+    rightLabel: "问题",
     pairs: [
-      { left: "我爱妈妈。", right: "I love Mum.", audioText: "我爱妈妈。" },
-      { left: "这是我的书。", right: "This is my book.", audioText: "这是我的书。" },
-      { left: "弟弟在睡觉。", right: "My younger brother is sleeping.", audioText: "弟弟在睡觉。" }
+      { left: "我爱妈妈。", right: "你爱谁？" },
+      { left: "这是我的书。", right: "这是谁的书？" },
+      { left: "弟弟在睡觉。", right: "弟弟在做什么？" }
     ]
   },
   {
@@ -452,16 +452,16 @@ const SPECS: MatchSeed[] = [
   },
   {
     skillId: "mandarin-vocabulary",
-    prompt: "把动物词语和英文意思配成一对。",
-    instruction: "先点词语，再点英文。",
-    explanation: "猫是 cat，狗是 dog，鸟是 bird。",
-    template: "match-animal-word",
-    leftLabel: "词语",
-    rightLabel: "English",
+    prompt: "把动物和它的本领配成一对。",
+    instruction: "先点动物，再点它的本领。",
+    explanation: "猫会捉老鼠，狗会看家，鸟会飞。",
+    template: "match-animal-ability",
+    leftLabel: "动物",
+    rightLabel: "本领",
     pairs: [
-      { left: "猫", right: "cat", audioText: "cat", audioLanguage: "en-US" },
-      { left: "狗", right: "dog", audioText: "dog", audioLanguage: "en-US" },
-      { left: "鸟", right: "bird", audioText: "bird", audioLanguage: "en-US" }
+      { left: "猫", right: "会捉老鼠" },
+      { left: "狗", right: "会看家" },
+      { left: "鸟", right: "会飞" }
     ]
   },
   {
@@ -494,30 +494,30 @@ const SPECS: MatchSeed[] = [
   },
   {
     skillId: "english-sight-words",
-    prompt: "Match each word with its Chinese meaning.",
-    instruction: "Tap an English word, then its Chinese meaning.",
-    explanation: "I means 我, you means 你, and we means 我们.",
-    template: "match-pronoun",
-    leftLabel: "English",
-    rightLabel: "中文",
+    prompt: "Match each word with the sentence where it fits.",
+    instruction: "Tap a word, then the sentence that uses it.",
+    explanation: "I like apples. You are my friend. We go to school.",
+    template: "match-sight-word-sentence",
+    leftLabel: "Word",
+    rightLabel: "Sentence",
     pairs: [
-      { left: "I", right: "我", audioText: "I", audioLanguage: "en-US" },
-      { left: "you", right: "你", audioText: "you", audioLanguage: "en-US" },
-      { left: "we", right: "我们", audioText: "we", audioLanguage: "en-US" }
+      { left: "I", right: "___ like apples.", audioText: "I", audioLanguage: "en-US" },
+      { left: "you", right: "___ are my friend.", audioText: "you", audioLanguage: "en-US" },
+      { left: "we", right: "___ go to school.", audioText: "we", audioLanguage: "en-US" }
     ]
   },
   {
     skillId: "english-vocabulary",
-    prompt: "Match each word with its Chinese meaning.",
-    instruction: "Tap an English word, then its Chinese meaning.",
-    explanation: "Apple is 苹果, bear is 熊, and fish is 鱼.",
-    template: "match-word-picture",
-    leftLabel: "English",
-    rightLabel: "中文",
+    prompt: "Match each word with its meaning.",
+    instruction: "Tap a word, then the meaning that fits.",
+    explanation: "An apple is a fruit, a bear is a big furry animal, and a fish swims in water.",
+    template: "match-word-definition",
+    leftLabel: "Word",
+    rightLabel: "Meaning",
     pairs: [
-      { left: "apple", right: "苹果", audioText: "apple", audioLanguage: "en-US" },
-      { left: "bear", right: "熊", audioText: "bear", audioLanguage: "en-US" },
-      { left: "fish", right: "鱼", audioText: "fish", audioLanguage: "en-US" }
+      { left: "apple", right: "a fruit", audioText: "apple", audioLanguage: "en-US" },
+      { left: "bear", right: "a big furry animal", audioText: "bear", audioLanguage: "en-US" },
+      { left: "fish", right: "an animal that swims", audioText: "fish", audioLanguage: "en-US" }
     ]
   },
   {
@@ -578,16 +578,16 @@ const SPECS: MatchSeed[] = [
   },
   {
     skillId: "english-spelling",
-    prompt: "Match each Chinese word with its English spelling.",
-    instruction: "Tap the Chinese word, then the correctly spelled English word.",
-    explanation: "苹果 is apple, 熊 is bear, and 鱼 is fish.",
-    template: "match-spelling-meaning",
-    leftLabel: "中文",
-    rightLabel: "English spelling",
+    prompt: "Match each word with the letters that complete it.",
+    instruction: "Tap the word with a gap, then the letters that complete it.",
+    explanation: "app + le = apple, b + ea + r = bear, and f + is + h = fish.",
+    template: "match-spelling-parts",
+    leftLabel: "Word with a gap",
+    rightLabel: "Missing letters",
     pairs: [
-      { left: "苹果", right: "apple" },
-      { left: "熊", right: "bear" },
-      { left: "鱼", right: "fish" }
+      { left: "app__", right: "le" },
+      { left: "b__r", right: "ea" },
+      { left: "f__h", right: "is" }
     ]
   },
   {
@@ -683,9 +683,9 @@ const SPECS: MatchSeed[] = [
     leftLabel: "Spoken word",
     rightLabel: "Picture word",
     pairs: [
-      { left: "apple", right: "apple", audioText: "apple", audioLanguage: "en-US" },
-      { left: "bear", right: "bear", audioText: "bear", audioLanguage: "en-US" },
-      { left: "fish", right: "fish", audioText: "fish", audioLanguage: "en-US" }
+      { left: "apple", right: "apple", audioText: "apple", audioLanguage: "en-US", rightImage: "apple" },
+      { left: "bear", right: "bear", audioText: "bear", audioLanguage: "en-US", rightImage: "bear" },
+      { left: "fish", right: "fish", audioText: "fish", audioLanguage: "en-US", rightImage: "fish" }
     ]
   }
 ];
@@ -704,6 +704,7 @@ function createMatchQuestion(seed: MatchSeed, index: number, skills: Skill[]): M
     "match-fraction-add-sub",
     "match-equal-measurement",
     "match-sentence-meaning",
+    "match-sentence-question",
     "match-literal-detail",
     "match-sentence-ending"
   ]);

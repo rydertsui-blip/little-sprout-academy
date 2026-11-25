@@ -127,6 +127,15 @@ describe("family learning app", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: /小星/ })).toBeInTheDocument());
   });
 
+  it("shows three island stops and a today marker on the child home", async () => {
+    render(<App />);
+    await createFamilyWithChild("小岛");
+    fireEvent.click(screen.getByRole("button", { name: /小岛/ }));
+    expect(screen.getByTestId("island-trail")).toBeInTheDocument();
+    expect(screen.getAllByTestId("island-trail-stop")).toHaveLength(3);
+    expect(screen.getByTestId("island-today")).toHaveTextContent("今天从这里开始");
+  });
+
   it("recommends a starting level from age and lets the parent confirm it", async () => {
     render(<App />);
     await createFamily();
@@ -297,6 +306,17 @@ describe("family learning app", () => {
     await answerCurrentQuestion();
     await waitFor(() => expect(screen.getByTestId("answer-feedback")).toBeInTheDocument());
     expect(screen.getByRole("button", { name: "Read the explanation" })).toBeInTheDocument();
+  });
+
+  it("marks the answered screen as feedback and shows Sprout there", async () => {
+    render(<App />);
+    await createFamilyWithChild("小复");
+    fireEvent.click(screen.getByRole("button", { name: /小复/ }));
+    fireEvent.click(screen.getByRole("button", { name: "数学 Math" }));
+    await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
+    await answerCurrentQuestion();
+    expect(screen.getByTestId("answer-feedback").closest(".quiz-layout")).toHaveClass("is-feedback");
+    expect(screen.getByTestId("feedback-mascot")).toBeInTheDocument();
   });
 
   it("introduces a new practice skill with a teach card before answering", async () => {
@@ -497,19 +517,26 @@ describe("family learning app", () => {
     expect(cards[1]).toHaveTextContent("2/7");
   });
 
-  it("shows unit choices and the kilogram-to-gram conversion", () => {
+  it("shows unit choices and the kilogram-to-gram conversion without printing the requested answer", () => {
     const choiceQuestion = QUESTIONS.find((item) => item.skillId === "math-measurement-units" && /length of a pencil/i.test(item.prompt));
     const conversionQuestion = QUESTIONS.find((item) => item.skillId === "math-measurement-units" && /5 kilograms is equal/i.test(item.prompt));
+    const additionQuestion = QUESTIONS.find((item) => item.skillId === "math-measurement-units" && /3 kg plus 2 kg/i.test(item.prompt));
     expect(choiceQuestion).toBeDefined();
     expect(conversionQuestion).toBeDefined();
+    expect(additionQuestion).toBeDefined();
     const { unmount } = render(<MathTool question={choiceQuestion!} />);
     expect(screen.getByTestId("unit-cards")).toBeInTheDocument();
     expect(screen.getByText("centimetres")).toBeInTheDocument();
     unmount();
-    render(<MathTool question={conversionQuestion!} />);
+    const { unmount: unmountConversion } = render(<MathTool question={conversionQuestion!} />);
     expect(screen.getByTestId("unit-conversion")).toBeInTheDocument();
-    expect(screen.getByText("1 kg")).toBeInTheDocument();
-    expect(screen.getByText("1000 g")).toBeInTheDocument();
+    expect(screen.getByText("5 kg")).toBeInTheDocument();
+    expect(screen.getByText("?")).toBeInTheDocument();
+    expect(screen.getByText(/1000 g/)).toBeInTheDocument();
+    unmountConversion();
+    render(<MathTool question={additionQuestion!} />);
+    expect(screen.getByTestId("unit-quantities")).toBeInTheDocument();
+    expect(screen.queryByTestId("unit-conversion")).not.toBeInTheDocument();
   });
 
   it("shows the money amount from the question but not the cent answer", () => {
@@ -740,6 +767,7 @@ describe("family learning app", () => {
     fireEvent.click(screen.getByRole("button", { name: /小禾/ }));
     fireEvent.click(screen.getByRole("button", { name: "数学 Math" }));
     await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
+    expect(document.querySelector(".quiz-layout")).toHaveClass("quiz-match");
     const question = await answerCurrentQuestion(false);
     expect(question.kind).toBe("match");
     expect(screen.getByTestId("answer-feedback")).toHaveClass("wrong-feedback");

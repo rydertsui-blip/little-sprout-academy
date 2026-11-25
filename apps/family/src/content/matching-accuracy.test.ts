@@ -77,23 +77,23 @@ describe("matching question content accuracy", () => {
       for (const pair of question.pairs) expect(pair.right).toBe(toneName(pair.left));
     }
     expectPairs("match-opposites", { 大: "小", 上: "下", 多: "少" });
-    expectPairs("match-word-meaning", { 苹果: "apple", 书: "book", 水: "water" });
-    expectPairs("match-sentence-meaning", { "我爱妈妈。": "I love Mum.", "这是我的书。": "This is my book.", "弟弟在睡觉。": "My younger brother is sleeping." });
+    expectPairs("match-word-category", { 苹果: "水果", 书: "学习用品", 水: "饮品" });
+    expectPairs("match-sentence-question", { "我爱妈妈。": "你爱谁？", "这是我的书。": "这是谁的书？", "弟弟在睡觉。": "弟弟在做什么？" });
     expectPairs("match-classifier", { 猫: "只", 花: "朵", 山: "座" });
     expectPairs("match-missing-word", { "我每天 ___ 学校。": "去", "妈妈在厨房 ___ 饭。": "煮", "小鸟在天上 ___。": "飞" });
-    expectPairs("match-animal-word", { 猫: "cat", 狗: "dog", 鸟: "bird" });
+    expectPairs("match-animal-ability", { 猫: "会捉老鼠", 狗: "会看家", 鸟: "会飞" });
   });
 
   it("checks the reviewed English matching maps", () => {
     expectPairs("match-letter-case", { A: "a", B: "b", C: "c" });
     expectPairs("match-beginning-sound", { apple: "a", ball: "b", cat: "c" });
-    expectPairs("match-pronoun", { I: "我", you: "你", we: "我们" });
-    expectPairs("match-word-picture", { apple: "苹果", bear: "熊", fish: "鱼" });
+    expectPairs("match-sight-word-sentence", { I: "___ like apples.", you: "___ are my friend.", we: "___ go to school." });
+    expectPairs("match-word-definition", { apple: "a fruit", bear: "a big furry animal", fish: "an animal that swims" });
     expectPairs("match-article", { apple: "an apple", cat: "a cat", elephant: "an elephant" });
     expectPairs("match-plural", { cat: "cats", dog: "dogs", book: "books" });
     expectPairs("match-sentence-ending", { "The cat": "is sleeping.", "The boy": "is running.", "The girls": "are reading." });
     expectPairs("match-literal-detail", { "Tom has a red ball.": "red", "The cat is on the mat.": "on the mat", "Mia likes apples.": "apples" });
-    expectPairs("match-spelling-meaning", { 苹果: "apple", 熊: "bear", 鱼: "fish" });
+    expectPairs("match-spelling-parts", { app__: "le", b__r: "ea", f__h: "is" });
     expectPairs("match-number-word", { one: "1", two: "2", three: "3" });
   });
 });

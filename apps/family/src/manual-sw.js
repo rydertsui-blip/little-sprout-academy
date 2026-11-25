@@ -34,10 +34,34 @@ const CORE = [
   "./assets/images/apple-touch-icon.png"
 ];
 
+async function cacheWithRetry(cache, path, retries = 2) {
+  let lastError;
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      await cache.add(path);
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
+
+async function cacheBatch(cache, paths, concurrency = 8) {
+  const queue = Array.from(new Set(paths));
+  const workers = Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
+    while (queue.length > 0) {
+      const next = queue.shift();
+      if (next) await cacheWithRetry(cache, next);
+    }
+  });
+  await Promise.all(workers);
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    await Promise.all(CORE.map((path) => cache.add(path)));
+    await cacheBatch(cache, CORE);
     const indexResponse = await fetch("./index.html", { cache: "reload" });
     if (!indexResponse.ok) throw new Error(`index precache failed: ${indexResponse.status}`);
     const indexCopy = indexResponse.clone();
@@ -46,26 +70,29 @@ self.addEventListener("install", (event) => {
     const linkedAssets = Array.from(indexHtml.matchAll(/(?:src|href)="([^"]+)"/g))
       .map((match) => match[1])
       .filter((path) => path.includes("assets/"));
-    await Promise.all(linkedAssets.map((path) => cache.add(path)));
+    await cacheBatch(cache, linkedAssets);
     const manifestResponse = await fetch("./precache-manifest.json", { cache: "reload" });
     if (!manifestResponse.ok) throw new Error(`precache manifest failed: ${manifestResponse.status}`);
     const manifest = await manifestResponse.json();
-    const assetPaths = ["audio", "images", "companions"]
+    const assetPaths = ["audio", "images", "companions", "hanzi"]
       .flatMap((key) => Array.isArray(manifest[key]) ? manifest[key] : [])
       .filter((path) => typeof path === "string" && path.startsWith("./"));
     if (assetPaths.length === 0) throw new Error("precache manifest has no media assets");
-    await Promise.all(Array.from(new Set(assetPaths)).map((path) => cache.add(path)));
+    await cacheBatch(cache, assetPaths);
     const cssAssets = linkedAssets.filter((path) => path.endsWith(".css"));
+    const fontUrls = [];
     for (const cssPath of cssAssets) {
       const response = await fetch(cssPath, { cache: "reload" });
       if (!response.ok) throw new Error(`css precache failed: ${response.status}`);
       const cssText = await response.text();
-      const fontUrls = Array.from(cssText.matchAll(/url\(([^)]+)\)/g))
-        .map((match) => match[1].replace(/^['"]|['"]$/g, ""))
-        .filter((path) => !path.startsWith("data:"))
-        .map((path) => new URL(path, new URL(cssPath, self.location.href)).href);
-      await Promise.all(fontUrls.map((path) => cache.add(path)));
+      for (const match of cssText.matchAll(/url\(([^)]+)\)/g)) {
+        const raw = match[1].replace(/^['"]|['"]$/g, "");
+        if (!raw.startsWith("data:")) {
+          fontUrls.push(new URL(raw, new URL(cssPath, self.location.href)).href);
+        }
+      }
     }
+    await cacheBatch(cache, fontUrls);
     await self.skipWaiting();
   })());
 });
@@ -95,12 +122,16 @@ self.addEventListener("fetch", (event) => {
   event.respondWith((async () => {
     const cached = await caches.match(event.request);
     if (cached) return cached;
-    const response = await fetch(event.request);
-    if (response.ok && new URL(event.request.url).origin === location.origin) {
-      const copy = response.clone();
-      const cache = await caches.open(CACHE_NAME);
-      await cache.put(event.request, copy);
+    try {
+      const response = await fetch(event.request);
+      if (response.ok && new URL(event.request.url).origin === location.origin) {
+        const copy = response.clone();
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(event.request, copy);
+      }
+      return response;
+    } catch {
+      return Response.error();
     }
-    return response;
   })());
 });

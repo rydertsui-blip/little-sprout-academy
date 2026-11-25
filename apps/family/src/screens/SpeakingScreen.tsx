@@ -23,6 +23,7 @@ interface SpeakingScreenProps {
 export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreenProps) {
   const [index, setIndex] = useState(0);
   const [state, setState] = useState<RecordingState>("idle");
+  const [demoState, setDemoState] = useState<"playing" | "error" | null>(null);
   const [error, setError] = useState("");
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -48,6 +49,10 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
       revokeRecording();
     };
   }, [index, prompt.language, prompt.text]);
+
+  useEffect(() => {
+    setDemoState(null);
+  }, [index]);
 
   useEffect(() => {
     const suspend = () => {
@@ -83,6 +88,7 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
 
   async function startRecording() {
     stopAudio();
+    setDemoState(null);
     revokeRecording();
     const token = ++requestTokenRef.current;
     setError("");
@@ -141,7 +147,11 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
     if (state === "recording" || state === "requesting") return;
     playerRef.current?.pause();
     if (state === "playing") setState("recorded");
-    playOrSpeak(prompt.text, prompt.language);
+    setDemoState("playing");
+    playOrSpeak(prompt.text, prompt.language, (status) => {
+      if (status === "ended") setDemoState(null);
+      else if (status === "error") setDemoState("error");
+    });
   }
 
   async function playRecording() {
@@ -194,7 +204,7 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
           <div className="teacher-bubble">
             <small>小芽老师</small>
             <strong>{state === "recording" ? "我在录音，慢慢说。" : state === "recorded" ? "录好了，按一下听听自己的声音。" : state === "playing" ? "正在播放你的录音。" : state === "error" ? error : "先听一次，再跟着说。"}</strong>
-            <button className="audio-button" type="button" onClick={playDemonstration} aria-label={`听示范 ${prompt.display}`} disabled={state === "recording" || state === "requesting"}><Volume2 aria-hidden="true" /></button>
+            <button className={`audio-button ${demoState ? `is-${demoState}` : ""}`} type="button" onClick={playDemonstration} aria-label={demoState === "playing" ? "播放中" : demoState === "error" ? "再点一次" : `听示范 ${prompt.display}`} disabled={state === "recording" || state === "requesting"}><Volume2 aria-hidden="true" /></button>
           </div>
           <div className="speaking-teacher-art" aria-hidden="true"><img src="./assets/images/scene-speaking.png" alt="" /></div>
         </section>

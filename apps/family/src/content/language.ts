@@ -65,9 +65,9 @@ function buildMandarinQuestions(skill: Skill): ChoiceQuestion[] {
   switch (skill.id) {
     case "k2-mandarin-listen":
       return build([
-        { prompt: "听一听，点出你听到的动物。", instruction: "先听，再点出正确的图片。", correctAnswer: "猫", options: ["猫", "狗", "鸟"], explanation: "你听到的是“猫”。", template: "listen-animal", audioText: "猫", audioLanguage: "zh-CN", audioOnly: true },
-        { prompt: "听一听，点出你听到的动物。", instruction: "先听，再点出正确的图片。", correctAnswer: "狗", options: ["狗", "猫", "鱼"], explanation: "你听到的是“狗”。", template: "listen-animal", audioText: "狗", audioLanguage: "zh-CN", audioOnly: true },
-        { prompt: "听一听，点出你听到的动物。", instruction: "先听，再点出正确的图片。", correctAnswer: "鸟", options: ["鸟", "鱼", "猫"], explanation: "你听到的是“鸟”。", template: "listen-animal", audioText: "鸟", audioLanguage: "zh-CN", audioOnly: true },
+        { prompt: "听一听，点出你听到的动物。", instruction: "先听，再点出正确的图片。", correctAnswer: "猫", options: ["猫", "狗", "鸟"], explanation: "你听到的是“猫”。", template: "listen-animal", audioText: "猫", audioLanguage: "zh-CN", audioOnly: true, optionImages: { 猫: "cat", 狗: "dog", 鸟: "bird" } },
+        { prompt: "听一听，点出你听到的动物。", instruction: "先听，再点出正确的图片。", correctAnswer: "狗", options: ["狗", "猫", "鱼"], explanation: "你听到的是“狗”。", template: "listen-animal", audioText: "狗", audioLanguage: "zh-CN", audioOnly: true, optionImages: { 狗: "dog", 猫: "cat", 鱼: "fish" } },
+        { prompt: "听一听，点出你听到的动物。", instruction: "先听，再点出正确的图片。", correctAnswer: "鸟", options: ["鸟", "鱼", "猫"], explanation: "你听到的是“鸟”。", template: "listen-animal", audioText: "鸟", audioLanguage: "zh-CN", audioOnly: true, optionImages: { 鸟: "bird", 鱼: "fish", 猫: "cat" } },
         { prompt: "听一听，点出你听到的颜色。", instruction: "先听，再点出正确的颜色。", correctAnswer: "红色", options: ["红色", "蓝色", "绿色"], explanation: "你听到的是“红色”。", template: "listen-color", audioText: "红色", audioLanguage: "zh-CN", audioOnly: true },
         { prompt: "听一听，点出你听到的颜色。", instruction: "先听，再点出正确的颜色。", correctAnswer: "蓝色", options: ["蓝色", "红色", "黄色"], explanation: "你听到的是“蓝色”。", template: "listen-color", audioText: "蓝色", audioLanguage: "zh-CN", audioOnly: true },
         { prompt: "听一听，点出你听到的数字。", instruction: "先听，再点出正确的数字。", correctAnswer: "三", options: ["三", "五", "七"], explanation: "你听到的是“三”。", template: "listen-number", audioText: "三", audioLanguage: "zh-CN", audioOnly: true },
@@ -125,21 +125,21 @@ function buildMandarinQuestions(skill: Skill): ChoiceQuestion[] {
       ]);
     case "mandarin-characters":
       return build([
-        { prompt: "哪一个字是“water”？", instruction: "选择正确的汉字。", correctAnswer: "水", options: ["水", "火", "木"], explanation: "water 对应的汉字是“水”。", template: "meaning-character", audioText: "水", audioLanguage: "zh-CN" },
-        { prompt: "哪一个字是“sun”？", instruction: "选择正确的汉字。", correctAnswer: "日", options: ["日", "月", "山"], explanation: "sun 对应的汉字是“日”。", template: "meaning-character", audioText: "日", audioLanguage: "zh-CN" },
-        { prompt: "哪一个字是“moon”？", instruction: "选择正确的汉字。", correctAnswer: "月", options: ["月", "日", "雨"], explanation: "moon 对应的汉字是“月”。", template: "meaning-character", audioText: "月", audioLanguage: "zh-CN" },
-        { prompt: "哪一个字是“mountain”？", instruction: "选择正确的汉字。", correctAnswer: "山", options: ["山", "水", "田"], explanation: "mountain 对应的汉字是“山”。", template: "meaning-character", audioText: "山", audioLanguage: "zh-CN" },
-        { prompt: "哪一个字是“fire”？", instruction: "选择正确的汉字。", correctAnswer: "火", options: ["火", "木", "水"], explanation: "fire 对应的汉字是“火”。", template: "meaning-character", audioText: "火", audioLanguage: "zh-CN" },
-        { prompt: "哪一个字是“tree”？", instruction: "选择正确的汉字。", correctAnswer: "木", options: ["木", "火", "口"], explanation: "tree 对应的汉字是“木”。", template: "meaning-character", audioText: "木", audioLanguage: "zh-CN" }
+        { prompt: "哪一种东西可以喝，也会流动？", instruction: "选择正确的汉字。", correctAnswer: "水", options: ["水", "火", "木"], explanation: "水可以喝，也会流动。", template: "meaning-character", audioText: "水", audioLanguage: "zh-CN" },
+        { prompt: "哪一个字表示白天发光的天体？", instruction: "选择正确的汉字。", correctAnswer: "日", options: ["日", "月", "山"], explanation: "日表示太阳。", template: "meaning-character", audioText: "日", audioLanguage: "zh-CN" },
+        { prompt: "哪一个字表示夜晚常见的天体？", instruction: "选择正确的汉字。", correctAnswer: "月", options: ["月", "日", "雨"], explanation: "月表示月亮。", template: "meaning-character", audioText: "月", audioLanguage: "zh-CN" },
+        { prompt: "哪一个字表示高高的地面？", instruction: "选择正确的汉字。", correctAnswer: "山", options: ["山", "水", "田"], explanation: "山是高高隆起的陆地。", template: "meaning-character", audioText: "山", audioLanguage: "zh-CN" },
+        { prompt: "哪一个字表示燃烧的东西？", instruction: "选择正确的汉字。", correctAnswer: "火", options: ["火", "木", "水"], explanation: "火会燃烧。", template: "meaning-character", audioText: "火", audioLanguage: "zh-CN" },
+        { prompt: "哪一个字表示树木？", instruction: "选择正确的汉字。", correctAnswer: "木", options: ["木", "火", "口"], explanation: "木表示树木。", template: "meaning-character", audioText: "木", audioLanguage: "zh-CN" }
       ]);
     case "mandarin-vocabulary":
       return build([
-        { prompt: "“月亮”指的是什么？", instruction: "选择正确的意思。", correctAnswer: "the moon", options: ["the moon", "the sun", "a star"], explanation: "“月亮”就是 the moon。", template: "meaning", audioText: "月亮", audioLanguage: "zh-CN" },
-        { prompt: "“喝水”是在做什么？", instruction: "选择正确的动作。", correctAnswer: "drink water", options: ["drink water", "eat rice", "wash hands"], explanation: "“喝水”是 drink water。", template: "meaning", audioText: "喝水", audioLanguage: "zh-CN" },
-        { prompt: "“小鸟”指的是哪一种动物？", instruction: "选择正确的意思。", correctAnswer: "bird", options: ["bird", "rabbit", "cat"], explanation: "“小鸟”是 bird。", template: "meaning", audioText: "小鸟", audioLanguage: "zh-CN" },
-        { prompt: "“花朵”指的是什么？", instruction: "选择正确的意思。", correctAnswer: "flower", options: ["flower", "tree", "grass"], explanation: "“花朵”是 flower。", template: "meaning", audioText: "花朵", audioLanguage: "zh-CN" },
-        { prompt: "“足球”是什么？", instruction: "选择正确的意思。", correctAnswer: "football", options: ["football", "basketball", "a shoe"], explanation: "“足球”是 football。", template: "meaning", audioText: "足球", audioLanguage: "zh-CN" },
-        { prompt: "“高山”指的是什么？", instruction: "选择正确的意思。", correctAnswer: "a high mountain", options: ["a high mountain", "a river", "a house"], explanation: "“高山”就是 a high mountain。", template: "meaning", audioText: "高山", audioLanguage: "zh-CN" }
+        { prompt: "夜晚天上圆圆发亮的是什么？", instruction: "选择正确答案。", correctAnswer: "月亮", options: ["月亮", "太阳", "星星"], explanation: "夜晚天上圆圆发亮的是月亮。", template: "meaning", audioText: "选择正确答案。", audioLanguage: "zh-CN" },
+        { prompt: "口渴时，我们是在做什么？", instruction: "选择正确答案。", correctAnswer: "喝水", options: ["喝水", "吃饭", "洗手"], explanation: "口渴时要喝水。", template: "meaning", audioText: "选择正确答案。", audioLanguage: "zh-CN" },
+        { prompt: "哪一种动物会飞、会唱歌？", instruction: "选择正确答案。", correctAnswer: "小鸟", options: ["小鸟", "兔子", "猫"], explanation: "小鸟会飞，也会唱歌。", template: "meaning", audioText: "选择正确答案。", audioLanguage: "zh-CN" },
+        { prompt: "植物上开放、颜色鲜艳的部分是什么？", instruction: "选择正确答案。", correctAnswer: "花朵", options: ["花朵", "树木", "小草"], explanation: "花朵是植物上开放的部分。", template: "meaning", audioText: "选择正确答案。", audioLanguage: "zh-CN" },
+        { prompt: "哪一种球可以踢？", instruction: "选择正确答案。", correctAnswer: "足球", options: ["足球", "篮球", "鞋子"], explanation: "足球可以用脚踢。", template: "meaning", audioText: "选择正确答案。", audioLanguage: "zh-CN" },
+        { prompt: "又高又大的山地叫什么？", instruction: "选择正确答案。", correctAnswer: "高山", options: ["高山", "河流", "房子"], explanation: "又高又大的山地叫高山。", template: "meaning", audioText: "选择正确答案。", audioLanguage: "zh-CN" }
       ]);
     case "mandarin-reading":
       return build([
@@ -188,7 +188,7 @@ function buildMandarinQuestions(skill: Skill): ChoiceQuestion[] {
         { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "我喜欢小猫。", options: ["我喜欢小猫。", "小猫喜欢我。", "喜欢我小猫。"], explanation: "“我喜欢小猫。”语序完整自然。", template: "sentence-order", audioText: "我喜欢小猫。", audioLanguage: "zh-CN" },
         { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "弟弟去学校。", options: ["弟弟去学校。", "去弟弟学校。", "学校去弟弟。"], explanation: "“弟弟去学校。”语序正确。", template: "sentence-order", audioText: "弟弟去学校。", audioLanguage: "zh-CN" },
         { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "妈妈在厨房。", options: ["妈妈在厨房。", "在妈妈厨房。", "厨房妈妈在。"], explanation: "“妈妈在厨房。”语序正确。", template: "sentence-order", audioText: "妈妈在厨房。", audioLanguage: "zh-CN" },
-        { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "小鸟飞在天空。", options: ["小鸟飞在天空。", "天空飞在小鸟。", "飞小鸟在天空。"], explanation: "“小鸟飞在天空。”语序自然。", template: "sentence-order", audioText: "小鸟飞在天空。", audioLanguage: "zh-CN" },
+        { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "小鸟在天空中飞。", options: ["小鸟在天空中飞。", "天空飞在小鸟。", "飞小鸟在天空。"], explanation: "“小鸟在天空中飞。”语序完整自然。", template: "sentence-order", audioText: "选择完整、自然的句子。", audioLanguage: "zh-CN" },
         { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "我们一起去公园。", options: ["我们一起去公园。", "一起去我们公园。", "公园去我们一起。"], explanation: "“我们一起去公园。”语序正确。", template: "sentence-order", audioText: "我们一起去公园。", audioLanguage: "zh-CN" },
         { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "爸爸喜欢喝茶。", options: ["爸爸喜欢喝茶。", "喝茶喜欢爸爸。", "喜欢爸爸喝茶。"], explanation: "“爸爸喜欢喝茶。”语序正确。", template: "sentence-order", audioText: "爸爸喜欢喝茶。", audioLanguage: "zh-CN" }
       ]);
@@ -336,7 +336,7 @@ function buildEnglishQuestions(skill: Skill): ChoiceQuestion[] {
         { prompt: "Which spelling is correct?", instruction: "Tap the correctly spelled word.", correctAnswer: "fish", options: ["fish", "fihs", "fih"], explanation: "The correct spelling is fish.", template: "spelling", audioText: "fish", audioLanguage: "en-US" },
         { prompt: "Which spelling is correct?", instruction: "Tap the correctly spelled word.", correctAnswer: "moon", options: ["moon", "mune", "mone"], explanation: "The correct spelling is moon.", template: "spelling", audioText: "moon", audioLanguage: "en-US" },
         { prompt: "Which spelling is correct?", instruction: "Tap the correctly spelled word.", correctAnswer: "tree", options: ["tree", "trea", "tre"], explanation: "The correct spelling is tree.", template: "spelling", audioText: "tree", audioLanguage: "en-US" },
-        { prompt: "Which spelling is correct?", instruction: "Tap the correctly spelled word.", correctAnswer: "water", options: ["water", "watter", "wader"], explanation: "The correct spelling is water.", template: "spelling", audioText: "water", audioLanguage: "en-US" }
+        { prompt: "Which spelling is correct?", instruction: "Tap the correctly spelled word.", correctAnswer: "water", options: ["water", "watter", "watr"], explanation: "The correct spelling is water.", template: "spelling", audioText: "water", audioLanguage: "en-US" }
       ]);
     default:
       return [];
@@ -457,13 +457,13 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
       return [
         zh("哪一个词里有“火”？", "火苗", ["火苗", "月亮", "小鸟"], "“火苗”里有火。", "character-word", "火"),
         zh("哪一个字有“女”字旁？", "妈", ["妈", "狗", "花"], "“妈”有女字旁。", "radical-shape", "妈", 3),
-        zh("哪一个字是“hand”？", "手", ["手", "口", "目"], "hand 对应的字是“手”。", "meaning-character", "手"),
+        zh("哪一个字表示身体上用来拿东西的部位？", "手", ["手", "口", "目"], "手可以用来拿东西。", "meaning-character", "手"),
         zh("哪一个词里有“日”？", "太阳", ["太阳", "田地", "足球"], "“太阳”里有日。", "character-word", "日"),
         zh("哪一个字有“艹”草字头？", "花", ["花", "猫", "狗"], "“花”有草字头。", "radical-shape", "花", 3),
-        zh("哪一个字是“eye”？", "目", ["目", "日", "木"], "eye 对应的字是“目”。", "meaning-character", "目"),
+        zh("哪一个字表示身体上用来看东西的部位？", "目", ["目", "日", "木"], "目就是眼睛，可以用来看东西。", "meaning-character", "目"),
         zh("哪一个词里有“田”？", "田地", ["田地", "月亮", "小手"], "“田地”里有田。", "character-word", "田"),
         zh("哪一个字有“木”字旁？", "树", ["树", "花", "狗"], "“树”有木字旁。", "radical-shape", "树", 3),
-        zh("哪一个字是“foot”？", "足", ["足", "手", "口"], "foot 对应的字是“足”。", "meaning-character", "足"),
+        zh("哪一个字表示身体上用来走路的部位？", "足", ["足", "手", "口"], "足就是脚，可以用来走路。", "meaning-character", "足"),
         zh("哪一个词里有“月”？", "月亮", ["月亮", "田地", "火苗"], "“月亮”里有月。", "character-word", "月"),
         zh("哪一个字有“口”字框？", "口", ["口", "山", "水"], "“口”字本身就是一个方框。", "radical-shape", "口", 4)
         ,zh("哪一个词里有“手”？", "小手", ["小手", "太阳", "月亮"], "“小手”里有手。", "character-word", "手")
@@ -643,10 +643,10 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
       return [
         en("Which one is a fruit?", "apple", ["apple", "dog", "tree"], "An apple is a fruit.", "category-word"),
         en("Which one can fly?", "bird", ["bird", "fish", "tree"], "A bird can fly.", "context-word"),
-        en("Which word means the moon?", "moon", ["moon", "sun", "star"], "The moon is called “moon”.", "word-meaning"),
+        { prompt: "Which word means the large round object that shines in the night sky?", instruction: "Tap the correct answer.", options: ["moon", "sun", "star"], correctAnswer: "moon", explanation: "The moon is the large round object seen in the night sky.", template: "word-meaning", audioText: "Tap the correct answer.", audioLanguage: "en-US" },
         en("Which one is a drink?", "water", ["water", "book", "flower"], "Water is a drink.", "category-word")
         ,en("Which one is an animal?", "bear", ["bear", "apple", "star"], "A bear is an animal.", "category-word")
-        ,en("Which word means a tree?", "tree", ["tree", "fish", "book"], "A tree is called “tree”.", "word-meaning")
+        ,{ prompt: "Which word means a tall plant with a trunk and branches?", instruction: "Tap the correct answer.", options: ["tree", "fish", "book"], correctAnswer: "tree", explanation: "A tree is a tall plant with a trunk and branches.", template: "word-meaning", audioText: "Tap the correct answer.", audioLanguage: "en-US" }
       ];
     case "english-a-an":
       return [
@@ -725,7 +725,7 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
     case "english-spelling":
       return [
         en("Which spelling is correct?", "book", ["book", "boook", "bok"], "The correct spelling is book.", "spelling"),
-        en("Which spelling is correct?", "bag", ["bag", "beg", "bagg"], "The correct spelling is bag.", "spelling"),
+        en("Which spelling is correct?", "bag", ["bag", "bgg", "bga"], "The correct spelling is bag.", "spelling"),
         en("Which spelling is correct?", "pen", ["pen", "pne", "penn"], "The correct spelling is pen.", "spelling"),
         en("Which spelling is correct?", "egg", ["egg", "eg", "egghe"], "The correct spelling is egg.", "spelling"),
         en("Which spelling is correct?", "star", ["star", "starr", "satr"], "The correct spelling is star.", "spelling", 3)

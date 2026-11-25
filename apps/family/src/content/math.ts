@@ -58,8 +58,8 @@ export function buildMathQuestions(skill: Skill): ChoiceQuestion[] {
         ["Which number is missing? 11, 12, __, 14", "13", ["10", "15"], "The missing number is 13.", "k2-number-sequence"],
         ["Count by 2s: 2, 4, 6, __", "8", ["7", "9"], "The pattern adds 2 each time, so the next number is 8.", "k2-pattern"],
         ["What comes next? red, blue, red, blue, __", "red", ["blue", "green"], "The colours repeat red, blue, red, blue, so the next colour is red.", "k2-pattern"],
-        ["Which shape has no straight sides?", "circle", ["square", "triangle"], "A circle has a curved side and no straight sides.", "k2-shape-identify"],
-        ["How many corners does a triangle have?", "3", ["4", "2"], "A triangle has 3 corners.", "k2-shape-identify"],
+        ["Which number comes before 13?", "12", ["14", "11"], "Counting back from 13 gives 12.", "k2-number-sequence"],
+        ["Which number is 2 more than 15?", "17", ["16", "18"], "Two more than 15 is 17.", "k2-number-sequence"],
         ["Which group has more? ●●● or ●●●●●", "5 dots", ["3 dots", "both are equal"], "5 dots is more than 3 dots.", "k2-compare-groups"],
         ["Which number is 1 more than 14?", "15", ["13", "16"], "One more than 14 is 15.", "k2-number-sequence"]
       ] as const;
@@ -152,7 +152,7 @@ export function buildMathQuestions(skill: Skill): ChoiceQuestion[] {
     }
     case "math-fractions": {
       const data = [[4, "one quarter"], [3, "one third"], [5, "one fifth"], [6, "one sixth"], [2, "one half"], [8, "one eighth"]];
-      data.forEach(([parts, phrase], index) => q.push(makeMathQuestion(skill, index, `A whole is cut into ${parts} equal parts. Which fraction of the whole is one part?`, String(phrase), ["one half", "one quarter", "two thirds", "three quarters"], `One of ${parts} equal parts is ${phrase}.`, "unit-fraction")));
+      data.forEach(([parts, phrase], index) => q.push(makeMathQuestion(skill, index, `A whole is cut into ${parts} equal parts. Which fraction of the whole is one part? Choose the words.`, String(phrase), ["one half", "one quarter", "two thirds", "three quarters"], `One of ${parts} equal parts is ${phrase}.`, "unit-fraction")));
       break;
     }
     case "math-money": {
@@ -401,7 +401,7 @@ function buildMathDepthSeeds(skillId: string): MathDepthSeed[] {
         seed("What is 1/3 of 9?", 3, [1, 6], "Nine split into 3 equal groups gives 3.", "fraction-of-set", 3),
         seed("A whole is cut into 5 equal parts. Which fraction of the whole is one part?", "1/5", ["1/2", "1/10"], "One of 5 equal parts is one fifth, or 1/5.", "fraction-words", 1),
         seed("A whole is cut into 8 equal parts. Which fraction of the whole is one part?", "1/8", ["1/4", "1/2"], "One of 8 equal parts is one eighth, or 1/8.", "fraction-words", 2),
-        seed("A whole is cut into 10 equal parts. Which fraction of the whole is one part?", "one tenth", ["one half", "one quarter"], "One of 10 equal parts is one tenth.", "unit-fraction", 2),
+        seed("A whole is cut into 10 equal parts. Which fraction of the whole is one part? Choose the words.", "one tenth", ["one half", "one quarter"], "One of 10 equal parts is one tenth.", "unit-fraction", 2),
         seed("What is 1/5 of 10?", 2, [5, 10], "Ten split into 5 equal groups gives 2 in each group.", "fraction-of-set", 2),
         seed("What is 1/4 of 16?", 4, [8, 2], "Sixteen split into 4 equal groups gives 4 in each group.", "fraction-of-set", 3),
         seed("A whole is cut into 4 equal parts. Which fraction of the whole is one part?", "1/4", ["1/2", "1/8"], "One of 4 equal parts is one quarter, or 1/4.", "fraction-words", 1),
@@ -440,7 +440,7 @@ function buildMathDepthSeeds(skillId: string): MathDepthSeed[] {
         seed("Which 3D shape has 6 square faces?", "cube", ["cylinder", "sphere"], "A cube has six square faces.", "shape-identify", 3),
         seed("How many corners does a triangle have?", 3, [4, 2], "A triangle has three corners.", "shape-classify", 1),
         seed("How many faces does a cuboid have?", 6, [8, 4], "A cuboid has six faces.", "shape-classify", 3),
-        seed("Two identical right triangles can be joined to make which shape?", "square", ["circle", "cuboid"], "Two matching right triangles can form a square.", "compose-decompose", 4)
+        seed("Two identical isosceles right triangles are joined along their longest sides. Which shape do they make?", "square", ["circle", "cuboid"], "The two longest sides form the diagonal of a square.", "compose-decompose", 4)
       ];
     case "math-picture-graph":
       return [

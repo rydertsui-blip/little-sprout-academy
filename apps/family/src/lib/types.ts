@@ -64,6 +64,7 @@ export interface MatchPair {
   right: string;
   audioText?: string;
   audioLanguage?: "zh-CN" | "en-US";
+  rightImage?: string;
 }
 
 export interface MatchQuestion extends QuestionBase {

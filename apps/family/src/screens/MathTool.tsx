@@ -13,7 +13,9 @@ type ToolKind =
   | "shapes"
   | "graph"
   | "ruler"
-  | "units";
+  | "units"
+  | "counting"
+  | "pattern";
 
 const TOOL_BY_SKILL: Record<string, ToolKind> = {
   "k2-math-count-20": "number-line",
@@ -50,7 +52,9 @@ const TOOL_LABEL: Record<ToolKind, string> = {
   "shapes": "Shapes",
   "graph": "Picture graph",
   "ruler": "Centimetre ruler",
-  "units": "Unit reference"
+  "units": "Unit reference",
+  "counting": "Counting pictures",
+  "pattern": "Pattern"
 };
 
 function PlaceValue({ question }: { question: Question }) {
@@ -244,6 +248,21 @@ function TwoStepArray({ question }: { question: Question }) {
 }
 
 function NumberBond({ question }: { question: Question }) {
+  const target = question.prompt.match(/makes?\s+(\d+)/i)?.[1];
+  const given = question.prompt.match(/(\d+)\s*\+\s*_{2,}/)?.[1];
+  if (target && given) {
+    return (
+      <div className="number-bond-visual" data-testid="number-bond-visual">
+        <div className="number-bond-whole"><small>whole</small><strong>{target}</strong></div>
+        <div className="number-bond-connector" aria-hidden="true"><i /><i /></div>
+        <div className="number-bond-parts">
+          <span><small>part</small><strong>{given}</strong></span>
+          <span><small>part</small><strong>?</strong></span>
+        </div>
+        <p>part + part = whole</p>
+      </div>
+    );
+  }
   const { a, b } = questionNumbers(question.prompt);
   return (
     <div className="number-bond-visual">
@@ -260,17 +279,18 @@ function NumberBond({ question }: { question: Question }) {
 
 function ArrayBoard({ question }: { question: Question }) {
   const equation = question.prompt.match(/(\d+)\s*(?:÷|\/|×|x|\*)\s*(\d+)/);
-  const first = equation ? Number(equation[1]) : 4;
-  const second = equation ? Number(equation[2]) : 5;
+  const story = question.prompt.match(/(\d+)\s+(?:groups?|rows?)\s+(?:have|with)\s+(\d+)/i);
+  const first = equation ? Number(equation[1]) : story ? Number(story[1]) : 4;
+  const second = equation ? Number(equation[2]) : story ? Number(story[2]) : 5;
   const isDivision = /÷|\//.test(question.prompt);
   const groups = isDivision ? first / second : first;
   const perGroup = second;
-  const usable = Boolean(equation) && Number.isInteger(groups) && groups > 0 && groups <= 10 && perGroup > 0 && perGroup <= 10;
+  const usable = Boolean(equation || story) && Number.isInteger(groups) && groups > 0 && groups <= 10 && perGroup > 0 && perGroup <= 10;
   const rows = usable ? groups : 4;
   const columns = usable ? perGroup : 5;
-  const caption = question.kind === "match" || !equation || !usable ? "An array shows equal rows and columns" : `${rows} groups of ${columns}`;
+  const caption = question.kind === "match" || !usable ? "An array shows equal rows and columns" : `${rows} groups of ${columns}`;
   return (
-    <div className="array-board" aria-hidden="true">
+    <div className="array-board" data-testid="array-board" data-rows={rows} data-columns={columns} aria-hidden="true">
       {Array.from({ length: rows }, (_, row) => (
         <div className="array-row" key={row}>
           {Array.from({ length: columns }, (_, column) => <span key={column} />)}
@@ -486,7 +506,11 @@ function Clock({ question }: { question: Question }) {
         <circle cx="100" cy="100" r="76" fill="#fffdf8" stroke="#17324d" strokeWidth="3" />
         {Array.from({ length: 12 }, (_, index) => {
           const angle = (index / 12) * Math.PI * 2;
-          return <line key={index} x1={100 + 66 * Math.sin(angle)} y1={100 - 66 * Math.cos(angle)} x2={100 + 72 * Math.sin(angle)} y2={100 - 72 * Math.cos(angle)} stroke="#17324d" strokeWidth="2" />;
+          return <line key={`tick-${index}`} x1={100 + 66 * Math.sin(angle)} y1={100 - 66 * Math.cos(angle)} x2={100 + 72 * Math.sin(angle)} y2={100 - 72 * Math.cos(angle)} stroke="#17324d" strokeWidth="2" />;
+        })}
+        {Array.from({ length: 12 }, (_, index) => {
+          const angle = (index / 12) * Math.PI * 2;
+          return <text key={`num-${index}`} x={100 + 52 * Math.sin(angle)} y={100 - 52 * Math.cos(angle)} textAnchor="middle" dominantBaseline="middle" fill="#17324d" fontSize="17" fontWeight="800">{index === 0 ? 12 : index}</text>;
         })}
         <line x1="100" y1="100" x2={hour.x2} y2={hour.y2} stroke="#17324d" strokeWidth="6" />
         <line x1="100" y1="100" x2={minute.x2} y2={minute.y2} stroke="#e85c47" strokeWidth="4" />
@@ -575,7 +599,103 @@ function DurationVisual({ question }: { question: Question }) {
   );
 }
 
-function Shapes() {
+function CountingPictures({ question }: { question: Question }) {
+  const prompt = question.prompt;
+  const symbol = prompt.includes("★") ? "★" : prompt.includes("●") ? "●" : "";
+  if (!symbol) return null;
+  const compare = /which group has more/i.test(prompt);
+  const separators = compare ? /\s+or\s+/i : /[+−]/;
+  const segments = prompt.split(separators).filter((segment) => segment.includes(symbol));
+  const counts = segments.map((segment) => Array.from(segment).filter((character) => character === symbol).length);
+  const operator = compare ? "or" : /[+＋]/.test(prompt) ? "+" : "−";
+  const caption = compare
+    ? "Which group has more?"
+    : /[+＋]/.test(prompt)
+      ? "Put the two groups together."
+      : /[−]/.test(prompt)
+        ? "Take away the second group."
+        : symbol === "★" ? "Count the stars." : "Count the dots.";
+  return (
+    <div className="counting-pictures" data-testid="counting-pictures" data-groups={counts.join(",")} aria-hidden="true">
+      {segments.map((segment, index) => (
+        <span className="counting-group" key={index}>
+          {index > 0 ? <i>{operator}</i> : null}
+          {compare ? <small>{index === 0 ? "Group A" : "Group B"}</small> : null}
+          <strong className={`counting-symbol counting-${symbol === "★" ? "star" : "dot"}`}>{segment.replace(/[^●★]/g, "").trim()}</strong>
+        </span>
+      ))}
+      <small className="counting-caption">{caption}</small>
+    </div>
+  );
+}
+
+function SequenceTool({ question }: { question: Question }) {
+  const prompt = question.prompt;
+  const colorMatches = [...prompt.matchAll(/\b(red|blue|green|yellow|orange|purple|pink|brown)\b/gi)].map((match) => match[1].toLowerCase());
+  if (colorMatches.length >= 2) {
+    return (
+      <div className="pattern-tool" data-testid="pattern-tool" data-kind="colour" aria-hidden="true">
+        {colorMatches.map((color, index) => <span className="pattern-dot" data-color={color} key={`${color}-${index}`} />)}
+        <span className="pattern-missing">?</span>
+        <small>Continue the colour pattern.</small>
+      </div>
+    );
+  }
+  const tail = prompt.split(/[?:]/).slice(-1)[0]?.trim() ?? "";
+  const tokens = tail.split(/,\s*/).map((token) => token.trim()).filter((token) => /^\d+$|^_+$/.test(token));
+  if (tokens.length >= 2) {
+    return (
+      <div className="pattern-tool" data-testid="pattern-tool" data-kind="number" aria-hidden="true">
+        {tokens.map((token, index) => <span className={`pattern-chip${/^_+$/.test(token) ? " is-missing" : ""}`} key={`${token}-${index}`}>{/^_+$/.test(token) ? "?" : token}</span>)}
+        <small>{/count by/i.test(prompt) ? "Count on in equal steps." : "Find the missing number."}</small>
+      </div>
+    );
+  }
+  const numbers = prompt.match(/\d+/g)?.map(Number) ?? [];
+  if (numbers.length) {
+    return (
+      <div className="pattern-tool" data-testid="pattern-tool" data-kind="number" aria-hidden="true">
+        <span className="pattern-chip">{numbers.at(-1)}</span>
+        <i>→</i>
+        <span className="pattern-chip is-missing">?</span>
+        <small>{/more than/i.test(prompt) ? "One more." : "What comes next?"}</small>
+      </div>
+    );
+  }
+  return null;
+}
+
+function Shapes({ question }: { question: Question }) {
+  const is3d = /3d|three-dimensional|cube|cuboid|cylinder|sphere|faces|roll/i.test(question.prompt);
+  if (is3d) {
+    return (
+      <svg className="math-svg shapes-svg" data-testid="shapes-3d" viewBox="0 0 520 142" aria-hidden="true">
+        <g data-shape="cube">
+          <polygon points="38,52 58,34 98,34 78,52" fill="#ffe3a4" stroke="#17324d" strokeWidth="2" />
+          <polygon points="78,52 98,34 98,74 78,92" fill="#f4cf76" stroke="#17324d" strokeWidth="2" />
+          <rect x="38" y="52" width="40" height="40" fill="#fff0c6" stroke="#17324d" strokeWidth="2" />
+        </g>
+        <g data-shape="cuboid">
+          <polygon points="150,56 170,40 254,40 234,56" fill="#bfe5e3" stroke="#17324d" strokeWidth="2" />
+          <polygon points="234,56 254,40 254,80 234,96" fill="#9fd4d2" stroke="#17324d" strokeWidth="2" />
+          <rect x="150" y="56" width="84" height="40" fill="#dff0ef" stroke="#17324d" strokeWidth="2" />
+        </g>
+        <g data-shape="cylinder">
+          <rect x="300" y="44" width="48" height="44" fill="#d8e2f7" stroke="#17324d" strokeWidth="2" />
+          <ellipse cx="324" cy="44" rx="24" ry="9" fill="#edf2fd" stroke="#17324d" strokeWidth="2" />
+          <ellipse cx="324" cy="88" rx="24" ry="9" fill="#d8e2f7" stroke="#17324d" strokeWidth="2" />
+        </g>
+        <g data-shape="sphere">
+          <circle cx="420" cy="66" r="32" fill="#ffd4c7" stroke="#17324d" strokeWidth="2" />
+          <ellipse cx="410" cy="55" rx="12" ry="8" fill="#ffe9e3" opacity="0.8" />
+        </g>
+        <text x="58" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+        <text x="192" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+        <text x="324" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+        <text x="420" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+      </svg>
+    );
+  }
   return (
     <svg className="math-svg shapes-svg" viewBox="0 0 520 132" aria-hidden="true">
       <polygon points="42,96 82,28 122,96" fill="#ffe3a4" stroke="#17324d" strokeWidth="2" />
@@ -682,18 +802,22 @@ function measurementParts(prompt: string): Array<{ value: string; meta: UnitMeta
 
 function Units({ question }: { question: Question }) {
   const prompt = question.prompt;
-  const kgToG = /kilogram|kg/i.test(prompt) && /gram|\bg\b/i.test(prompt);
-  const mToCm = /metre|meter|\bm\b/i.test(prompt) && /centimetre|centimeter|\bcm\b/i.test(prompt);
-  const lToMl = /litre|liter|\bl\b/i.test(prompt) && /millilitre|\bml\b/i.test(prompt);
+  const kgToG = /kilograms?|\bkg\b/i.test(prompt) && /\bgrams?\b|\bg\b/i.test(prompt);
+  const mToCm = /\bmetres?\b|\bmeters?\b|\bm\b/i.test(prompt) && /\bcentimetres?\b|\bcentimeters?\b|\bcm\b/i.test(prompt);
+  const lToMl = /\blitres?\b|\bliters?\b|\bl\b/i.test(prompt) && /\bmillilitres?\b|\bmilliliters?\b|\bml\b/i.test(prompt);
   if (kgToG || mToCm || lToMl) {
-    const left = kgToG ? "1 kg" : mToCm ? "1 m" : "1 L";
-    const right = kgToG ? "1000 g" : mToCm ? "100 cm" : "1000 mL";
-    const asksOne = /1\s*(?:kilogram|kg|metre|meter|m|litre|liter|l)\b.*(?:equal|how many)/i.test(prompt) || /how many .* (?:in|is|are) 1\b/i.test(prompt);
+    const sourceSymbol = kgToG ? "kg" : mToCm ? "m" : "L";
+    const sourceName = kgToG ? "kilograms" : mToCm ? "metres" : "litres";
+    const targetName = kgToG ? "grams" : mToCm ? "centimetres" : "millilitres";
+    const equivalent = kgToG ? "1000 g" : mToCm ? "100 cm" : "1000 mL";
+    const quantity = measurementParts(prompt).find((item) => item.meta.symbol === sourceSymbol);
+    const amount = quantity?.value ?? "1";
     return (
       <div className="unit-conversion" data-testid="unit-conversion" aria-hidden="true">
-        <span><strong>{left}</strong><small>{kgToG ? "kilograms" : mToCm ? "metres" : "litres"}</small></span>
+        <span><strong>{amount} {sourceSymbol}</strong><small>{sourceName}</small></span>
         <i>=</i>
-        <span><strong>{asksOne ? "?" : right}</strong><small>{kgToG ? "grams" : mToCm ? "centimetres" : "millilitres"}</small></span>
+        <span><strong>?</strong><small>{targetName}</small></span>
+        {amount !== "1" ? <small className="unit-conversion-note">1 {sourceSymbol} = {equivalent}</small> : null}
       </div>
     );
   }
@@ -722,7 +846,7 @@ function Units({ question }: { question: Question }) {
   );
 }
 
-function TwoStepTool({ question }: { question: Question }) {
+function TwoStepTool({ question, defaultOpen = true }: { question: Question; defaultOpen?: boolean }) {
   const numbers = question.prompt.match(/\d+/g) ?? [];
   const kind = question.template === "match-two-step"
     ? "Two-step model"
@@ -734,7 +858,7 @@ function TwoStepTool({ question }: { question: Question }) {
           ? "Two-step model"
           : "Bar model";
   return (
-    <details className="math-tool" aria-label={`Math tool: ${kind}`} open>
+    <details className="math-tool" aria-label={`Math tool: ${kind}`} open={defaultOpen}>
       <summary><span>Math tool</span><strong>{kind}</strong><small>Open or close</small></summary>
       <div className="math-tool-body">
         {question.template === "match-two-step"
@@ -759,9 +883,11 @@ function ToolVisual({ kind, max, question }: { kind: ToolKind; max: number; ques
   if (kind === "money") return <MoneyBoard question={question} />;
   if (kind === "clock") return <Clock question={question} />;
   if (kind === "duration") return <DurationVisual question={question} />;
-  if (kind === "shapes") return <Shapes />;
+  if (kind === "shapes") return <Shapes question={question} />;
   if (kind === "graph") return <PictureGraph question={question} />;
   if (kind === "ruler") return <Ruler question={question} />;
+  if (kind === "counting") return <CountingPictures question={question} />;
+  if (kind === "pattern") return <SequenceTool question={question} />;
   return <Units question={question} />;
 }
 
@@ -769,14 +895,18 @@ const TOOL_CAPTION: Partial<Record<ToolKind, string>> = {
   "place-value": "Example: 1 hundred, 1 ten and 1 one"
 };
 
-export function MathTool({ question }: { question: Question }) {
-  if (question.skillId === "math-two-step-problems") return <TwoStepTool question={question} />;
+export function MathTool({ question, defaultOpen = true }: { question: Question; defaultOpen?: boolean }) {
+  if (question.skillId === "math-two-step-problems") return <TwoStepTool question={question} defaultOpen={defaultOpen} />;
   const skillKind = TOOL_BY_SKILL[question.skillId];
   if (!skillKind) return null;
-  const visualKind: ToolKind = skillKind === "number-line" && question.template === "number-bond"
-    ? "number-bond"
-    : skillKind === "number-line" && question.template.startsWith("story")
-      ? "bar-model"
+  const visualKind: ToolKind =
+    question.skillId === "k2-math-count-20" && ["count-dots", "compare-groups"].includes(question.template) ? "counting"
+      : question.skillId === "k2-math-count-20" && question.template === "shape-identify" ? "shapes"
+      : question.skillId === "k2-math-count-20" && ["k2-number-sequence", "k2-pattern"].includes(question.template) ? "pattern"
+      : question.skillId === "k2-math-add-within-10" && ["k2-add-pictures", "k2-subtract-pictures"].includes(question.template) ? "counting"
+      : question.skillId === "k2-math-add-within-10" && ["k2-add-story", "k2-subtract-story"].includes(question.template) ? "bar-model"
+      : skillKind === "number-line" && ["number-bond", "k2-number-bond"].includes(question.template) ? "number-bond"
+      : skillKind === "number-line" && question.template.startsWith("story") ? "bar-model"
       : skillKind;
   const label = visualKind === "array" && question.skillId === "math-divide-tables"
     ? "Equal groups"
@@ -786,17 +916,18 @@ export function MathTool({ question }: { question: Question }) {
         ? "Length bars"
         : TOOL_LABEL[visualKind];
   const max = question.skillId === "k2-math-add-within-10" ? 10 : question.skillId === "k2-math-count-20" ? 20 : question.skillId === "math-add-sub-1000" || question.skillId === "math-place-value-1000" ? 1000 : 100;
+  if (question.kind === "match" && question.skillId === "math-time") return null;
   const jumpLine = visualKind === "number-line" && ["math-add-sub-regroup", "math-add-sub-1000"].includes(question.skillId);
   const dynamicPlaceValue = visualKind === "place-value" && question.skillId === "math-place-value-1000";
   const dynamicDivision = visualKind === "array" && question.skillId === "math-divide-tables";
   return (
-    <details className="math-tool" aria-label={`Math tool: ${label}`} open>
+    <details className="math-tool" aria-label={`Math tool: ${label}`} open={defaultOpen}>
       <summary><span>Math tool</span><strong>{label}</strong><small>Open or close</small></summary>
       <div className="math-tool-body">
         <ToolVisual kind={visualKind} max={max} question={question} />
         {jumpLine ? null : visualKind === "number-line" ? <p>Number line: 0 to {max}; each step is {max / 10}</p> : null}
         {TOOL_CAPTION[visualKind] && !dynamicPlaceValue ? <p>{TOOL_CAPTION[visualKind]}</p> : null}
-        {["clock", "duration", "fraction", "graph", "money", "ruler", "units"].includes(visualKind) || jumpLine || dynamicPlaceValue || dynamicDivision ? null : <p>Example model. Compare it with the question.</p>}
+        {["clock", "duration", "fraction", "graph", "money", "ruler", "units", "counting", "pattern"].includes(visualKind) || jumpLine || dynamicPlaceValue || dynamicDivision ? null : <p className="math-tool-note">Example model. Compare it with the question.</p>}
       </div>
     </details>
   );

@@ -19,7 +19,8 @@ const audioDir = join(output, "assets/audio");
 const audio = filesUnder(audioDir).filter((entry) => entry.endsWith(".m4a")).map((entry) => `./${relative(output, entry)}`);
 const images = filesUnder(join(output, "assets/images")).filter((entry) => entry.endsWith(".png")).map((entry) => `./${relative(output, entry)}`);
 const companions = filesUnder(join(output, "assets/companions")).map((entry) => `./${relative(output, entry)}`);
-const manifest = { audio, images, companions };
+const hanzi = filesUnder(join(output, "assets/hanzi")).filter((entry) => entry.endsWith(".json")).map((entry) => `./${relative(output, entry)}`);
+const manifest = { audio, images, companions, hanzi };
 const manifestPath = join(output, "precache-manifest.json");
 writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 

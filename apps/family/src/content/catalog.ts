@@ -174,6 +174,22 @@ export function validateContentCatalog(): ContentIssue[] {
       if (question.pairs.some((pair) => !pair.left.trim() || !pair.right.trim())) {
         issues.push({ code: "empty-match-label", message: `${question.id} has an empty match label`, questionId: question.id, skillId: question.skillId });
       }
+      for (const pair of question.pairs) {
+        if (pair.rightImage && !KNOWN_IMAGE_NAMES.has(pair.rightImage)) {
+          issues.push({ code: "unknown-match-image", message: `${question.id} references unknown picture ${pair.rightImage}`, questionId: question.id, skillId: question.skillId });
+        }
+        if (pair.rightImage && !pair.right.trim()) {
+          issues.push({ code: "empty-match-picture-label", message: `${question.id} picture pair has no word`, questionId: question.id, skillId: question.skillId });
+        }
+      }
+      if (question.template === "match-listen-word" || question.template === "match-listen-wh") {
+        if (question.pairs.some((pair) => !pair.audioText)) {
+          issues.push({ code: "missing-listen-pair-audio", message: `${question.id} listening match pair has no audio`, questionId: question.id, skillId: question.skillId });
+        }
+      }
+      if (question.template === "match-listen-word" && question.pairs.some((pair) => !pair.rightImage)) {
+        issues.push({ code: "missing-match-picture", message: `${question.id} listening match pair has no picture`, questionId: question.id, skillId: question.skillId });
+      }
       if (!question.leftLabel.trim() || !question.rightLabel.trim()) {
         issues.push({ code: "missing-match-column-label", message: `${question.id} has no column label`, questionId: question.id, skillId: question.skillId });
       }

@@ -12,9 +12,29 @@ describe("bundled audio assets", () => {
     }
   });
 
+  it("does not reuse one recording for two different spoken texts", () => {
+    const seen = new Map<string, string>();
+    for (const [text, asset] of Object.entries(AUDIO_ASSETS)) {
+      const previous = seen.get(asset);
+      if (previous) expect(previous, asset).toBe(text);
+      seen.set(asset, text);
+    }
+  });
+
   it("gives every question a bundled recording", () => {
     for (const question of QUESTIONS) {
       expect(AUDIO_ASSETS[question.audioText ?? question.prompt], question.id).toBeTruthy();
+    }
+  });
+
+  it("gives every matching pair with speech a bundled recording", () => {
+    for (const question of QUESTIONS) {
+      if (question.kind !== "match") continue;
+      for (const pair of question.pairs) {
+        if (pair.audioText) {
+          expect(AUDIO_ASSETS[pair.audioText], `${question.id}: ${pair.audioText}`).toBeTruthy();
+        }
+      }
     }
   });
 

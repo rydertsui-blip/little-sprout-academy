@@ -696,15 +696,36 @@ export default function App() {
             </div>
             <button className="primary-button teacher-start" type="button" onClick={startRecommendedLearning}>{ui.child.start}<small aria-hidden="true">{homeHasSession ? ui.child.startContinue(subjectName(homeSubject, systemLocale), homeRemaining) : ui.child.startToday(subjectName(homeSubject, systemLocale), homeRemaining)}</small><ArrowRight aria-hidden="true" /></button>
           </section>
+          <div className="island-trail" aria-hidden="true" data-testid="island-trail">
+            <span className="island-trail-label">{ui.child.todayTrail}</span>
+            <div className="island-trail-track">
+              {homeCards.map((card, index) => (
+                <span key={card.subject} className={`island-trail-stop ${homeSubject === card.subject ? "is-current" : ""}`} data-testid="island-trail-stop">
+                  <i>{index + 1}</i>
+                  <b>{card.shortLabel}</b>
+                </span>
+              ))}
+            </div>
+          </div>
           <div className="subject-grid">
-            {homeCards.map((card) => {
+            {homeCards.map((card, index) => {
               const progress = buildSubjectProgressView(activeChild, card.subject);
               const reviewCount = Math.min(progress.dueReviewCount, activeChild.settings.sessionLength <= 6 ? 1 : 2);
+              const isToday = homeSubject === card.subject;
               return (
-              <button key={card.subject} className={`subject-card ${card.className}`} type="button" aria-label={card.title} onClick={() => startSubject(card.subject)}>
-                <div className="subject-art"><img src={`./assets/images/${card.image}.png`} alt="" /></div>
+              <button key={card.subject} className={`subject-card ${card.className}${isToday ? " is-today" : ""}`} type="button" aria-label={card.title} onClick={() => startSubject(card.subject)}>
+                <div className="subject-art">
+                  <span className="island-step" aria-hidden="true">{index + 1}</span>
+                  {progress.todayCompleted ? (
+                    <span className="island-done" aria-hidden="true" data-testid="island-done"><Check aria-hidden="true" /></span>
+                  ) : null}
+                  <img src={`./assets/images/${card.image}.png`} alt="" />
+                </div>
                 <div className="subject-copy">
-                  <span>{ui.child.island}</span>
+                  <div className="subject-kicker">
+                    <span>{ui.child.island}</span>
+                    {isToday ? <em className="today-tag" data-testid="island-today">{ui.child.todayHere}</em> : null}
+                  </div>
                   <strong>{card.title}</strong>
                   <DailyMissionCard
                     progress={progress}
@@ -904,6 +925,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
   const [hintOpen, setHintOpen] = useState(false);
   const [hintUsed, setHintUsed] = useState(false);
   const [pendingWrong, setPendingWrong] = useState<string | null>(null);
+  const [audioStatus, setAudioStatus] = useState<{ id: string; status: "playing" | "error" } | null>(null);
   const locale = subjectLocale(question.subject);
   const copy = uiCopyFor(locale);
   const hint = hintForQuestion(question, locale);
@@ -916,7 +938,12 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
     setHintOpen(false);
     setHintUsed(false);
     setPendingWrong(null);
+    setAudioStatus(null);
   }, [question.id]);
+
+  useEffect(() => {
+    setAudioStatus(null);
+  }, [feedback]);
 
   useEffect(() => () => stopAudio(), []);
 
@@ -970,20 +997,45 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
     void onAnswer(false, pendingWrong, 0, true);
   }
 
+  function playQuizAudio(id: string, text: string, languageCode: string) {
+    setAudioStatus({ id, status: "playing" });
+    playOrSpeak(text, languageCode, (status) => {
+      if (status === "ended") {
+        setAudioStatus((current) => current?.id === id ? null : current);
+      } else if (status === "error") {
+        setAudioStatus((current) => current?.id === id ? { id, status: "error" } : current);
+      }
+    });
+  }
+
+  function audioStateFor(id: string): "playing" | "error" | null {
+    return audioStatus?.id === id ? audioStatus.status : null;
+  }
+
+  function audioTextFor(id: string, fallback: string): string {
+    const status = audioStateFor(id);
+    return status === "playing" ? copy.session.audioPlaying : status === "error" ? copy.session.audioError : fallback;
+  }
+
   const matchQuestion = question.kind === "match" ? question : null;
+  const questionAudioStatus = audioStateFor("question");
+  const teachAudioStatus = audioStateFor("teach");
+  const hintAudioStatus = audioStateFor("hint");
+  const feedbackAudioStatus = audioStateFor("feedback");
+  const teachInitiallyOpen = typeof window === "undefined" || (window.innerWidth >= 768 && window.innerHeight >= 700);
   return (
-    <main className={`quiz-layout quiz-${question.subject}${question.passage ? " quiz-reading" : ""}`} lang={contentLanguage}>
+    <main className={`quiz-layout quiz-${question.subject}${question.passage ? " quiz-reading" : ""}${matchQuestion ? " quiz-match" : ""}${feedback ? " is-feedback" : ""}`} lang={contentLanguage}>
       <section className="quiz-stage">
         <div className="quiz-skill-chip">{subjectName(question.subject, locale)}<span>{skillTitle(question.skillId, locale)}</span></div>
-        <button className={`audio-button ${question.audioOnly ? "is-game-listen" : ""}`} type="button" onClick={() => playOrSpeak(preAnswerAudio(question), language)} aria-label={question.audioOnly ? copy.session.listenSound : copy.session.listenQuestion}><Headphones aria-hidden="true" /><span>{question.audioOnly ? copy.session.listenSound : copy.session.listenQuestion}</span></button>
+        <button className={`audio-button ${question.audioOnly ? "is-game-listen" : ""} ${questionAudioStatus ? `is-${questionAudioStatus}` : ""}`} type="button" onClick={() => playQuizAudio("question", preAnswerAudio(question), language)} aria-label={questionAudioStatus === "playing" ? copy.session.audioPlaying : questionAudioStatus === "error" ? copy.session.audioError : question.audioOnly ? copy.session.listenSound : copy.session.listenQuestion}><Headphones aria-hidden="true" /><span>{audioTextFor("question", question.audioOnly ? copy.session.listenSound : copy.session.listenQuestion)}</span></button>
         {teach ? (
-          <details className="skill-teach" open>
+          <details className="skill-teach" open={teachInitiallyOpen}>
             <summary>{copy.session.teachSummary}<small className="skill-teach-toggle">{copy.session.teachToggle}</small></summary>
             <div className="skill-teach-body">
               <strong>{teach.title}</strong>
               <p>{teach.body}</p>
               {teach.example ? <small>{teach.example}</small> : null}
-              <button className="quiet-button compact-button teach-audio" type="button" aria-label={copy.session.teachAudio} onClick={() => playOrSpeak(`${teach.title}${locale === "en" ? ". " : "。"}${teach.body}${teach.example ? `${locale === "en" ? ". " : "。"}${teach.example}` : ""}`, teachLanguage)}><Volume2 aria-hidden="true" />{copy.session.listenOnce}</button>
+              <button className={`quiet-button compact-button teach-audio ${teachAudioStatus ? `is-${teachAudioStatus}` : ""}`} type="button" aria-label={teachAudioStatus === "playing" ? copy.session.audioPlaying : teachAudioStatus === "error" ? copy.session.audioError : copy.session.teachAudio} onClick={() => playQuizAudio("teach", `${teach.title}${locale === "en" ? ". " : "。"}${teach.body}${teach.example ? `${locale === "en" ? ". " : "。"}${teach.example}` : ""}`, teachLanguage)}><Volume2 aria-hidden="true" />{audioTextFor("teach", copy.session.listenOnce)}</button>
             </div>
           </details>
         ) : null}
@@ -992,7 +1044,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
         {question.image ? <img className="question-image" src={`./assets/images/${question.image}.png`} alt="" /> : null}
         {question.kind !== "match" ? <p className="question-instruction">{question.instruction}</p> : null}
         <h2 data-testid="question-prompt" data-question-id={question.id}>{question.prompt}</h2>
-        {question.subject === "math" ? <MathTool question={question} /> : null}
+        {question.subject === "math" ? <MathTool question={question} defaultOpen={question.kind !== "match"} /> : null}
         {question.skillId === "english-sentence-order" ? <LanguageTool question={question} /> : null}
       </section>
       <section className="answer-panel">
@@ -1002,7 +1054,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
         </div>
         {hintOpen ? (
           <div className="hint-card" aria-live="polite">
-            <div><Lightbulb aria-hidden="true" /><strong>{copy.session.hintTitle}</strong><button className="icon-button hint-audio" type="button" aria-label={copy.session.listenHint} onClick={() => playOrSpeak(hint, language)}><Volume2 aria-hidden="true" /></button></div>
+            <div><Lightbulb aria-hidden="true" /><strong>{copy.session.hintTitle}</strong><button className={`icon-button hint-audio ${hintAudioStatus ? `is-${hintAudioStatus}` : ""}`} type="button" aria-label={hintAudioStatus === "playing" ? copy.session.audioPlaying : hintAudioStatus === "error" ? copy.session.audioError : copy.session.listenHint} onClick={() => playQuizAudio("hint", hint, language)}><Volume2 aria-hidden="true" /></button></div>
             <p>{hint}</p>
           </div>
         ) : null}
@@ -1026,13 +1078,15 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
         ) : null}
         {feedback ? (
           <div ref={feedbackRef} className={`answer-feedback ${correct ? "correct-feedback" : "wrong-feedback"}`} data-testid="answer-feedback" aria-live="polite">
-            <div className="feedback-title">{correct
-              ? <><Check aria-hidden="true" />{question.kind === "match" ? copy.session.matchCorrectTitle : copy.session.correctTitle}</>
-              : <><X aria-hidden="true" />{question.kind === "match" ? copy.session.matchWrongTitle : copy.session.wrongTitle}</>}
+            <div className="feedback-title">
+              <img className="feedback-mascot" data-testid="feedback-mascot" src="./assets/images/sprout-teacher.png" alt="" aria-hidden="true" />
+              <span className="feedback-heading">{correct
+                ? <><Check aria-hidden="true" />{question.kind === "match" ? copy.session.matchCorrectTitle : copy.session.correctTitle}</>
+                : <><X aria-hidden="true" />{question.kind === "match" ? copy.session.matchWrongTitle : copy.session.wrongTitle}</>}</span>
             </div>
             {question.kind === "match" && feedback.mismatchCount ? <p className="match-mismatch-note">{copy.session.matchMismatchNote(feedback.mismatchCount)}</p> : null}
             <p>{question.explanation}</p>
-            <button className="quiet-button compact-button feedback-audio" type="button" aria-label={copy.session.explanationAudio} onClick={() => playOrSpeak(question.explanation, language)}><Volume2 aria-hidden="true" />{copy.session.listenExplanation}</button>
+            <button className={`quiet-button compact-button feedback-audio ${feedbackAudioStatus ? `is-${feedbackAudioStatus}` : ""}`} type="button" aria-label={feedbackAudioStatus === "playing" ? copy.session.audioPlaying : feedbackAudioStatus === "error" ? copy.session.audioError : copy.session.explanationAudio} onClick={() => playQuizAudio("feedback", question.explanation, language)}><Volume2 aria-hidden="true" />{audioTextFor("feedback", copy.session.listenExplanation)}</button>
             <button className="primary-button wide-button" type="button" onClick={onNext}>{copy.session.next}<ArrowRight aria-hidden="true" /></button>
           </div>
         ) : pendingWrong ? (

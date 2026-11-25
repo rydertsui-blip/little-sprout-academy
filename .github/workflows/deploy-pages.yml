@@ -1,0 +1,74 @@
+name: Deploy Little Sprout Family PWA to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/family/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/family
+        run: npm ci
+
+      - name: Run tests
+        working-directory: apps/family
+        run: npm test
+
+      - name: Build production bundle
+        working-directory: apps/family
+        run: npm run build
+
+      - name: Prepare GitHub Pages site directory
+        run: |
+          mkdir -p _site/family
+          cp -R family/. _site/family/
+          cat <<'EOF' > _site/index.html
+          <!doctype html>
+          <html lang="zh-Hans">
+            <head>
+              <meta charset="UTF-8" />
+              <meta http-equiv="refresh" content="0; url=./family/" />
+              <title>小芽家庭学习岛</title>
+            </head>
+            <body>
+              <p>正在跳转到 <a href="./family/">小芽家庭学习岛</a>…</p>
+            </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
