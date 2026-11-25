@@ -477,8 +477,8 @@ export default function App() {
     const priority = { "review-due": 0, "prerequisite-gap": 1, "weak-skill": 2, "new-skill": 3 } as const;
     const recommendation = buildChildInsights(activeChild).sort((a, b) => priority[a.reason] - priority[b.reason])[0];
     const subject = recommendation?.subject ?? "math";
-    const voice = subject === "math" ? "Today we will start with mathematics. Ready?" : subject === "mandarin" ? VOICE_LINES.startMandarin : "Today we will start with English. Ready?";
-    playOrSpeak(voice, subject === "mandarin" ? "zh-CN" : "en-US");
+    const voice = subject === "math" ? VOICE_LINES.startMath : subject === "mandarin" ? VOICE_LINES.startMandarin : VOICE_LINES.startEnglish;
+    playOrSpeak(voice, "zh-CN");
     startSubject(subject);
   }
 
@@ -1057,7 +1057,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
         ) : matchQuestion ? (
           <MatchingBoard key={matchQuestion.id} question={matchQuestion} disabled={Boolean(feedback)} onComplete={(matchCorrect, mismatchCount) => onAnswer(matchCorrect, "match", mismatchCount, hintUsed || Boolean(teach))} />
         ) : orderQuestion ? (
-          <OrderBoard key={orderQuestion.id} question={orderQuestion} disabled={Boolean(feedback)} onComplete={(orderCorrect, assembled) => onAnswer(orderCorrect, assembled, 0, hintUsed || Boolean(teach))} />
+          <OrderBoard key={orderQuestion.id} question={orderQuestion} disabled={Boolean(feedback)} feedback={feedback} onComplete={(orderCorrect, assembled) => onAnswer(orderCorrect, assembled, 0, hintUsed || Boolean(teach))} />
         ) : null}
         {feedback ? (
           <div ref={feedbackRef} className={`answer-feedback ${correct ? "correct-feedback" : "wrong-feedback"}`} data-testid="answer-feedback" aria-live="polite">

@@ -6,6 +6,7 @@ import type { OrderQuestion } from "../lib/types";
 interface OrderBoardProps {
   question: OrderQuestion;
   disabled: boolean;
+  feedback?: { correct: boolean; answer: string } | null;
   onComplete: (correct: boolean, assembled: string) => void;
 }
 
@@ -27,7 +28,7 @@ function deterministicTokenOrder(question: OrderQuestion): Array<{ index: number
   return items;
 }
 
-export default function OrderBoard({ question, disabled, onComplete }: OrderBoardProps) {
+export default function OrderBoard({ question, disabled, feedback = null, onComplete }: OrderBoardProps) {
   const locale = subjectLocale(question.subject);
   const bankTokens = useMemo(() => deterministicTokenOrder(question), [question]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
@@ -38,6 +39,7 @@ export default function OrderBoard({ question, disabled, onComplete }: OrderBoar
 
   const targetLength = question.correctOrder.length;
   const isComplete = selectedIndices.length === targetLength;
+  const slotsStateClass = feedback ? (feedback.correct ? "is-correct" : "is-wrong") : "";
 
   function pickToken(tokenIndex: number) {
     if (disabled || selectedIndices.includes(tokenIndex) || isComplete) return;
@@ -64,7 +66,7 @@ export default function OrderBoard({ question, disabled, onComplete }: OrderBoar
 
   return (
     <div className="order-board" data-testid="order-board">
-      <div className="order-slots" aria-label={locale === "zh" ? "已选顺序" : "Selected order"}>
+      <div className={`order-slots ${slotsStateClass}`.trim()} aria-label={locale === "zh" ? "已选顺序" : "Selected order"}>
         {Array.from({ length: targetLength }, (_, slotPos) => {
           const tokenIdx = selectedIndices[slotPos];
           const label = tokenIdx !== undefined ? question.tokens[tokenIdx] : null;
@@ -72,7 +74,7 @@ export default function OrderBoard({ question, disabled, onComplete }: OrderBoar
             <button
               key={slotPos}
               type="button"
-              className={`order-slot ${label ? "is-filled" : "is-empty"}`}
+              className={`order-slot ${label ? "is-filled" : "is-empty"} ${label && slotsStateClass ? slotsStateClass : ""}`.trim()}
               disabled={disabled || !label}
               onClick={() => removeSlot(slotPos)}
               aria-label={label ? `${label}` : `${slotPos + 1}`}
@@ -82,6 +84,13 @@ export default function OrderBoard({ question, disabled, onComplete }: OrderBoar
           );
         })}
       </div>
+
+      {feedback && !feedback.correct ? (
+        <div className="order-correct-preview" data-testid="order-correct-preview">
+          <small>{locale === "zh" ? "正确顺序" : "Correct order"}</small>
+          <strong>{question.correctOrder.join(question.separator ?? "")}</strong>
+        </div>
+      ) : null}
 
       <div className="order-bank" aria-label={locale === "zh" ? "词语选项" : "Word bank"}>
         {bankTokens.map(({ index, label }) => {

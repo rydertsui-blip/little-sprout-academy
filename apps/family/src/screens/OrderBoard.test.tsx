@@ -51,4 +51,18 @@ describe("OrderBoard", () => {
     fireEvent.click(screen.getByRole("button", { name: /Check/i }));
     expect(onComplete).toHaveBeenCalledWith(true, "I like apples.");
   });
+
+  it("shows wrong state and correct order preview when feedback is wrong", () => {
+    render(
+      <OrderBoard
+        question={sampleQuestion}
+        disabled={true}
+        feedback={{ correct: false, answer: "apples. like I" }}
+        onComplete={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("order-correct-preview")).toHaveTextContent("I like apples.");
+    expect(screen.getByLabelText("Selected order").className).toContain("is-wrong");
+  });
 });
