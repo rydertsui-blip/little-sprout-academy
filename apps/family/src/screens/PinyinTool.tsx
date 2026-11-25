@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Volume2 } from "lucide-react";
 import { playOrSpeak } from "../lib/audio";
+import {
+  PINYIN_FINALS,
+  PINYIN_INITIALS,
+  PINYIN_WHOLE_SYLLABLES,
+  type PinyinGroup,
+  type PinyinUnit,
+} from "../content/pinyinChart";
 import type { Question } from "../lib/types";
 
 interface ToneDemo {
@@ -54,6 +61,21 @@ const PINYIN_SKILLS = new Set([
   "mandarin-syllables",
 ]);
 
+const CHART_GROUPS: ReadonlyArray<{ id: PinyinGroup; label: string; units: readonly PinyinUnit[] }> = [
+  { id: "initials", label: "声母 (23)", units: PINYIN_INITIALS },
+  { id: "finals", label: "韵母 (24)", units: PINYIN_FINALS },
+  { id: "whole", label: "整体认读 (16)", units: PINYIN_WHOLE_SYLLABLES },
+];
+
+function stripToneMarks(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/v/g, "ü")
+    .toLowerCase()
+    .trim();
+}
+
 function usesMaCharacter(question: Question): boolean {
   const combined = `${question.displayCharacter ?? ""}${question.prompt}`;
   return combined.includes("妈") || combined.includes("马");
@@ -70,20 +92,36 @@ function safeBlendDemos(question: Question): BlendDemo[] {
   return (filtered.length >= 3 ? filtered : BLEND_DEMOS).slice(0, 3);
 }
 
+function defaultChartGroup(skillId: string): PinyinGroup {
+  if (skillId === "mandarin-finals") return "finals";
+  if (skillId === "mandarin-syllables") return "whole";
+  return "initials";
+}
+
 export function PinyinTool({ question, defaultOpen = true }: { question: Question; defaultOpen?: boolean }) {
   const [activeTone, setActiveTone] = useState<number | null>(null);
   const [demoIndex, setDemoIndex] = useState(0);
   const [activePart, setActivePart] = useState<"initial" | "final" | "blend" | null>(null);
+  const [viewMode, setViewMode] = useState<"blend" | "chart">("blend");
+  const [chartGroup, setChartGroup] = useState<PinyinGroup>(() => defaultChartGroup(question.skillId));
+  const [activeSymbol, setActiveSymbol] = useState<string | null>(null);
 
   useEffect(() => {
     setActiveTone(null);
     setDemoIndex(0);
     setActivePart(null);
-  }, [question.id]);
+    setViewMode("blend");
+    setChartGroup(defaultChartGroup(question.skillId));
+    setActiveSymbol(null);
+  }, [question.id, question.skillId]);
 
   const isToneSkill = question.skillId === "mandarin-tones";
   const toneSet = useMemo(() => (usesMaCharacter(question) ? TONE_SET_BA : TONE_SET_MA), [question]);
   const blendDemos = useMemo(() => safeBlendDemos(question), [question]);
+  const hiddenAnswer = useMemo(() => {
+    if (question.kind !== "choice") return "";
+    return stripToneMarks(question.correctAnswer);
+  }, [question]);
 
   if (!PINYIN_SKILLS.has(question.skillId)) return null;
 
@@ -134,79 +172,152 @@ export function PinyinTool({ question, defaultOpen = true }: { question: Questio
   }
 
   const currentDemo = blendDemos[demoIndex] ?? blendDemos[0];
+  const currentGroup = CHART_GROUPS.find((item) => item.id === chartGroup) ?? CHART_GROUPS[0];
+
   return (
     <details className="math-tool pinyin-tool" aria-label="拼音教具：拼读积木台" open={defaultOpen}>
       <summary>
         <span>拼音教具</span>
-        <strong>拼读积木台</strong>
-        <small>点一点学拼读</small>
+        <strong>拼读积木台 · 拼音表</strong>
+        <small>点一点学发音</small>
       </summary>
       <div className="math-tool-body pinyin-tool-body" data-testid="pinyin-blend-board">
-        <div className="pinyin-demo-tabs" role="group" aria-label="示范拼读例字">
-          {blendDemos.map((demo, idx) => (
-            <button
-              key={demo.id}
-              type="button"
-              className={`pinyin-demo-tab ${idx === demoIndex ? "is-active" : ""}`}
-              aria-pressed={idx === demoIndex}
-              onClick={() => {
-                setDemoIndex(idx);
-                setActivePart(null);
-              }}
-            >
-              {demo.char} {demo.syllable}
-            </button>
-          ))}
-        </div>
-
-        <div className="pinyin-blend-row">
+        <div className="pinyin-mode-switch" role="tablist" aria-label="拼音教具模式">
           <button
             type="button"
-            className={`pinyin-block pinyin-block-initial ${activePart === "initial" ? "is-active" : ""}`}
-            onClick={() => {
-              setActivePart("initial");
-              playOrSpeak(currentDemo.initialAudio, "zh-CN");
-            }}
+            role="tab"
+            aria-selected={viewMode === "blend"}
+            className={`pinyin-demo-tab ${viewMode === "blend" ? "is-active" : ""}`}
+            onClick={() => setViewMode("blend")}
           >
-            <small>声母</small>
-            <strong>{currentDemo.initial}</strong>
-            <Volume2 aria-hidden="true" />
+            拼读积木
           </button>
-
-          <span className="pinyin-plus" aria-hidden="true">+</span>
-
           <button
             type="button"
-            className={`pinyin-block pinyin-block-final ${activePart === "final" ? "is-active" : ""}`}
-            onClick={() => {
-              setActivePart("final");
-              playOrSpeak(currentDemo.finalAudio, "zh-CN");
-            }}
+            role="tab"
+            aria-selected={viewMode === "chart"}
+            className={`pinyin-demo-tab ${viewMode === "chart" ? "is-active" : ""}`}
+            onClick={() => setViewMode("chart")}
           >
-            <small>韵母</small>
-            <strong>{currentDemo.final}</strong>
-            <Volume2 aria-hidden="true" />
-          </button>
-
-          <span className="pinyin-plus" aria-hidden="true">=</span>
-
-          <button
-            type="button"
-            className={`pinyin-block pinyin-block-result ${activePart === "blend" ? "is-active" : ""}`}
-            onClick={() => {
-              setActivePart("blend");
-              playOrSpeak(currentDemo.syllableAudio, "zh-CN");
-            }}
-          >
-            <small>拼一拼</small>
-            <strong>{currentDemo.syllable}</strong>
-            <em>{currentDemo.char}</em>
+            全部拼音表 (63)
           </button>
         </div>
 
-        <p className="pinyin-tool-caption">
-          先点声母、再点韵母，最后点“拼一拼”听它们合在一起的声音。
-        </p>
+        {viewMode === "blend" ? (
+          <>
+            <div className="pinyin-demo-tabs" role="group" aria-label="示范拼读例字">
+              {blendDemos.map((demo, idx) => (
+                <button
+                  key={demo.id}
+                  type="button"
+                  className={`pinyin-demo-tab ${idx === demoIndex ? "is-active" : ""}`}
+                  aria-pressed={idx === demoIndex}
+                  onClick={() => {
+                    setDemoIndex(idx);
+                    setActivePart(null);
+                  }}
+                >
+                  {demo.char} {demo.syllable}
+                </button>
+              ))}
+            </div>
+
+            <div className="pinyin-blend-row">
+              <button
+                type="button"
+                className={`pinyin-block pinyin-block-initial ${activePart === "initial" ? "is-active" : ""}`}
+                onClick={() => {
+                  setActivePart("initial");
+                  playOrSpeak(currentDemo.initialAudio, "zh-CN");
+                }}
+              >
+                <small>声母</small>
+                <strong>{currentDemo.initial}</strong>
+                <Volume2 aria-hidden="true" />
+              </button>
+
+              <span className="pinyin-plus" aria-hidden="true">+</span>
+
+              <button
+                type="button"
+                className={`pinyin-block pinyin-block-final ${activePart === "final" ? "is-active" : ""}`}
+                onClick={() => {
+                  setActivePart("final");
+                  playOrSpeak(currentDemo.finalAudio, "zh-CN");
+                }}
+              >
+                <small>韵母</small>
+                <strong>{currentDemo.final}</strong>
+                <Volume2 aria-hidden="true" />
+              </button>
+
+              <span className="pinyin-plus" aria-hidden="true">=</span>
+
+              <button
+                type="button"
+                className={`pinyin-block pinyin-block-result ${activePart === "blend" ? "is-active" : ""}`}
+                onClick={() => {
+                  setActivePart("blend");
+                  playOrSpeak(currentDemo.syllableAudio, "zh-CN");
+                }}
+              >
+                <small>拼一拼</small>
+                <strong>{currentDemo.syllable}</strong>
+                <em>{currentDemo.char}</em>
+              </button>
+            </div>
+
+            <p className="pinyin-tool-caption">
+              先点声母、再点韵母，最后点“拼一拼”听它们合在一起的声音。
+            </p>
+          </>
+        ) : (
+          <div className="pinyin-chart-panel" data-testid="pinyin-full-chart">
+            <div className="pinyin-demo-tabs" role="group" aria-label="拼音分类">
+              {CHART_GROUPS.map((group) => (
+                <button
+                  key={group.id}
+                  type="button"
+                  className={`pinyin-demo-tab ${group.id === chartGroup ? "is-active" : ""}`}
+                  aria-pressed={group.id === chartGroup}
+                  onClick={() => {
+                    setChartGroup(group.id);
+                    setActiveSymbol(null);
+                  }}
+                >
+                  {group.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="pinyin-chart-grid">
+              {currentGroup.units.map((unit) => {
+                const isMasked = hiddenAnswer !== "" && stripToneMarks(unit.symbol) === hiddenAnswer;
+                const isActive = activeSymbol === unit.symbol;
+                return (
+                  <button
+                    key={`${unit.group}-${unit.symbol}`}
+                    type="button"
+                    className={`pinyin-chart-key ${isActive ? "is-active" : ""} ${isMasked ? "is-masked" : ""}`}
+                    disabled={isMasked}
+                    aria-label={isMasked ? "本题答案已隐藏" : `听拼音 ${unit.symbol}`}
+                    aria-pressed={isActive}
+                    onClick={() => {
+                      setActiveSymbol(unit.symbol);
+                      playOrSpeak(unit.audioKey, "zh-CN");
+                    }}
+                  >
+                    <strong>{isMasked ? "？" : unit.symbol}</strong>
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="pinyin-tool-caption">
+              点任意拼音听标准读音；当前题目的答案已自动隐藏，放心练习。
+            </p>
+          </div>
+        )}
       </div>
     </details>
   );

@@ -203,6 +203,6 @@ async function run(): Promise<void> {
   console.log(`Successfully rebuilt all ${completed} audio files.`);
 }
 
-if (process.argv[1]?.endsWith("rebuild-audio.ts")) {
+if (process.argv[1]?.endsWith("rebuild-audio.ts") || process.argv[1]?.endsWith("rebuild-audio.mjs")) {
   void run();
 }

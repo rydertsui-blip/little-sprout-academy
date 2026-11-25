@@ -512,6 +512,14 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
 .pinyin-block svg { width: 15px; height: 15px; color: var(--muted); }
 .pinyin-plus { font-size: 22px; font-weight: 900; color: var(--ink); }
 .pinyin-tool-caption { margin: 0; color: var(--muted); font-size: 12px; font-weight: 800; text-align: center; }
+.pinyin-mode-switch { display: flex; justify-content: center; gap: 6px; padding-bottom: 4px; border-bottom: 1px dashed rgba(23, 50, 77, 0.12); }
+.pinyin-chart-panel { display: grid; gap: 10px; }
+.pinyin-chart-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 6px; }
+.pinyin-chart-key { min-height: 44px; padding: 6px 4px; border-radius: 12px; border: 1.5px solid rgba(23, 50, 77, 0.14); background: #fff; color: var(--ink); display: grid; place-items: center; cursor: pointer; transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease; }
+.pinyin-chart-key strong { font-size: 17px; line-height: 1; font-weight: 800; }
+.pinyin-chart-key:hover:not(:disabled) { transform: translateY(-1px); border-color: rgba(241, 119, 94, 0.45); background: #fffaf7; }
+.pinyin-chart-key.is-active { border-color: var(--coral); background: #fff2ec; color: var(--coral-dark, #c84b31); }
+.pinyin-chart-key.is-masked, .pinyin-chart-key:disabled { background: rgba(23, 50, 77, 0.05); border-style: dashed; color: var(--muted); cursor: not-allowed; opacity: 0.72; }
 @media (max-width: 520px) {
   .tone-coaster-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pinyin-block { min-width: 68px; min-height: 70px; padding: 6px 8px; }
