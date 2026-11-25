@@ -185,7 +185,6 @@ export default function App() {
   const systemLocale: Locale = household?.uiLocale ?? "zh";
   const ui = uiCopyFor(systemLocale);
   const [screen, setScreen] = useState<Screen>("profiles");
-  const [speakingSubject, setSpeakingSubject] = useState<"mandarin" | "english" | null>(null);
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
   const [showParentGate, setShowParentGate] = useState(false);
   const [setupError, setSetupError] = useState("");
@@ -482,11 +481,7 @@ export default function App() {
     startSubject(subject);
   }
 
-  function openSpeaking(subject?: "mandarin" | "english") {
-    setSpeakingSubject(subject ?? null);
-    playOrSpeak(VOICE_LINES.speakingIntro, "zh-CN");
-    setScreen("speaking");
-  }
+
 
   async function recordHandwriting(entry: HandwritingCharacter, mistakes: number): Promise<boolean> {
     if (!activeChild) return false;
@@ -576,7 +571,7 @@ export default function App() {
   }
 
   if (screen === "speaking" && activeChild) {
-    return <>{storageBanner}<SpeakingScreen child={activeChild} subject={speakingSubject ?? undefined} onBack={() => setScreen("child")} onLock={lockHousehold} /></>;
+    return <>{storageBanner}<SpeakingScreen child={activeChild} onBack={() => setScreen("child")} onLock={lockHousehold} /></>;
   }
 
   if (screen === "companions" && activeChild) {
@@ -711,38 +706,30 @@ export default function App() {
               const reviewCount = Math.min(progress.dueReviewCount, activeChild.settings.sessionLength <= 6 ? 1 : 2);
               const isToday = homeSubject === card.subject;
               return (
-              <div key={card.subject} className="subject-island-wrap">
-                <button className={`subject-card ${card.className}${isToday ? " is-today" : ""}`} type="button" aria-label={card.title} onClick={() => startSubject(card.subject)}>
-                  <div className="subject-art">
-                    <span className="island-step" aria-hidden="true">{index + 1}</span>
-                    {progress.todayCompleted ? (
-                      <span className="island-done" aria-hidden="true" data-testid="island-done"><Check aria-hidden="true" /></span>
-                    ) : null}
-                    <img src={`./assets/images/${card.image}.png`} alt="" />
+              <button key={card.subject} className={`subject-card ${card.className}${isToday ? " is-today" : ""}`} type="button" aria-label={card.title} onClick={() => startSubject(card.subject)}>
+                <div className="subject-art">
+                  <span className="island-step" aria-hidden="true">{index + 1}</span>
+                  {progress.todayCompleted ? (
+                    <span className="island-done" aria-hidden="true" data-testid="island-done"><Check aria-hidden="true" /></span>
+                  ) : null}
+                  <img src={`./assets/images/${card.image}.png`} alt="" />
+                </div>
+                <div className="subject-copy">
+                  <div className="subject-kicker">
+                    <span>{ui.child.island}</span>
+                    {isToday ? <em className="today-tag" data-testid="island-today">{ui.child.todayHere}</em> : null}
                   </div>
-                  <div className="subject-copy">
-                    <div className="subject-kicker">
-                      <span>{ui.child.island}</span>
-                      {isToday ? <em className="today-tag" data-testid="island-today">{ui.child.todayHere}</em> : null}
-                    </div>
-                    <strong>{card.title}</strong>
-                    <DailyMissionCard
-                      progress={progress}
-                      hasDiagnostic={Boolean(activeChild.diagnostics[card.subject])}
-                      hasActiveSession={Boolean(activeChild.activeSessions[card.subject])}
-                      reviewCount={reviewCount}
-                      locale={systemLocale}
-                    />
-                  </div>
-                  <div className="subject-status"><Star aria-hidden="true" /><span>{activeChild.activeSessions[card.subject] ? ui.child.continueSubject : activeChild.diagnostics[card.subject] ? ui.child.practiceSubject : ui.child.beginSubject}</span><ChevronRight aria-hidden="true" /></div>
-                </button>
-                {card.subject === "mandarin" || card.subject === "english" ? (
-                  <button className="quiet-button compact-button subject-speaking-pill" type="button" onClick={() => openSpeaking(card.subject as "mandarin" | "english")}>
-                    <Mic aria-hidden="true" />
-                    <span>{card.subject === "mandarin" ? "华文口语小游戏" : "English Speaking"}</span>
-                  </button>
-                ) : null}
-              </div>
+                  <strong>{card.title}</strong>
+                  <DailyMissionCard
+                    progress={progress}
+                    hasDiagnostic={Boolean(activeChild.diagnostics[card.subject])}
+                    hasActiveSession={Boolean(activeChild.activeSessions[card.subject])}
+                    reviewCount={reviewCount}
+                    locale={systemLocale}
+                  />
+                </div>
+                <div className="subject-status"><Star aria-hidden="true" /><span>{activeChild.activeSessions[card.subject] ? ui.child.continueSubject : activeChild.diagnostics[card.subject] ? ui.child.practiceSubject : ui.child.beginSubject}</span><ChevronRight aria-hidden="true" /></div>
+              </button>
               );
             })}
           </div>

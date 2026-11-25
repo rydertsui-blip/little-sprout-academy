@@ -219,8 +219,8 @@ describe("family learning app", () => {
     expect(screen.queryByRole("button", { name: /看笔顺，亲手写/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /写字练习/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /声音小游戏/ })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /华文口语小游戏/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /English Speaking/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /华文口语小游戏/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /English Speaking/ })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /跟小芽开始/ })).toBeInTheDocument();
   });
 
