@@ -497,7 +497,7 @@ export const GENERATED_AUDIO_ASSETS: AudioAssetMap = {
   "把词语和合适的量词配成一对。": "auto-79f8e62ace16",
   "把词语和类别连起来。": "auto-db525c3fc771",
   "把词语和英文意思配成一对。": "auto-6a536da3b1a9",
-  "把问题和听到的答案连起来。": "auto-6d092225270c",
+  "听一听词语，再连到正确的意思。": "auto-6d092225270c",
   "日": "auto-15917f3b3261",
   "早上": "auto-172fb7196ffc",
   "月": "auto-d9b59879f3b8",

@@ -32,16 +32,16 @@ const SPECS: MatchSeed[] = [
   },
   {
     skillId: "mandarin-listening",
-    prompt: "把问题和听到的答案连起来。",
-    instruction: "先听左边的答案，再点右边对应的问题。",
-    explanation: "听到“小明”点“谁”，听到“厨房”点“哪里”，听到“看书”点“做什么”。",
+    prompt: "听一听词语，再连到正确的意思。",
+    instruction: "先点左边听词语，再点右边它表示的是人物、地方还是动作。",
+    explanation: "“小明”是一个人的名字（人物），“厨房”是一个地方，“看书”是一个动作。",
     template: "match-listen-wh",
-    leftLabel: "听到的答案",
-    rightLabel: "问题",
+    leftLabel: "听到的词语",
+    rightLabel: "表示什么",
     pairs: [
-      { left: "小明", right: "谁", audioText: "小明", audioLanguage: "zh-CN" },
-      { left: "厨房", right: "哪里", audioText: "厨房", audioLanguage: "zh-CN" },
-      { left: "看书", right: "做什么", audioText: "看书", audioLanguage: "zh-CN" }
+      { left: "小明", right: "人物（谁）", audioText: "小明", audioLanguage: "zh-CN" },
+      { left: "厨房", right: "地方（哪里）", audioText: "厨房", audioLanguage: "zh-CN" },
+      { left: "看书", right: "动作（做什么）", audioText: "看书", audioLanguage: "zh-CN" }
     ]
   },
   {
