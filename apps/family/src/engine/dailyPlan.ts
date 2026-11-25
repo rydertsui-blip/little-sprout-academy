@@ -48,8 +48,16 @@ function currentSkillFor(child: ChildProfile, subject: Subject, now: Date) {
     ?? subjectSkills[0];
 }
 
+function targetDifficultyForPKnown(pKnown: number): 1 | 2 | 3 | 4 | 5 {
+  if (pKnown < 0.42) return 1;
+  if (pKnown < 0.60) return 2;
+  if (pKnown < 0.78) return 3;
+  if (pKnown < 0.90) return 4;
+  return 5;
+}
+
 function rankQuestions(
-  skills: Array<{ id: string; pKnown: number }>,
+  skills: Array<{ id: string; pKnown: number; seenTemplates: Record<string, number> }>,
   subject: Subject,
   recentIds: Set<string>,
   usedIds: Set<string>,
@@ -62,13 +70,15 @@ function rankQuestions(
     .sort((a, b) => {
       const aSkill = skills[skillOrder.get(a.skillId)!];
       const bSkill = skills[skillOrder.get(b.skillId)!];
-      const targetDifficulty = (pKnown: number) => pKnown < 0.55 ? 1 : pKnown < 0.8 ? 2 : 3;
       const transferRank = (question: Question) => question.transferLevel === "far-transfer" ? 0 : question.transferLevel === "near-transfer" ? 1 : 2;
+      const aSeen = aSkill.seenTemplates[a.template] ?? 0;
+      const bSeen = bSkill.seenTemplates[b.template] ?? 0;
       return (preferTransfer ? transferRank(a) - transferRank(b) : 0)
         || (skillOrder.get(a.skillId)! - skillOrder.get(b.skillId)!)
         || Number(recentIds.has(a.id)) - Number(recentIds.has(b.id))
         || Number(templatePenaltyIds.has(a.template)) - Number(templatePenaltyIds.has(b.template))
-        || Math.abs(a.difficulty - targetDifficulty(aSkill.pKnown)) - Math.abs(b.difficulty - targetDifficulty(bSkill.pKnown))
+        || aSeen - bSeen
+        || Math.abs(a.difficulty - targetDifficultyForPKnown(aSkill.pKnown)) - Math.abs(b.difficulty - targetDifficultyForPKnown(bSkill.pKnown))
         || a.id.localeCompare(b.id);
     });
 }
@@ -86,9 +96,10 @@ function takeQuestions(
   const skills = skillIds
     .map((id) => {
       const skill = SKILLS.find((item) => item.id === id);
-      return skill ? { id, pKnown: child.evidence[id]?.pKnown ?? 0.45 } : null;
+      const evidence = child.evidence[id];
+      return skill ? { id, pKnown: evidence?.pKnown ?? 0.45, seenTemplates: evidence?.diversity.templateFamilies ?? {} } : null;
     })
-    .filter((item): item is { id: string; pKnown: number } => Boolean(item));
+    .filter((item): item is { id: string; pKnown: number; seenTemplates: Record<string, number> } => Boolean(item));
   return rankQuestions(skills, subject, recentIds, usedIds, templatePenaltyIds, preferTransfer).slice(0, count);
 }
 

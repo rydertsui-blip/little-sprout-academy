@@ -53,9 +53,50 @@ export function createAdaptiveSession(
   return createSessionRecord(child, subject, now, kind, length);
 }
 
+function dynamicTargetDifficulty(pKnown: number): 1 | 2 | 3 | 4 | 5 {
+  if (pKnown < 0.42) return 1;
+  if (pKnown < 0.60) return 2;
+  if (pKnown < 0.78) return 3;
+  if (pKnown < 0.90) return 4;
+  return 5;
+}
+
+function selectFrustrationRecoveryQuestion(child: ChildProfile, session: SessionRecord, answered: Set<string>): Question | null {
+  const recentTwo = session.attempts.slice(-2);
+  if (recentTwo.length < 2 || recentTwo.some((attempt) => attempt.correct)) return null;
+  const strugglingSkillId = recentTwo.at(-1)!.skillId;
+  const strugglingSkill = getSkillById(strugglingSkillId);
+  const lastWrongQuestion = getQuestionById(recentTwo.at(-1)!.questionId);
+  const recoverySkillIds = new Set<string>([
+    strugglingSkillId,
+    ...(strugglingSkill?.prerequisites ?? []).filter((id) => child.settings.enabledSkills.includes(id))
+  ]);
+  const easyCandidates = getQuestionsForSubject(session.subject)
+    .filter((question) => recoverySkillIds.has(question.skillId)
+      && !answered.has(question.id)
+      && question.difficulty <= 2
+      && question.transferLevel === "same-context"
+      && (question.kind !== "match" || question.pairs.length === 3))
+    .sort((a, b) => {
+      const aSameSkill = a.skillId === strugglingSkillId ? 0 : 1;
+      const bSameSkill = b.skillId === strugglingSkillId ? 0 : 1;
+      const aDifferentTemplate = lastWrongQuestion && a.template === lastWrongQuestion.template ? 1 : 0;
+      const bDifferentTemplate = lastWrongQuestion && b.template === lastWrongQuestion.template ? 1 : 0;
+      return a.difficulty - b.difficulty
+        || aDifferentTemplate - bDifferentTemplate
+        || aSameSkill - bSameSkill
+        || a.id.localeCompare(b.id);
+    });
+  return easyCandidates[0] ?? null;
+}
+
 export function selectNextQuestion(child: ChildProfile, session: SessionRecord): Question | null {
   const answered = new Set(session.attempts.map((attempt) => attempt.questionId));
   if (session.attempts.length >= session.length) return null;
+  if (session.kind === "practice") {
+    const recovery = selectFrustrationRecoveryQuestion(child, session, answered);
+    if (recovery) return recovery;
+  }
   if (session.plannedQuestionIds.length > 0) {
     const planned = session.plannedQuestionIds.find((questionId) => !answered.has(questionId));
     if (planned) return getQuestionById(planned) ?? null;
@@ -86,8 +127,8 @@ export function selectNextQuestion(child: ChildProfile, session: SessionRecord):
   const recommendations = recommendedNextSkills(child, session.subject, new Date());
   for (const recommendation of recommendations) {
     const skillEvidence = child.evidence[recommendation.skill.id];
-    const baseDifficulty = skillEvidence.pKnown < 0.55 ? 1 : skillEvidence.pKnown < 0.8 ? 2 : 3;
-    const targetDifficulty = (session.attempts.length === 0 ? Math.max(baseDifficulty, startingDifficultyForLevel(child.gradeLevel)) : baseDifficulty) as 1 | 2 | 3;
+    const baseDifficulty = dynamicTargetDifficulty(skillEvidence.pKnown);
+    const targetDifficulty = (session.attempts.length === 0 ? Math.max(baseDifficulty, startingDifficultyForLevel(child.gradeLevel)) : baseDifficulty) as 1 | 2 | 3 | 4 | 5;
     const recentAttempts = session.attempts.slice(-4)
       .map((attempt) => getQuestionById(attempt.questionId))
       .filter((question): question is Question => Boolean(question));
