@@ -1,4 +1,4 @@
-const CACHE_NAME = "little-sprout-family-v3";
+const CACHE_NAME = "little-sprout-family-e94cd96d68f9";
 const CORE = [
   "./",
   "./index.html",
@@ -39,6 +39,7 @@ self.addEventListener("install", (event) => {
     const cache = await caches.open(CACHE_NAME);
     await Promise.all(CORE.map((path) => cache.add(path)));
     const indexResponse = await fetch("./index.html", { cache: "reload" });
+    if (!indexResponse.ok) throw new Error(`index precache failed: ${indexResponse.status}`);
     const indexCopy = indexResponse.clone();
     const indexHtml = await indexResponse.text();
     await cache.put("./index.html", indexCopy);
@@ -46,12 +47,21 @@ self.addEventListener("install", (event) => {
       .map((match) => match[1])
       .filter((path) => path.includes("assets/"));
     await Promise.all(linkedAssets.map((path) => cache.add(path)));
+    const manifestResponse = await fetch("./precache-manifest.json", { cache: "reload" });
+    if (!manifestResponse.ok) throw new Error(`precache manifest failed: ${manifestResponse.status}`);
+    const manifest = await manifestResponse.json();
+    const assetPaths = ["audio", "images", "companions"]
+      .flatMap((key) => Array.isArray(manifest[key]) ? manifest[key] : [])
+      .filter((path) => typeof path === "string" && path.startsWith("./"));
+    if (assetPaths.length === 0) throw new Error("precache manifest has no media assets");
+    await Promise.all(Array.from(new Set(assetPaths)).map((path) => cache.add(path)));
     const cssAssets = linkedAssets.filter((path) => path.endsWith(".css"));
     for (const cssPath of cssAssets) {
       const response = await fetch(cssPath, { cache: "reload" });
+      if (!response.ok) throw new Error(`css precache failed: ${response.status}`);
       const cssText = await response.text();
       const fontUrls = Array.from(cssText.matchAll(/url\(([^)]+)\)/g))
-        .map((match) => match[1].replace(/^['\"]|['\"]$/g, ""))
+        .map((match) => match[1].replace(/^['"]|['"]$/g, ""))
         .filter((path) => !path.startsWith("data:"))
         .map((path) => new URL(path, new URL(cssPath, self.location.href)).href);
       await Promise.all(fontUrls.map((path) => cache.add(path)));
@@ -70,12 +80,14 @@ self.addEventListener("fetch", (event) => {
     event.respondWith((async () => {
       try {
         const response = await fetch(event.request);
-        const copy = response.clone();
-        const cache = await caches.open(CACHE_NAME);
-        await cache.put("./index.html", copy);
+        if (response.ok) {
+          const copy = response.clone();
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put("./index.html", copy);
+        }
         return response;
       } catch {
-        return caches.match("./index.html");
+        return (await caches.match("./index.html")) ?? Response.error();
       }
     })());
     return;

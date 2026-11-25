@@ -1,0 +1,49 @@
+{
+  "id": "gemini-doudou",
+  "name": "豆豆",
+  "source": {
+    "type": "gemini-generated-sprite-sheet",
+    "file": "work/companion-concepts/gemini-doudou-sprite-sheet.jpeg",
+    "width": 1376,
+    "height": 768,
+    "columns": 4,
+    "rows": 3,
+    "sha256": "7411d4a878ea09c063f6c48d410f9a79d99adbc713a781b243c4635dc743bc72"
+  },
+  "frame": {
+    "width": 344,
+    "height": 256
+  },
+  "animations": {
+    "idle": {
+      "file": "idle.png",
+      "frames": 4,
+      "width": 1376,
+      "height": 256,
+      "frameWidth": 344,
+      "frameHeight": 256,
+      "frameMs": 240,
+      "sha256": "5f023fdcd35c936ec0975c6c16b105f0451f5bfbfc2fd177235dd61f5f502960"
+    },
+    "walk": {
+      "file": "walk.png",
+      "frames": 4,
+      "width": 1376,
+      "height": 256,
+      "frameWidth": 344,
+      "frameHeight": 256,
+      "frameMs": 150,
+      "sha256": "4a133212c48ccf1a0da08c180f501095fdc6d2629abb3fdb91f5e168e0fa0334"
+    },
+    "celebrate": {
+      "file": "celebrate.png",
+      "frames": 4,
+      "width": 1376,
+      "height": 256,
+      "frameWidth": 344,
+      "frameHeight": 256,
+      "frameMs": 180,
+      "sha256": "d8ea4ebfcdd9d16e1c1fbcb2a817834b611fa13e4a9da9a5c340648a6c38d6a0"
+    }
+  }
+}
