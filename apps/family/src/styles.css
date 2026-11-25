@@ -170,6 +170,8 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
 .island-trail-stop.is-current { background: var(--yellow); color: var(--ink); box-shadow: 0 3px 0 rgba(23, 50, 77, 0.14); }
 .island-trail-stop.is-current i { background: var(--coral); color: #fff; }
 .subject-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+.subject-island-wrap { display: grid; gap: 10px; align-content: start; }
+.subject-speaking-pill { justify-self: start; min-height: 44px; }
 .subject-card { position: relative; display: grid; overflow: hidden; border: var(--border); border-radius: 18px; background: var(--paper-bright); box-shadow: var(--shadow); text-align: left; padding: 0; }
 .subject-card.is-today { box-shadow: 0 7px 0 rgba(23, 50, 77, 0.12), 0 0 0 4px rgba(244, 184, 75, 0.24); }
 .subject-art { position: relative; isolation: isolate; min-height: 178px; display: grid; place-items: center; padding: 18px 12px 10px; }

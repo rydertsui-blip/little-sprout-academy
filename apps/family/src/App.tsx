@@ -185,6 +185,7 @@ export default function App() {
   const systemLocale: Locale = household?.uiLocale ?? "zh";
   const ui = uiCopyFor(systemLocale);
   const [screen, setScreen] = useState<Screen>("profiles");
+  const [speakingSubject, setSpeakingSubject] = useState<"mandarin" | "english" | null>(null);
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
   const [showParentGate, setShowParentGate] = useState(false);
   const [setupError, setSetupError] = useState("");
@@ -481,13 +482,10 @@ export default function App() {
     startSubject(subject);
   }
 
-  function openSpeaking() {
+  function openSpeaking(subject?: "mandarin" | "english") {
+    setSpeakingSubject(subject ?? null);
     playOrSpeak(VOICE_LINES.speakingIntro, "zh-CN");
     setScreen("speaking");
-  }
-
-  function openHandwriting() {
-    setScreen("handwriting");
   }
 
   async function recordHandwriting(entry: HandwritingCharacter, mistakes: number): Promise<boolean> {
@@ -578,7 +576,7 @@ export default function App() {
   }
 
   if (screen === "speaking" && activeChild) {
-    return <>{storageBanner}<SpeakingScreen child={activeChild} onBack={() => setScreen("child")} onLock={lockHousehold} /></>;
+    return <>{storageBanner}<SpeakingScreen child={activeChild} subject={speakingSubject ?? undefined} onBack={() => setScreen("child")} onLock={lockHousehold} /></>;
   }
 
   if (screen === "companions" && activeChild) {
@@ -713,30 +711,38 @@ export default function App() {
               const reviewCount = Math.min(progress.dueReviewCount, activeChild.settings.sessionLength <= 6 ? 1 : 2);
               const isToday = homeSubject === card.subject;
               return (
-              <button key={card.subject} className={`subject-card ${card.className}${isToday ? " is-today" : ""}`} type="button" aria-label={card.title} onClick={() => startSubject(card.subject)}>
-                <div className="subject-art">
-                  <span className="island-step" aria-hidden="true">{index + 1}</span>
-                  {progress.todayCompleted ? (
-                    <span className="island-done" aria-hidden="true" data-testid="island-done"><Check aria-hidden="true" /></span>
-                  ) : null}
-                  <img src={`./assets/images/${card.image}.png`} alt="" />
-                </div>
-                <div className="subject-copy">
-                  <div className="subject-kicker">
-                    <span>{ui.child.island}</span>
-                    {isToday ? <em className="today-tag" data-testid="island-today">{ui.child.todayHere}</em> : null}
+              <div key={card.subject} className="subject-island-wrap">
+                <button className={`subject-card ${card.className}${isToday ? " is-today" : ""}`} type="button" aria-label={card.title} onClick={() => startSubject(card.subject)}>
+                  <div className="subject-art">
+                    <span className="island-step" aria-hidden="true">{index + 1}</span>
+                    {progress.todayCompleted ? (
+                      <span className="island-done" aria-hidden="true" data-testid="island-done"><Check aria-hidden="true" /></span>
+                    ) : null}
+                    <img src={`./assets/images/${card.image}.png`} alt="" />
                   </div>
-                  <strong>{card.title}</strong>
-                  <DailyMissionCard
-                    progress={progress}
-                    hasDiagnostic={Boolean(activeChild.diagnostics[card.subject])}
-                    hasActiveSession={Boolean(activeChild.activeSessions[card.subject])}
-                    reviewCount={reviewCount}
-                    locale={systemLocale}
-                  />
-                </div>
-                <div className="subject-status"><Star aria-hidden="true" /><span>{activeChild.activeSessions[card.subject] ? ui.child.continueSubject : activeChild.diagnostics[card.subject] ? ui.child.practiceSubject : ui.child.beginSubject}</span><ChevronRight aria-hidden="true" /></div>
-              </button>
+                  <div className="subject-copy">
+                    <div className="subject-kicker">
+                      <span>{ui.child.island}</span>
+                      {isToday ? <em className="today-tag" data-testid="island-today">{ui.child.todayHere}</em> : null}
+                    </div>
+                    <strong>{card.title}</strong>
+                    <DailyMissionCard
+                      progress={progress}
+                      hasDiagnostic={Boolean(activeChild.diagnostics[card.subject])}
+                      hasActiveSession={Boolean(activeChild.activeSessions[card.subject])}
+                      reviewCount={reviewCount}
+                      locale={systemLocale}
+                    />
+                  </div>
+                  <div className="subject-status"><Star aria-hidden="true" /><span>{activeChild.activeSessions[card.subject] ? ui.child.continueSubject : activeChild.diagnostics[card.subject] ? ui.child.practiceSubject : ui.child.beginSubject}</span><ChevronRight aria-hidden="true" /></div>
+                </button>
+                {card.subject === "mandarin" || card.subject === "english" ? (
+                  <button className="quiet-button compact-button subject-speaking-pill" type="button" onClick={() => openSpeaking(card.subject as "mandarin" | "english")}>
+                    <Mic aria-hidden="true" />
+                    <span>{card.subject === "mandarin" ? "华文口语小游戏" : "English Speaking"}</span>
+                  </button>
+                ) : null}
+              </div>
               );
             })}
           </div>
@@ -748,20 +754,6 @@ export default function App() {
               locale={systemLocale}
             />
           ) : null}
-          <div className="offline-activity-row">
-            <button className="handwriting-entry writing-entry" type="button" onClick={openHandwriting}>
-              <span className="handwriting-entry-icon writing-entry-icon"><Pencil aria-hidden="true" /></span>
-              <span className="handwriting-entry-copy"><small>{ui.child.handwritingEyebrow}</small><strong>{ui.child.handwritingTitle}</strong><p>{ui.child.handwritingBody}</p></span>
-              <span className="writing-entry-art" aria-hidden="true"><img src="./assets/images/pencil.png" alt="" /></span>
-              <span className="handwriting-entry-progress"><span>{writingCompleted} / {HANDWRITING_CHARACTERS.length}</span><ChevronRight aria-hidden="true" /></span>
-            </button>
-            <button className="handwriting-entry speaking-entry" type="button" onClick={openSpeaking}>
-              <span className="handwriting-entry-icon speaking-entry-icon"><Mic aria-hidden="true" /></span>
-              <span className="handwriting-entry-copy"><small>{ui.child.speakingEyebrow}</small><strong>{ui.child.speakingTitle}</strong><p>{ui.child.speakingBody}</p></span>
-              <span className="speaking-entry-art" aria-hidden="true"><img src="./assets/images/scene-speaking.png" alt="" /></span>
-              <span className="handwriting-entry-progress"><ChevronRight aria-hidden="true" /></span>
-            </button>
-          </div>
         </main>
       ) : null}
     </div>

@@ -16,11 +16,16 @@ const DECKS: Array<{ category: SpeakingCategory; label: string }> = [
 
 interface SpeakingScreenProps {
   child: ChildProfile;
+  subject?: "mandarin" | "english";
   onBack: () => void;
   onLock: () => void | Promise<void>;
 }
 
-export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreenProps) {
+export default function SpeakingScreen({ child, subject, onBack, onLock }: SpeakingScreenProps) {
+  const prompts = subject
+    ? SPEAKING_PROMPTS.filter((item) => item.language === (subject === "mandarin" ? "zh-CN" : "en-US"))
+    : SPEAKING_PROMPTS;
+  const availableDecks = DECKS.filter((deck) => prompts.some((item) => (item.category ?? "word") === deck.category));
   const [index, setIndex] = useState(0);
   const [state, setState] = useState<RecordingState>("idle");
   const [demoState, setDemoState] = useState<"playing" | "error" | null>(null);
@@ -31,7 +36,7 @@ export default function SpeakingScreen({ child, onBack, onLock }: SpeakingScreen
   const recordingUrlRef = useRef<string | null>(null);
   const playerRef = useRef<HTMLAudioElement | null>(null);
   const requestTokenRef = useRef(0);
-  const prompt = SPEAKING_PROMPTS[index];
+  const prompt = prompts[index % prompts.length] ?? prompts[0];
   const category = prompt.category ?? "word";
   const categoryLabel = category === "organize" ? "看图说两句" : category === "read-aloud" ? "朗读小游戏" : category === "speaking-purpose" ? "情境开口" : prompt.language === "zh-CN" ? "词语跟读" : "English speaking";
   const longText = category === "read-aloud" || category === "speaking-purpose";
