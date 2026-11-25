@@ -194,12 +194,36 @@ const PROMPT_AUDIO_ASSETS: Record<string, string> = {
   "Match each word with the letters that complete it.": "prompt-en-84aa0f55",
 };
 
+const PINYIN_TOOL_AUDIO_ASSETS: Record<string, string> = {
+  "麻": "pinyin-ma2",
+  "骂": "pinyin-ma4",
+  "八": "pinyin-ba1",
+  "拔": "pinyin-ba2",
+  "把": "pinyin-ba3",
+  "爸": "pinyin-ba4",
+  "波": "pinyin-bo1",
+  "坡": "pinyin-po1",
+  "摸": "pinyin-mo1",
+  "哥": "pinyin-ge1",
+  "科": "pinyin-ke1",
+  "诗": "pinyin-shi1",
+  "阿": "pinyin-a1",
+  "凹": "pinyin-ao1",
+  "袄": "pinyin-ao3",
+  "偶": "pinyin-ou3",
+  "哀": "pinyin-ai1",
+  "安": "pinyin-an1",
+  "跑": "pinyin-pao3",
+  "开": "pinyin-kai1",
+};
+
 export const AUDIO_ASSETS: Record<string, string> = {
   ...REVIEWED_AUDIO_ASSETS,
   ...GENERATED_AUDIO_ASSETS,
   ...MATCH_AUDIO_ASSETS,
   ...LISTENING_ANSWER_AUDIO_ASSETS,
-  ...PROMPT_AUDIO_ASSETS
+  ...PROMPT_AUDIO_ASSETS,
+  ...PINYIN_TOOL_AUDIO_ASSETS
 };
 
 export function getAudioAsset(text: string): string | undefined {

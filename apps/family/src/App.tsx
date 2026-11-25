@@ -37,6 +37,7 @@ import { CompanionShop } from "./screens/CompanionShop";
 import { DailyMissionCard } from "./screens/DailyMissionCard";
 import { MathTool } from "./screens/MathTool";
 import { LanguageTool } from "./screens/LanguageTool";
+import { PinyinTool } from "./screens/PinyinTool";
 import MatchingBoard from "./screens/MatchingBoard";
 import OrderBoard from "./screens/OrderBoard";
 import HandwritingScreen from "./screens/HandwritingScreen";
@@ -1027,6 +1028,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
         <h2 data-testid="question-prompt" data-question-id={question.id}>{question.prompt}</h2>
         {question.subject === "math" ? <MathTool question={question} defaultOpen={question.kind !== "match"} /> : null}
         {question.skillId === "english-sentence-order" ? <LanguageTool question={question} /> : null}
+        {question.subject === "mandarin" ? <PinyinTool question={question} defaultOpen={question.kind !== "match"} /> : null}
       </section>
       <section className="answer-panel">
         <div className="quiz-tools">

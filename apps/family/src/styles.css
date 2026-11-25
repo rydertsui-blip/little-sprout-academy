@@ -487,6 +487,36 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
 .sentence-tile.is-placed { border-color: #6b8bcc; background: #eaf0ff; }
 .sentence-actions { display: flex; justify-content: center; }
 .language-tool .math-tool-body > p { color: var(--muted); font-size: 12px; font-weight: 800; text-align: center; }
+.pinyin-tool-body { width: 100%; gap: 10px; }
+.tone-coaster-grid { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.tone-coaster-card { display: grid; justify-items: center; gap: 3px; min-height: 112px; padding: 8px 6px; border: var(--border); border-radius: 9px; background: #fffdf8; box-shadow: 0 4px 0 rgba(23, 50, 77, 0.1); text-align: center; }
+.tone-coaster-card.is-active { border-color: var(--coral); background: #fff2e8; box-shadow: 0 4px 0 #b84836; }
+.tone-coaster-card:active { transform: translateY(2px); box-shadow: none; }
+.tone-curve-svg { width: 54px; height: 40px; }
+.tone-coaster-card strong { font-family: "Andika", sans-serif; font-size: 20px; line-height: 1.1; color: var(--ink); }
+.tone-coaster-card span { color: var(--muted); font-size: 11px; font-weight: 800; line-height: 1.2; }
+.tone-coaster-card small { padding: 1px 8px; border-radius: 999px; background: var(--paper); color: var(--ink); font-size: 13px; font-weight: 900; }
+.pinyin-demo-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.pinyin-demo-tab { min-height: 36px; padding: 4px 12px; border: 2px solid rgba(23, 50, 77, 0.25); border-radius: 999px; background: var(--paper); font-family: "Andika", "HanziPen SC", sans-serif; font-size: 14px; font-weight: 900; }
+.pinyin-demo-tab.is-active { border-color: var(--ink); background: #ffe3a4; box-shadow: 0 3px 0 rgba(23, 50, 77, 0.12); }
+.pinyin-blend-row { width: 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.pinyin-block { position: relative; min-width: 78px; min-height: 78px; display: grid; justify-items: center; align-content: center; gap: 2px; padding: 8px 12px; border: var(--border); border-radius: 10px; background: #fffdf8; box-shadow: 0 4px 0 rgba(23, 50, 77, 0.12); }
+.pinyin-block-initial { background: #d8e2f7; }
+.pinyin-block-final { background: #cce8c9; }
+.pinyin-block-result { min-width: 96px; background: #ffe3a4; box-shadow: 0 4px 0 #b87918; }
+.pinyin-block.is-active { border-color: var(--coral); box-shadow: 0 4px 0 #b84836; transform: translateY(-1px); }
+.pinyin-block:active { transform: translateY(2px); box-shadow: none; }
+.pinyin-block small { color: var(--muted); font-size: 11px; font-weight: 900; }
+.pinyin-block strong { font-family: "Andika", sans-serif; font-size: 24px; line-height: 1.1; color: var(--ink); }
+.pinyin-block em { font-style: normal; font-size: 16px; font-weight: 900; color: var(--ink); }
+.pinyin-block svg { width: 15px; height: 15px; color: var(--muted); }
+.pinyin-plus { font-size: 22px; font-weight: 900; color: var(--ink); }
+.pinyin-tool-caption { margin: 0; color: var(--muted); font-size: 12px; font-weight: 800; text-align: center; }
+@media (max-width: 520px) {
+  .tone-coaster-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pinyin-block { min-width: 68px; min-height: 70px; padding: 6px 8px; }
+  .pinyin-block-result { min-width: 84px; }
+}
 .division-groups { width: 100%; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 6px; }
 .division-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 100%; padding: 7px; border: 2px solid rgba(23, 50, 77, 0.32); border-radius: 8px; background: #fffdf8; }
 .division-dot { width: 12px; height: 12px; flex: 0 0 12px; border-radius: 50%; background: #6b8bcc; }
