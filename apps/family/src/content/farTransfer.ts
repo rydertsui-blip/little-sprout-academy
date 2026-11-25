@@ -408,7 +408,7 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
     skillId: "english-a-an",
     prompt: "Choose the correct phrase: I saw ___ old owl.",
     instruction: "Tap the correct article phrase.",
-    options: ["an old owl", "a old owl", "the old owl"],
+    options: ["an old owl", "a old owl", "two old owl"],
     correctAnswer: "an old owl",
     explanation: "Old begins with a vowel sound, so use an.",
     template: "sentence-article",

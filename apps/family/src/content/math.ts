@@ -111,13 +111,13 @@ export function buildMathQuestions(skill: Skill): ChoiceQuestion[] {
         ["A shop has 45 apples. It sells 18, then gets 12 more. How many apples are there now?", 39, [37, 75], "45 − 18 = 27, then 27 + 12 = 39.", "two-step-add-sub"],
         ["Ben has 36 stickers. He gives 14 away, then gets 9 more. How many stickers does he have now?", 31, [29, 59], "36 − 14 = 22, then 22 + 9 = 31.", "two-step-add-sub"],
         ["A bus has 58 people. 23 get off, then 15 get on. How many people are on the bus now?", 50, [48, 96], "58 − 23 = 35, then 35 + 15 = 50.", "two-step-add-sub"],
-        ["Lina reads 12 pages on Monday and 9 pages on Tuesday. How many pages does she read in all?", 21, [20, 31], "12 + 9 = 21 pages.", "two-step-add-sub"],
-        ["There are 24 chairs. 9 chairs are used. How many chairs are empty?", 15, [14, 33], "24 − 9 = 15 chairs.", "two-step-add-sub"],
+        ["Lina has a 30-page book. She reads 12 pages on Monday and 9 pages on Tuesday. How many pages are left?", 9, [11, 21], "12 + 9 = 21 pages read, then 30 − 21 = 9 pages left.", "two-step-add-sub"],
+        ["There are 24 chairs in a room. 9 chairs are used, then 6 more chairs are brought in. How many empty chairs are there now?", 21, [15, 30], "24 − 9 = 15 empty chairs, then 15 + 6 = 21 empty chairs.", "two-step-add-sub"],
         ["A farmer has 16 eggs. He collects 7 more, then sells 5. How many eggs does he have now?", 18, [16, 23], "16 + 7 = 23, then 23 − 5 = 18.", "two-step-add-sub"],
         ["There are 4 boxes with 7 books in each box. 5 books are taken out. How many books remain?", 23, [21, 33], "4 × 7 = 28, then 28 − 5 = 23.", "two-step-multiply"],
         ["There are 3 bags with 8 oranges in each bag. 6 oranges are eaten. How many oranges remain?", 18, [16, 30], "3 × 8 = 24, then 24 − 6 = 18.", "two-step-multiply"],
         ["A tray has 5 rows with 6 eggs in each row. 4 eggs break. How many eggs are left?", 26, [24, 34], "5 × 6 = 30, then 30 − 4 = 26.", "two-step-multiply"],
-        ["A pencil costs 40 cents. A ruler costs 25 cents. How many cents do they cost altogether?", 65, [55, 75], "40 + 25 = 65 cents.", "two-step-money"],
+        ["A pencil costs 40 cents and a ruler costs 25 cents. You pay $1. How much change do you get in cents?", 35, [65, 45], "40 + 25 = 65 cents, then 100 − 65 = 35 cents change.", "two-step-money"],
         ["A book costs $3.50. You pay $5. How much change do you get in cents?", 150, [50, 250], "500 − 350 = 150 cents.", "two-step-money"],
         ["A toy costs $4.20. A bag costs $1.30. How many cents do they cost altogether?", 550, [450, 650], "420 + 130 = 550 cents.", "two-step-money"]
       ] as const;
@@ -152,7 +152,7 @@ export function buildMathQuestions(skill: Skill): ChoiceQuestion[] {
     }
     case "math-fractions": {
       const data = [[4, "one quarter"], [3, "one third"], [5, "one fifth"], [6, "one sixth"], [2, "one half"], [8, "one eighth"]];
-      data.forEach(([parts, phrase], index) => q.push(makeMathQuestion(skill, index, `A whole is cut into ${parts} equal parts. Which fraction of the whole is one part? Choose the words.`, String(phrase), ["one half", "one quarter", "two thirds", "three quarters"], `One of ${parts} equal parts is ${phrase}.`, "unit-fraction")));
+      data.forEach(([parts, phrase], index) => q.push(makeMathQuestion(skill, index, `A whole is cut into ${parts} equal parts. Which fraction of the whole is one part? Choose the words.`, String(phrase), ["one fifth", "two thirds", "one half", "one quarter"], `One of ${parts} equal parts is ${phrase}.`, "unit-fraction")));
       break;
     }
     case "math-money": {

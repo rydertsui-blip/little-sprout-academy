@@ -185,7 +185,7 @@ function buildMandarinQuestions(skill: Skill): ChoiceQuestion[] {
       ]);
     case "mandarin-word-order":
       return build([
-        { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "我喜欢小猫。", options: ["我喜欢小猫。", "小猫喜欢我。", "喜欢我小猫。"], explanation: "“我喜欢小猫。”语序完整自然。", template: "sentence-order", audioText: "我喜欢小猫。", audioLanguage: "zh-CN" },
+        { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "我喜欢小猫。", options: ["我喜欢小猫。", "我小猫喜欢。", "喜欢我小猫。"], explanation: "“我喜欢小猫。”语序完整自然。", template: "sentence-order", audioText: "我喜欢小猫。", audioLanguage: "zh-CN" },
         { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "弟弟去学校。", options: ["弟弟去学校。", "去弟弟学校。", "学校去弟弟。"], explanation: "“弟弟去学校。”语序正确。", template: "sentence-order", audioText: "弟弟去学校。", audioLanguage: "zh-CN" },
         { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "妈妈在厨房。", options: ["妈妈在厨房。", "在妈妈厨房。", "厨房妈妈在。"], explanation: "“妈妈在厨房。”语序正确。", template: "sentence-order", audioText: "妈妈在厨房。", audioLanguage: "zh-CN" },
         { prompt: "哪一句是正确的？", instruction: "选择完整、自然的句子。", correctAnswer: "小鸟在天空中飞。", options: ["小鸟在天空中飞。", "天空飞在小鸟。", "飞小鸟在天空。"], explanation: "“小鸟在天空中飞。”语序完整自然。", template: "sentence-order", audioText: "选择完整、自然的句子。", audioLanguage: "zh-CN" },
@@ -280,12 +280,12 @@ function buildEnglishQuestions(skill: Skill): ChoiceQuestion[] {
       ]);
     case "english-a-an":
       return build([
-        { prompt: "Choose the correct phrase: ___ apple", instruction: "Tap a or an.", correctAnswer: "an apple", options: ["an apple", "a apple", "the apple"], explanation: "Apple begins with a vowel sound, so use an.", template: "article", audioText: "an apple", audioLanguage: "en-US" },
-        { prompt: "Choose the correct phrase: ___ cat", instruction: "Tap a or an.", correctAnswer: "a cat", options: ["a cat", "an cat", "the cat"], explanation: "Cat begins with a consonant sound, so use a.", template: "article", audioText: "a cat", audioLanguage: "en-US" },
-        { prompt: "Choose the correct phrase: ___ elephant", instruction: "Tap a or an.", correctAnswer: "an elephant", options: ["an elephant", "a elephant", "the elephant"], explanation: "Elephant begins with a vowel sound, so use an.", template: "article", audioText: "an elephant", audioLanguage: "en-US" },
-        { prompt: "Choose the correct phrase: ___ orange", instruction: "Tap a or an.", correctAnswer: "an orange", options: ["an orange", "a orange", "the orange"], explanation: "Orange begins with a vowel sound, so use an.", template: "article", audioText: "an orange", audioLanguage: "en-US" },
-        { prompt: "Choose the correct phrase: ___ book", instruction: "Tap a or an.", correctAnswer: "a book", options: ["a book", "an book", "the book"], explanation: "Book begins with a consonant sound, so use a.", template: "article", audioText: "a book", audioLanguage: "en-US" },
-        { prompt: "Choose the correct phrase: ___ dog", instruction: "Tap a or an.", correctAnswer: "a dog", options: ["a dog", "an dog", "the dog"], explanation: "Dog begins with a consonant sound, so use a.", template: "article", audioText: "a dog", audioLanguage: "en-US" }
+        { prompt: "Choose the correct phrase: ___ apple", instruction: "Tap a or an.", correctAnswer: "an apple", options: ["an apple", "a apple", "two apple"], explanation: "Apple begins with a vowel sound, so use an.", template: "article", audioText: "an apple", audioLanguage: "en-US" },
+        { prompt: "Choose the correct phrase: ___ cat", instruction: "Tap a or an.", correctAnswer: "a cat", options: ["a cat", "an cat", "two cat"], explanation: "Cat begins with a consonant sound, so use a.", template: "article", audioText: "a cat", audioLanguage: "en-US" },
+        { prompt: "Choose the correct phrase: ___ elephant", instruction: "Tap a or an.", correctAnswer: "an elephant", options: ["an elephant", "a elephant", "two elephant"], explanation: "Elephant begins with a vowel sound, so use an.", template: "article", audioText: "an elephant", audioLanguage: "en-US" },
+        { prompt: "Choose the correct phrase: ___ orange", instruction: "Tap a or an.", correctAnswer: "an orange", options: ["an orange", "a orange", "two orange"], explanation: "Orange begins with a vowel sound, so use an.", template: "article", audioText: "an orange", audioLanguage: "en-US" },
+        { prompt: "Choose the correct phrase: ___ book", instruction: "Tap a or an.", correctAnswer: "a book", options: ["a book", "an book", "two book"], explanation: "Book begins with a consonant sound, so use a.", template: "article", audioText: "a book", audioLanguage: "en-US" },
+        { prompt: "Choose the correct phrase: ___ dog", instruction: "Tap a or an.", correctAnswer: "a dog", options: ["a dog", "an dog", "two dog"], explanation: "Dog begins with a consonant sound, so use a.", template: "article", audioText: "a dog", audioLanguage: "en-US" }
       ]);
     case "english-plural":
       return build([
@@ -465,7 +465,7 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
         zh("哪一个字有“木”字旁？", "树", ["树", "花", "狗"], "“树”有木字旁。", "radical-shape", "树", 3),
         zh("哪一个字表示身体上用来走路的部位？", "足", ["足", "手", "口"], "足就是脚，可以用来走路。", "meaning-character", "足"),
         zh("哪一个词里有“月”？", "月亮", ["月亮", "田地", "火苗"], "“月亮”里有月。", "character-word", "月"),
-        zh("哪一个字有“口”字框？", "口", ["口", "山", "水"], "“口”字本身就是一个方框。", "radical-shape", "口", 4)
+        zh("哪一个字表示嘴巴？", "口", ["口", "山", "水"], "“口”表示嘴巴，所以有“开口、门口”等词语。", "meaning-character", "口", 4)
         ,zh("哪一个词里有“手”？", "小手", ["小手", "太阳", "月亮"], "“小手”里有手。", "character-word", "手")
       ];
     case "mandarin-vocabulary":
@@ -650,12 +650,12 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
       ];
     case "english-a-an":
       return [
-        en("Choose the correct phrase: ___ egg", "an egg", ["an egg", "a egg", "the egg"], "Egg begins with a vowel sound.", "article"),
-        en("Choose the correct phrase: ___ pen", "a pen", ["a pen", "an pen", "the pen"], "Pen begins with a consonant sound.", "article"),
-        en("Choose the correct phrase: ___ umbrella", "an umbrella", ["an umbrella", "a umbrella", "the umbrella"], "Umbrella begins with a vowel sound.", "article", 3),
-        en("Choose the correct phrase: ___ bag", "a bag", ["a bag", "an bag", "the bag"], "Bag begins with a consonant sound.", "article"),
-        en("Choose the correct phrase: ___ insect", "an insect", ["an insect", "a insect", "the insect"], "Insect begins with a vowel sound.", "article", 3)
-        ,en("Choose the correct phrase: ___ old book", "an old book", ["an old book", "a old book", "the old book"], "Old begins with a vowel sound.", "article")
+        en("Choose the correct phrase: ___ egg", "an egg", ["an egg", "a egg", "two egg"], "Egg begins with a vowel sound.", "article"),
+        en("Choose the correct phrase: ___ pen", "a pen", ["a pen", "an pen", "two pen"], "Pen begins with a consonant sound.", "article"),
+        en("Choose the correct phrase: ___ umbrella", "an umbrella", ["an umbrella", "a umbrella", "two umbrella"], "Umbrella begins with a vowel sound.", "article", 3),
+        en("Choose the correct phrase: ___ bag", "a bag", ["a bag", "an bag", "two bag"], "Bag begins with a consonant sound.", "article"),
+        en("Choose the correct phrase: ___ insect", "an insect", ["an insect", "a insect", "two insect"], "Insect begins with a vowel sound.", "article", 3)
+        ,en("Choose the correct phrase: ___ old book", "an old book", ["an old book", "a old book", "two old book"], "Old begins with a vowel sound.", "article")
       ];
     case "english-plural":
       return [
@@ -719,7 +719,7 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
         ,read("How does Mei feel at the end of the day?", "happy", ["happy", "sad", "tired"], "Mei is smiling and has new friends, so she feels happy.", "feeling", 4, "A new girl named Mei joins P2. She sits alone at lunch. Lily shares her sandwich and asks Mei to play. By the end of the day, Mei is smiling and has two new friends.", "Read the clues, then tap the best answer.")
         ,read("What did Lily do to help Mei?", "shared her sandwich and asked her to play", ["shared her sandwich and asked her to play", "took her bag", "told her to go home"], "Lily shares her sandwich and asks Mei to play.", "inference", 3, "A new girl named Mei joins P2. She sits alone at lunch. Lily shares her sandwich and asks Mei to play. By the end of the day, Mei is smiling and has two new friends.", "Read the clues, then tap the best answer.")
         ,read("Why do Tom and his mother put the cake on the table?", "to cool", ["to cool", "to eat it", "to hide it"], "They put the cake on the table to cool.", "why", 3, "It is Grandma's birthday. Tom and his mother bake a cake. They put it on the table to cool. When they come back, the cake has one bite missing. Their cat is licking its paw.", "Read the clues, then tap the best answer.")
-        ,read("Who probably ate the cake?", "the cat", ["the cat", "Grandma", "Tom"], "The cat is licking its paw, so it probably ate the cake.", "inference", 4, "It is Grandma's birthday. Tom and his mother bake a cake. They put it on the table to cool. When they come back, the cake has one bite missing. Their cat is licking its paw.", "Read the clues, then tap the best answer.")
+        ,read("Who probably ate the cake?", "two cat", ["two cat", "Grandma", "Tom"], "The cat is licking its paw, so it probably ate the cake.", "inference", 4, "It is Grandma's birthday. Tom and his mother bake a cake. They put it on the table to cool. When they come back, the cake has one bite missing. Their cat is licking its paw.", "Read the clues, then tap the best answer.")
         ,read("How does the cake look when they come back?", "one bite is missing", ["one bite is missing", "it is whole", "it is in the oven"], "The cake has one bite missing when they come back.", "inference", 3, "It is Grandma's birthday. Tom and his mother bake a cake. They put it on the table to cool. When they come back, the cake has one bite missing. Their cat is licking its paw.", "Read the clues, then tap the best answer.")
       ];
     case "english-spelling":

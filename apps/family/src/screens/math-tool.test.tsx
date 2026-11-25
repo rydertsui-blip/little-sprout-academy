@@ -94,10 +94,11 @@ describe("two-step math visual models", () => {
     expect(container.querySelector(".bar-model-parts")).toBeNull();
   });
 
-  it("uses subtraction when a quantity is used", () => {
+  it("uses subtraction then addition for a two-step chair problem", () => {
     const { container } = render(<MathTool question={question("q-math-two-step-problems-5")} />);
-    expect(container.querySelector(".bar-model-whole strong")?.textContent).toBe("24");
-    expect(container.querySelectorAll(".bar-model-part strong")[0]?.textContent).toBe("9");
+    expect(container.querySelector('[data-testid="two-step-model"]')).toBeTruthy();
+    expect(container.textContent).toContain("− 9");
+    expect(container.textContent).toContain("+ 6");
   });
 
   it("reads the operation that follows the number", () => {
@@ -113,12 +114,10 @@ describe("two-step math visual models", () => {
     expect(container.querySelectorAll(".two-step-array-grid span.is-removed")).toHaveLength(5);
   });
 
-  it("shows a sum when cents are added", () => {
+  it("shows a money model for a two-step change problem", () => {
     const { container } = render(<MathTool question={question("q-math-two-step-problems-10")} />);
     expect(container.querySelector('[data-testid="money-tool"]')).toBeTruthy();
-    expect(container.textContent).toContain("40¢");
-    expect(container.textContent).toContain("25¢");
-    expect(container.textContent).toContain("+");
+    expect(container.textContent).toContain("$1.00");
   });
 
   it("shows pay minus cost for a change question", () => {
