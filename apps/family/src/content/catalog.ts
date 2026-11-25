@@ -54,7 +54,7 @@ const FACTUAL_MATH_TEMPLATES = new Set([
 ]);
 
 rawQuestions.forEach((question) => {
-  question.diagnostic = true;
+  question.diagnostic = question.transferLevel !== "far-transfer";
   if (!question.audioOnly) {
     question.audioText = preAnswerAudio(question);
   } else if (question.audioOnly) {

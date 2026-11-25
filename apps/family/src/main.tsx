@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { CompanionPreviewScreen } from "./companions/CompanionPreviewScreen";
 import "./styles.css";
 
@@ -8,6 +9,8 @@ const companionPreview = import.meta.env.DEV && new URLSearchParams(window.locat
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    {companionPreview ? <CompanionPreviewScreen /> : <App />}
+    <ErrorBoundary>
+      {companionPreview ? <CompanionPreviewScreen /> : <App />}
+    </ErrorBoundary>
   </React.StrictMode>
 );
