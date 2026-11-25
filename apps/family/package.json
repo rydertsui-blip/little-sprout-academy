@@ -13,6 +13,7 @@
     "verify:depth": "tsx scripts/verify-content.ts --depth",
     "update:content": "tsx scripts/verify-content.ts --update",
     "update:question-ids": "tsx scripts/update-question-ids.ts",
+    "rebuild:audio": "tsx scripts/rebuild-audio.ts",
     "build": "npm run verify:sources && npm run verify:content && npm run verify:depth && tsc -b && vite build && cp src/manual-sw.js ../../family/sw.js && node scripts/postbuild.mjs"
   },
   "dependencies": {
@@ -31,6 +32,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
     "jsdom": "^31.0.1",
+    "msedge-tts": "^2.1.1",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
