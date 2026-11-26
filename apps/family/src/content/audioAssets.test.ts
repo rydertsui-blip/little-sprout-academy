@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { AUDIO_ASSETS } from "./audioAssets";
+import { AUDIO_ASSETS, PINYIN_TOOL_AUDIO_ASSETS } from "./audioAssets";
 import { QUESTIONS } from "./catalog";
 import { SPEAKING_PROMPTS } from "./speaking";
 
@@ -13,10 +13,15 @@ describe("bundled audio assets", () => {
   });
 
   it("does not reuse one recording for two different spoken texts", () => {
+    // The pinyin chart deliberately points several labels at one recording:
+    // initials/finals/whole syllables and their teaching homophone (e.g. "r"
+    // 读 "日", "y"/"i"/"yi" 读 "衣"). Those sounds are identical, so still
+    // hold the one-text-per-recording rule for everything else.
+    const chartAssets = new Set(Object.values(PINYIN_TOOL_AUDIO_ASSETS));
     const seen = new Map<string, string>();
     for (const [text, asset] of Object.entries(AUDIO_ASSETS)) {
       const previous = seen.get(asset);
-      if (previous) expect(previous, asset).toBe(text);
+      if (previous && !chartAssets.has(asset)) expect(previous, asset).toBe(text);
       seen.set(asset, text);
     }
   });

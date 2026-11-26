@@ -27,6 +27,8 @@ const SKILL_SEEDS: SkillSeed[] = [
   { id: "math-length-measure", subject: "math", title: "Length in centimetres", shortTitle: "长度", gradeBand: "P1", description: "Measure, draw, compare and order lengths in centimetres.", prerequisites: ["math-count-100"], sourceDocument: M },
   { id: "math-fractions-add-sub", subject: "math", title: "Add and subtract like fractions", shortTitle: "同分母分数加减", gradeBand: "P2", description: "Add and subtract like fractions within one whole.", prerequisites: ["math-fractions"], sourceDocument: M },
   { id: "math-measurement-units", subject: "math", title: "Length, mass and volume units", shortTitle: "量与单位", gradeBand: "P2", description: "Use metres, kilograms, grams and litres to measure and compare.", prerequisites: ["math-count-100"], sourceDocument: M },
+  { id: "math-scaled-picture-graph", subject: "math", title: "Scaled picture graphs", shortTitle: "比例统计图", gradeBand: "P2", description: "Read and interpret picture graphs where each symbol stands for 2, 5 or 10 items.", prerequisites: ["math-picture-graph", "math-multiply-tables"], sourceDocument: M },
+  { id: "math-number-patterns-1000", subject: "math", title: "Odd, even and number patterns", shortTitle: "奇偶与数规律", gradeBand: "P2", description: "Identify odd and even numbers, skip-count patterns within 1000 and mixed multiplication-addition problems.", prerequisites: ["math-place-value-1000", "math-add-sub-1000"], sourceDocument: M },
 
   { id: "k2-mandarin-listen", subject: "mandarin", title: "Listening for everyday words", shortTitle: "听懂词语", gradeBand: "K2", description: "Listen and point to familiar animals, colours, numbers, actions, family words and fruit.", prerequisites: [], sourceDocument: K2 },
   { id: "k2-mandarin-vocabulary", subject: "mandarin", title: "Everyday words", shortTitle: "生活词汇", gradeBand: "K2", description: "Understand and name everyday categories, body parts, opposites and action words.", prerequisites: ["k2-mandarin-listen"], sourceDocument: K2 },
@@ -41,6 +43,10 @@ const SKILL_SEEDS: SkillSeed[] = [
   { id: "mandarin-listening", subject: "mandarin", title: "Listening comprehension", shortTitle: "听句子", gradeBand: "P1-P2", description: "Listen to short spoken sentences and identify who, where and what happens.", prerequisites: ["mandarin-reading"], sourceDocument: C },
   { id: "mandarin-classifiers", subject: "mandarin", title: "Classifiers", shortTitle: "量词", gradeBand: "P1-P2", description: "Use common classifiers such as 只, 朵 and 座.", prerequisites: ["mandarin-vocabulary"], sourceDocument: C },
   { id: "mandarin-word-order", subject: "mandarin", title: "Sentence order", shortTitle: "句子顺序", gradeBand: "P1-P2", description: "Choose complete and natural Mandarin sentences.", prerequisites: ["mandarin-reading"], sourceDocument: C },
+  { id: "mandarin-radicals-homographs", subject: "mandarin", title: "Radicals and look-alike characters", shortTitle: "部首与形近字", gradeBand: "P2", description: "Use meaning radicals to tell apart look-alike characters such as 清/晴/睛/请 and 跑/抱/泡/饱.", prerequisites: ["mandarin-characters", "mandarin-vocabulary"], sourceDocument: C },
+  { id: "mandarin-synonyms-collocations", subject: "mandarin", title: "Synonyms, antonyms and collocations", shortTitle: "近反义词与搭配", gradeBand: "P2", description: "Identify two-character synonyms and antonyms, and choose natural verb-object or adjective-noun collocations.", prerequisites: ["mandarin-vocabulary", "mandarin-classifiers"], sourceDocument: C },
+  { id: "mandarin-conjunctions-complex", subject: "mandarin", title: "Conjunctions and complex sentences", shortTitle: "关联词与复句", gradeBand: "P2", description: "Connect clauses with 因为…所以…, 虽然…但是…, 不但…而且… and 先…再…然后….", prerequisites: ["mandarin-word-order", "mandarin-reading"], sourceDocument: C },
+  { id: "mandarin-passage-comprehension", subject: "mandarin", title: "Short story comprehension", shortTitle: "短文阅读主旨", gradeBand: "P2", description: "Read multi-sentence Chinese stories to identify main ideas, cause-and-effect and character growth.", prerequisites: ["mandarin-reading-inference"], sourceDocument: C },
 
   { id: "k2-english-listen", subject: "english", title: "Listening for everyday words", shortTitle: "Listen and choose", gradeBand: "K2", description: "Listen and tap familiar animals, colours, numbers, actions, family words and fruit.", prerequisites: [], sourceDocument: K2 },
   { id: "k2-english-letters", subject: "english", title: "Letters and beginning sounds", shortTitle: "字母与首音", gradeBand: "K2", description: "Recognise upper and lower case letters, alphabet order and beginning sounds.", prerequisites: ["k2-english-listen"], sourceDocument: K2 },
@@ -55,7 +61,11 @@ const SKILL_SEEDS: SkillSeed[] = [
   { id: "english-sentence-order", subject: "english", title: "Sentence order", shortTitle: "句子顺序", gradeBand: "P1-P2", description: "Choose a complete and grammatical sentence.", prerequisites: ["english-sight-words"], sourceDocument: E },
   { id: "english-reading", subject: "english", title: "Reading comprehension", shortTitle: "阅读理解", gradeBand: "P2", description: "Find literal information in a short text.", prerequisites: ["english-sight-words"], sourceDocument: E },
   { id: "english-reading-inference", subject: "english", title: "Reading inference", shortTitle: "读文推断", gradeBand: "P2", description: "Use clues in a short text to infer why, what happens next and how someone feels.", prerequisites: ["english-reading"], sourceDocument: E },
-  { id: "english-spelling", subject: "english", title: "Basic spelling", shortTitle: "拼写", gradeBand: "P1-P2", description: "Choose correctly spelled high-frequency words.", prerequisites: ["english-phonics"], sourceDocument: E }
+  { id: "english-spelling", subject: "english", title: "Basic spelling", shortTitle: "拼写", gradeBand: "P1-P2", description: "Choose correctly spelled high-frequency words.", prerequisites: ["english-phonics"], sourceDocument: E },
+  { id: "english-tenses-agreement", subject: "english", title: "Verb tenses and agreement", shortTitle: "时态与主谓一致", gradeBand: "P2", description: "Use present singular/plural verbs, present continuous (-ing) and common past tense verbs.", prerequisites: ["english-sight-words", "english-plural"], sourceDocument: E },
+  { id: "english-prepositions-connectors", subject: "english", title: "Prepositions and connectors", shortTitle: "介词与连接词", gradeBand: "P2", description: "Use place and time prepositions (between, behind, in front of) and connectors (because, but, so).", prerequisites: ["english-sentence-order", "english-vocabulary"], sourceDocument: E },
+  { id: "english-pronouns-questions", subject: "english", title: "Pronouns and question words", shortTitle: "代词与疑问词", gradeBand: "P2", description: "Choose subject, object and possessive pronouns (he/him/his, she/her, they/them/their) and Wh- question words.", prerequisites: ["english-sight-words", "english-sentence-order"], sourceDocument: E },
+  { id: "english-cloze-passage", subject: "english", title: "Grammar and vocabulary cloze", shortTitle: "短文语境完形", gradeBand: "P2", description: "Use context clues across two to three sentences to choose the best grammar or vocabulary word.", prerequisites: ["english-reading", "english-tenses-agreement", "english-prepositions-connectors"], sourceDocument: E }
 ];
 
 const OFFICIAL_OUTCOMES_BY_SKILL: Record<string, Skill["officialOutcomes"]> = {
@@ -76,6 +86,8 @@ const OFFICIAL_OUTCOMES_BY_SKILL: Record<string, Skill["officialOutcomes"]> = {
   "math-length-measure": [{ outcomeId: "MOE-MATH-P1-LENGTH", mapping: "exact" }],
   "math-fractions-add-sub": [{ outcomeId: "MOE-MATH-P2-FRAC-AS", mapping: "exact" }],
   "math-measurement-units": [{ outcomeId: "MOE-MATH-P2-MEASURE", mapping: "exact" }],
+  "math-scaled-picture-graph": [{ outcomeId: "MOE-MATH-P2-PICGRAPH", mapping: "exact" }],
+  "math-number-patterns-1000": [{ outcomeId: "MOE-MATH-P2-WN-NUM", mapping: "exact" }, { outcomeId: "MOE-MATH-P2-WN-MD", mapping: "broad" }],
   "mandarin-initials": [{ outcomeId: "MOE-CN-P1P2-SOUND", mapping: "exact" }],
   "mandarin-finals": [{ outcomeId: "MOE-CN-P1P2-SOUND", mapping: "exact" }],
   "mandarin-tones": [{ outcomeId: "MOE-CN-P1P2-SOUND", mapping: "exact" }],
@@ -87,6 +99,10 @@ const OFFICIAL_OUTCOMES_BY_SKILL: Record<string, Skill["officialOutcomes"]> = {
   "mandarin-listening": [{ outcomeId: "MOE-CN-P1P2-SOUND", mapping: "broad" }],
   "mandarin-classifiers": [],
   "mandarin-word-order": [],
+  "mandarin-radicals-homographs": [{ outcomeId: "MOE-CN-P1P2-RADICALS", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-RECOGNITION", mapping: "exact" }],
+  "mandarin-synonyms-collocations": [{ outcomeId: "MOE-CN-P1P2-READ-INFER-WORD", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-READ-UNDERSTAND", mapping: "broad" }],
+  "mandarin-conjunctions-complex": [{ outcomeId: "MOE-CN-P1P2-READ-INFER-WORD", mapping: "broad" }, { outcomeId: "MOE-CN-P1P2-READ-UNDERSTAND", mapping: "broad" }],
+  "mandarin-passage-comprehension": [{ outcomeId: "MOE-CN-P1P2-READ-UNDERSTAND", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-READ-DETAIL", mapping: "exact" }, { outcomeId: "MOE-CN-P1P2-READ-INFER-WORD", mapping: "exact" }],
   "english-letters": [{ outcomeId: "MOE-EL-P1P2-READ-BEGIN", mapping: "broad" }],
   "english-listening": [{ outcomeId: "MOE-EL-P1P2-LISTEN-UNDERSTAND", mapping: "broad" }],
   "english-listening-comprehension": [{ outcomeId: "MOE-EL-P1P2-LISTEN-UNDERSTAND", mapping: "broad" }],
@@ -98,7 +114,11 @@ const OFFICIAL_OUTCOMES_BY_SKILL: Record<string, Skill["officialOutcomes"]> = {
   "english-sentence-order": [{ outcomeId: "MOE-EL-P1P2-GRAMMAR-WPS", mapping: "broad" }],
   "english-reading": [{ outcomeId: "MOE-EL-P1P2-READ-LITERAL-INFERENTIAL", mapping: "exact" }],
   "english-reading-inference": [{ outcomeId: "MOE-EL-P1P2-READ-LITERAL-INFERENTIAL", mapping: "broad" }],
-  "english-spelling": [{ outcomeId: "MOE-EL-P1P2-WRITE-SPELLING", mapping: "exact" }]
+  "english-spelling": [{ outcomeId: "MOE-EL-P1P2-WRITE-SPELLING", mapping: "exact" }],
+  "english-tenses-agreement": [{ outcomeId: "MOE-EL-P1P2-GRAMMAR-WPS", mapping: "exact" }],
+  "english-prepositions-connectors": [{ outcomeId: "MOE-EL-P1P2-GRAMMAR-WPS", mapping: "exact" }],
+  "english-pronouns-questions": [{ outcomeId: "MOE-EL-P1P2-GRAMMAR-WPS", mapping: "exact" }],
+  "english-cloze-passage": [{ outcomeId: "MOE-EL-P1P2-GRAMMAR-WPS", mapping: "exact" }, { outcomeId: "MOE-EL-P1P2-VOCAB-USE", mapping: "exact" }, { outcomeId: "MOE-EL-P1P2-READ-LITERAL-INFERENTIAL", mapping: "broad" }]
 };
 
 export const SKILLS: Skill[] = SKILL_SEEDS.map((skill) => ({

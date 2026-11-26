@@ -16,8 +16,60 @@ export const VOICE_LINES = {
   speakingListen: "听听自己的声音，再试一次。",
   speakingNext: "说得很好，我们换下一个。",
   correctEn: "That is right. Well done.",
-  wrongEn: "Not quite. Let us look at the answer together."
+  wrongEn: "Not quite. Let us look at the answer together.",
+  // Rich human-teacher coaching & emotional support lines
+  teachLeadZh: "这是个新本领，先听小芽老师讲个小秘诀吧！",
+  teachLeadEn: "Here is a new skill! Listen to my little secret first.",
+  retryEncourageZh1: "别着急，不要气馁，你已经很接近啦！听老师给你一个小提示：",
+  retryEncourageZh2: "没关系，差一点点就对啦！看看左边的教具，听老师给你一点小线索：",
+  retryEncourageZh3: "不用怕错，我们再想一想！老师悄悄告诉你一个小窍门：",
+  retryEncourageEn1: "Don't worry, don't give up! You are very close. Listen to this little clue:",
+  retryEncourageEn2: "Almost there! Take a look at the visual helper on the left and listen:",
+  retryEncourageEn3: "That is okay, let us think together! Here is a helpful hint:",
+  praiseZh2: "太棒啦！你一下子就找对了，真聪明！",
+  praiseZh3: "真厉害！思路非常清楚，小芽老师为你点赞！",
+  praiseZh4: "哇，完全正确！你学得真快！",
+  praiseEn2: "Awesome job! You got it right away!",
+  praiseEn3: "Brilliant thinking! You worked that out so well!",
+  praiseEn4: "Fantastic! You are getting really good at this!",
+  retrySuccessZh: "哇，刚才没放弃，听完提示一下子就做对啦！为你骄傲！",
+  retrySuccessEn: "You didn't give up, and you figured it out! I am so proud of you!",
+  wrongComfortZh: "没关系，这道题本来就有一点点难，不要气馁，听老师给你讲讲为什么：",
+  wrongComfortEn: "That is okay, this one is a little tricky. Don't give up, let me explain why:",
+  writeInviteZh: "刚认完这个字，来跟小芽老师一起动手写一写吧！",
+  speakingYourTurnZh: "轮到你啦，大声跟老师读出来吧！",
+  speakingYourTurnEn: "Your turn now! Say it nice and loud!",
+  speakingGreatZh: "哇，你的声音又响亮又好听，读得太准啦！",
+  speakingGreatEn: "Wonderful! Your voice is so clear and accurate!",
+  speakingEncourageZh: "不要气馁，声音可以再大一点点，再听老师读一遍，我们一起试一次！",
+  speakingEncourageEn: "Don't worry! Listen to me one more time, then let us try together!"
 } as const;
+
+export const TEACHER_PRAISE_ZH = [
+  VOICE_LINES.correctZh,
+  VOICE_LINES.praiseZh2,
+  VOICE_LINES.praiseZh3,
+  VOICE_LINES.praiseZh4
+] as const;
+
+export const TEACHER_PRAISE_EN = [
+  VOICE_LINES.correctEn,
+  VOICE_LINES.praiseEn2,
+  VOICE_LINES.praiseEn3,
+  VOICE_LINES.praiseEn4
+] as const;
+
+export const TEACHER_RETRY_ENCOURAGE_ZH = [
+  VOICE_LINES.retryEncourageZh1,
+  VOICE_LINES.retryEncourageZh2,
+  VOICE_LINES.retryEncourageZh3
+] as const;
+
+export const TEACHER_RETRY_ENCOURAGE_EN = [
+  VOICE_LINES.retryEncourageEn1,
+  VOICE_LINES.retryEncourageEn2,
+  VOICE_LINES.retryEncourageEn3
+] as const;
 
 const REVIEWED_AUDIO_ASSETS: Record<string, string> = {
   [VOICE_LINES.startMath]: "zh-start-math",
@@ -194,7 +246,25 @@ const PROMPT_AUDIO_ASSETS: Record<string, string> = {
   "Match each word with the letters that complete it.": "prompt-en-84aa0f55",
 };
 
-const PINYIN_TOOL_AUDIO_ASSETS: Record<string, string> = {
+export const PINYIN_TOOL_AUDIO_ASSETS: Record<string, string> = {
+  "r": "auto-15917f3b3261",
+  "ri": "auto-15917f3b3261",
+  "b": "pinyin-bo1", "p": "pinyin-po1", "m": "pinyin-mo1", "f": "pinyin-fo2",
+  "d": "pinyin-de2", "t": "pinyin-te4", "n": "pinyin-ne4", "l": "pinyin-le4",
+  "g": "pinyin-ge1", "k": "pinyin-ke1", "h": "pinyin-he1", "j": "pinyin-ji1",
+  "q": "pinyin-qi1", "x": "pinyin-xi1", "zh": "pinyin-zhi1", "ch": "pinyin-chi1",
+  "sh": "pinyin-shi1", "z": "pinyin-zi1", "c": "pinyin-ci1", "s": "pinyin-si1",
+  "y": "pinyin-yi1", "w": "pinyin-wu1",
+  "a": "pinyin-a1", "o": "pinyin-o1", "e": "pinyin-e1", "i": "pinyin-yi1",
+  "u": "pinyin-wu1", "ü": "pinyin-yu1", "ai": "pinyin-ai1", "ei": "pinyin-ei1",
+  "ui": "pinyin-ui1", "ao": "pinyin-ao1", "ou": "pinyin-ou1", "iu": "pinyin-iu1",
+  "ie": "pinyin-ie1", "üe": "pinyin-ue1", "er": "pinyin-er2", "an": "pinyin-an1",
+  "en": "pinyin-en1", "in": "pinyin-in1", "un": "pinyin-un1", "ün": "pinyin-vn1",
+  "ang": "pinyin-ang1", "eng": "pinyin-eng1", "ing": "pinyin-ing1", "ong": "pinyin-ong1",
+  "zhi": "pinyin-zhi1", "chi": "pinyin-chi1", "shi": "pinyin-shi1", "zi": "pinyin-zi1",
+  "ci": "pinyin-ci1", "si": "pinyin-si1", "yi": "pinyin-yi1", "wu": "pinyin-wu1",
+  "yu": "pinyin-yu1", "ye": "pinyin-ie1", "yue": "pinyin-ue1", "yuan": "pinyin-yuan1",
+  "yin": "pinyin-in1", "yun": "pinyin-vn1", "ying": "pinyin-ing1",
   "麻": "pinyin-ma2",
   "骂": "pinyin-ma4",
   "八": "pinyin-ba1",

@@ -342,14 +342,14 @@ const SPECS: MatchSeed[] = [
     skillId: "mandarin-finals",
     prompt: "把汉字和正确的韵母配成一对。",
     instruction: "先点汉字，再点韵母。",
-    explanation: "猫 māo 的韵母是 ao，山 shān 的韵母是 an，鸟 niǎo 的韵母是 iao。",
+    explanation: "猫 māo 的韵母是 ao，山 shān 的韵母是 an，书 shū 的韵母是 u。",
     template: "match-final",
     leftLabel: "汉字",
     rightLabel: "韵母",
     pairs: [
       { left: "猫", right: "ao", audioText: "猫" },
       { left: "山", right: "an", audioText: "山" },
-      { left: "鸟", right: "iao", audioText: "鸟" }
+      { left: "书", right: "u", audioText: "书" }
     ]
   },
   {
@@ -686,6 +686,146 @@ const SPECS: MatchSeed[] = [
       { left: "apple", right: "apple", audioText: "apple", audioLanguage: "en-US", rightImage: "apple" },
       { left: "bear", right: "bear", audioText: "bear", audioLanguage: "en-US", rightImage: "bear" },
       { left: "fish", right: "fish", audioText: "fish", audioLanguage: "en-US", rightImage: "fish" }
+    ]
+  },
+  {
+    skillId: "math-scaled-picture-graph",
+    prompt: "In a graph where each star stands for 5 books, match each row with its total number of books.",
+    instruction: "Tap a star count on the left, then its total books on the right.",
+    explanation: "2 stars = 10 books, 4 stars = 20 books, and 6 stars = 30 books.",
+    template: "match-scaled-graph",
+    leftLabel: "Stars (each = 5)",
+    rightLabel: "Total books",
+    pairs: [
+      { left: "2 stars", right: "10 books" },
+      { left: "4 stars", right: "20 books" },
+      { left: "6 stars", right: "30 books" }
+    ]
+  },
+  {
+    skillId: "math-number-patterns-1000",
+    prompt: "Match each number pattern or expression with its missing value.",
+    instruction: "Tap a pattern on the left, then its matching number on the right.",
+    explanation: "340 + 20 = 360, 500 − 50 = 450, and 4 × 5 + 3 = 23.",
+    template: "match-pattern-1000",
+    leftLabel: "Pattern or expression",
+    rightLabel: "Value",
+    pairs: [
+      { left: "320, 340, __", right: "360" },
+      { left: "550, 500, __", right: "450" },
+      { left: "4 × 5 + 3", right: "23" }
+    ]
+  },
+  {
+    skillId: "mandarin-radicals-homographs",
+    prompt: "把形近字和最合适的词语配成一对。",
+    instruction: "先点左边的汉字，再点右边能和它组成的词语。",
+    explanation: "“清”配“清水”，“晴”配“晴天”，“睛”配“眼睛”。",
+    template: "match-radical-homograph",
+    leftLabel: "形近字",
+    rightLabel: "词语",
+    pairs: [
+      { left: "清（三点水）", right: "河里的 ___ 水" },
+      { left: "晴（日字旁）", right: "出太阳的 ___ 天" },
+      { left: "睛（目字旁）", right: "亮晶晶的眼 ___" }
+    ]
+  },
+  {
+    skillId: "mandarin-synonyms-collocations",
+    prompt: "把每组近义词配成一对。",
+    instruction: "先点左边的词语，再点右边意思相近的词语。",
+    explanation: "“高兴”和“快乐”意思相近，“仔细”和“认真”意思相近，“立刻”和“马上”意思相近。",
+    template: "match-synonym-pair",
+    leftLabel: "词语",
+    rightLabel: "近义词",
+    pairs: [
+      { left: "高兴", right: "快乐" },
+      { left: "仔细", right: "认真" },
+      { left: "立刻", right: "马上" }
+    ]
+  },
+  {
+    skillId: "mandarin-conjunctions-complex",
+    prompt: "把前半句和最通顺的后半句配成一对。",
+    instruction: "先读前半句，再点右边意思连贯的后半句。",
+    explanation: "因为下大雨，所以改在室内上课；虽然山路很远，但是大家没有放弃；我先洗手，再吃晚饭。",
+    template: "match-complex-clause",
+    leftLabel: "前半句",
+    rightLabel: "后半句",
+    pairs: [
+      { left: "因为外面下大雨，", right: "所以体育课改在室内。" },
+      { left: "虽然这道题有点难，", right: "但是我还是认真想出来了。" },
+      { left: "放学回家后，我先洗手，", right: "再坐下来吃晚饭。" }
+    ]
+  },
+  {
+    skillId: "mandarin-passage-comprehension",
+    prompt: "把故事里的做法和它带来的好结果配成一对。",
+    instruction: "先点左边的做法，再点右边对应的结果。",
+    explanation: "每天按时浇水让小苗长高，把玩具分类收好让房间整洁，主动分享雨伞让同学不淋湿。",
+    template: "match-passage-cause",
+    leftLabel: "故事里的做法",
+    rightLabel: "带来的结果",
+    pairs: [
+      { left: "每天按时给种子浇水晒太阳", right: "花盆里长出了嫩绿的小苗" },
+      { left: "把积木和绘本分类放回架子", right: "房间变得整洁又好找东西" },
+      { left: "和没带伞的同学共撑一把伞", right: "两个人都能干干净净回家" }
+    ]
+  },
+  {
+    skillId: "english-tenses-agreement",
+    prompt: "Match each time clue and subject with the correct verb form.",
+    instruction: "Tap the sentence start on the left, then the matching verb phrase on the right.",
+    explanation: "Every day + He uses walks; Right now + They uses are playing; Yesterday + She uses visited.",
+    template: "match-tense-clue",
+    leftLabel: "Time clue and subject",
+    rightLabel: "Verb phrase",
+    pairs: [
+      { left: "Every day, Ben", right: "walks to school." },
+      { left: "Right now, the children", right: "are playing in the hall." },
+      { left: "Yesterday, Lily", right: "visited her aunt." }
+    ]
+  },
+  {
+    skillId: "english-prepositions-connectors",
+    prompt: "Match each sentence beginning with the connector and ending that make sense.",
+    instruction: "Tap a beginning on the left, then its matching ending on the right.",
+    explanation: "Use because for a reason, but for a contrast, and so for a result.",
+    template: "match-connector-clause",
+    leftLabel: "Sentence beginning",
+    rightLabel: "Connected ending",
+    pairs: [
+      { left: "Tom wore a jacket", right: "because the wind was cold." },
+      { left: "The box was small", right: "but it was very heavy." },
+      { left: "The library was closed,", right: "so we read at home." }
+    ]
+  },
+  {
+    skillId: "english-pronouns-questions",
+    prompt: "Match each question with the answer that fits the question word.",
+    instruction: "Tap a question on the left, then its matching answer on the right.",
+    explanation: "Whose asks about ownership, When asks about time, and Why asks for a reason.",
+    template: "match-wh-answer",
+    leftLabel: "Question",
+    rightLabel: "Answer",
+    pairs: [
+      { left: "Whose water bottle is this?", right: "It is his water bottle." },
+      { left: "When does the concert start?", right: "It starts at three o'clock." },
+      { left: "Why are you smiling?", right: "Because our team won the game." }
+    ]
+  },
+  {
+    skillId: "english-cloze-passage",
+    prompt: "Match each short context with the best word to complete the blank.",
+    instruction: "Tap a sentence on the left, then the word that fits the context.",
+    explanation: "A library needs quiet voices, a rainy walk needs an umbrella, and a hungry puppy eats eagerly.",
+    template: "match-cloze-context",
+    leftLabel: "Context sentence",
+    rightLabel: "Best word",
+    pairs: [
+      { left: "The baby was asleep, so we spoke ___.", right: "softly" },
+      { left: "Dark clouds filled the sky, so we carried an ___.", right: "umbrella" },
+      { left: "Ana practised the piano every day and played ___.", right: "well" }
     ]
   }
 ];

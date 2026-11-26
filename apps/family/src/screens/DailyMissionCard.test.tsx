@@ -19,7 +19,7 @@ describe("DailyMissionCard", () => {
   it("shows a concrete first step before the placement check", () => {
     render(<DailyMissionCard progress={progress} hasDiagnostic={false} hasActiveSession={false} reviewCount={2}
         locale="zh" />);
-    expect(screen.getByText("先做 8 题，找找起点")).toBeInTheDocument();
+    expect(screen.getByText("先做 5 题，找找起点")).toBeInTheDocument();
     expect(screen.queryByText("现在在：数到100")).not.toBeInTheDocument();
   });
 

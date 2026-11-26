@@ -53,10 +53,11 @@ const FACTUAL_MATH_TEMPLATES = new Set([
   ,"time-start"
   ,"real-world-fraction"
   ,"real-world-shape"
+  ,"odd-even-identify"
 ]);
 
 rawQuestions.forEach((question) => {
-  question.diagnostic = question.transferLevel !== "far-transfer";
+  question.diagnostic = question.transferLevel !== "far-transfer" && question.difficulty < 5;
   if (!question.audioOnly) {
     question.audioText = preAnswerAudio(question);
   } else if (question.audioOnly) {
@@ -157,6 +158,9 @@ export function validateContentCatalog(): ContentIssue[] {
         for (const image of Object.values(question.optionImages)) if (!KNOWN_IMAGE_NAMES.has(image)) issues.push({ code: "unknown-option-image", message: `${question.id} references unknown image ${image}`, questionId: question.id, skillId: question.skillId });
         if (Object.keys(question.optionImages).some((option) => !expected.has(option))) issues.push({ code: "extra-option-image", message: `${question.id} has an image for an unknown option`, questionId: question.id, skillId: question.skillId });
       }
+      if (question.displayCharacter && question.displayCharacter.trim() === question.correctAnswer.trim()) {
+        issues.push({ code: "visual-answer-leak", message: `${question.id} displayCharacter reveals the correctAnswer`, questionId: question.id, skillId: question.skillId });
+      }
       if (question.audioOnly && !question.audioText) issues.push({ code: "audio-only-source", message: `${question.id} is audio-only without audioText`, questionId: question.id, skillId: question.skillId });
       if (!question.audioOnly && question.audioText && speechRevealsAnswer(question, question.audioText)) issues.push({ code: "audio-answer-leak", message: `${question.id} audioText reveals the answer`, questionId: question.id, skillId: question.skillId });
       if (question.audioOnly && question.passage && speechRevealsAnswer(question, question.passage)) issues.push({ code: "audio-passage-leak", message: `${question.id} audio-only passage reveals the answer`, questionId: question.id, skillId: question.skillId });
@@ -167,10 +171,10 @@ export function validateContentCatalog(): ContentIssue[] {
       if (new Set(question.pairs.map((pair) => pair.id)).size !== question.pairs.length) {
         issues.push({ code: "duplicate-match-pair-id", message: `${question.id} has duplicate match pair ids`, questionId: question.id, skillId: question.skillId });
       }
-      if (new Set(question.pairs.map((pair) => pair.left)).size !== question.pairs.length) {
+      if (new Set(question.pairs.map((pair) => pair.left.trim().toLowerCase())).size !== question.pairs.length) {
         issues.push({ code: "duplicate-match-left", message: `${question.id} has duplicate left labels`, questionId: question.id, skillId: question.skillId });
       }
-      if (new Set(question.pairs.map((pair) => pair.right)).size !== question.pairs.length) {
+      if (new Set(question.pairs.map((pair) => pair.right.trim().toLowerCase())).size !== question.pairs.length) {
         issues.push({ code: "duplicate-match-right", message: `${question.id} has duplicate right labels`, questionId: question.id, skillId: question.skillId });
       }
       if (question.pairs.some((pair) => !pair.left.trim() || !pair.right.trim())) {
@@ -199,7 +203,11 @@ export function validateContentCatalog(): ContentIssue[] {
       if (question.correctOrder.length < 3 || question.tokens.length < question.correctOrder.length) {
         issues.push({ code: "order-token-count", message: `${question.id} must have at least 3 ordered tokens`, questionId: question.id, skillId: question.skillId });
       }
-      if (question.correctOrder.some((token) => !question.tokens.includes(token))) {
+      const tokenCounts = new Map<string, number>();
+      for (const token of question.tokens) tokenCounts.set(token, (tokenCounts.get(token) ?? 0) + 1);
+      const usedCounts = new Map<string, number>();
+      for (const token of question.correctOrder) usedCounts.set(token, (usedCounts.get(token) ?? 0) + 1);
+      if ([...usedCounts.entries()].some(([token, count]) => (tokenCounts.get(token) ?? 0) < count)) {
         issues.push({ code: "order-missing-token", message: `${question.id} correctOrder contains token missing from tokens`, questionId: question.id, skillId: question.skillId });
       }
     }

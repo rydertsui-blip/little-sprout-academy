@@ -40,6 +40,8 @@ export const SKILL_DEPTH_BLUEPRINTS: SkillDepthBlueprint[] = [
   blueprint("math-length-measure", "math", 18, ["length-measure", "length-compare", "length-change"]),
   blueprint("math-fractions-add-sub", "math", 18, ["fraction-add-sub", "visual-bar", "fraction-story"]),
   blueprint("math-measurement-units", "math", 18, ["measurement-unit", "unit-select", "unit-convert"], 3),
+  blueprint("math-scaled-picture-graph", "math", 18, ["scaled-graph-read", "scaled-graph-compare", "scaled-graph-total"]),
+  blueprint("math-number-patterns-1000", "math", 18, ["odd-even-identify", "pattern-1000", "mixed-mul-add"]),
   blueprint("k2-mandarin-listen", "mandarin", 12, ["listen-animal", "listen-color", "listen-number"]),
   blueprint("k2-mandarin-vocabulary", "mandarin", 12, ["category-word", "context-word", "meaning"]),
   blueprint("mandarin-initials", "mandarin", 18, ["initial", "initial-family", "picture-initial", "same-initial"]),
@@ -53,6 +55,10 @@ export const SKILL_DEPTH_BLUEPRINTS: SkillDepthBlueprint[] = [
   blueprint("mandarin-listening", "mandarin", 12, ["listen-where", "listen-action", "listen-object"]),
   blueprint("mandarin-classifiers", "mandarin", 12, ["classifier", "phrase-complete", "picture-sort"]),
   blueprint("mandarin-word-order", "mandarin", 12, ["sentence-order", "missing-word", "conversation-order"]),
+  blueprint("mandarin-radicals-homographs", "mandarin", 18, ["radical-meaning", "homograph-cloze", "radical-family"]),
+  blueprint("mandarin-synonyms-collocations", "mandarin", 18, ["synonym-word", "antonym-word", "word-collocation"]),
+  blueprint("mandarin-conjunctions-complex", "mandarin", 18, ["conjunction-cloze", "complex-clause", "sequence-clauses"]),
+  blueprint("mandarin-passage-comprehension", "mandarin", 18, ["passage-main-idea", "passage-cause", "passage-lesson"]),
   blueprint("k2-english-listen", "english", 12, ["listen-animal", "listen-color", "listen-number"]),
   blueprint("k2-english-letters", "english", 12, ["letter-case", "alphabet-order", "beginning-letter"]),
   blueprint("english-letters", "english", 12, ["beginning-letter", "letter-name", "letter-case"]),
@@ -66,7 +72,11 @@ export const SKILL_DEPTH_BLUEPRINTS: SkillDepthBlueprint[] = [
   blueprint("english-sentence-order", "english", 18, ["sentence-order"], 1),
   blueprint("english-reading", "english", 12, ["literal"], 1),
   blueprint("english-reading-inference", "english", 12, ["inference", "sequence", "why"]),
-  blueprint("english-spelling", "english", 12, ["spelling"], 1)
+  blueprint("english-spelling", "english", 12, ["spelling"], 1),
+  blueprint("english-tenses-agreement", "english", 18, ["subject-verb-agreement", "present-continuous", "past-tense"]),
+  blueprint("english-prepositions-connectors", "english", 18, ["preposition-place", "connector-clause", "preposition-time"]),
+  blueprint("english-pronouns-questions", "english", 18, ["pronoun-case", "possessive-pronoun", "wh-question-word"]),
+  blueprint("english-cloze-passage", "english", 18, ["grammar-cloze", "vocabulary-cloze", "connector-cloze"])
 ];
 
 const BLUEPRINT_BY_ID = new Map(SKILL_DEPTH_BLUEPRINTS.map((item) => [item.skillId, item]));

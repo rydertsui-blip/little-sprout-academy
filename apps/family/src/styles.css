@@ -355,12 +355,23 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
 .skill-teach-body p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
 .skill-teach-body small { color: #6d521f; font-weight: 800; }
 .teach-audio { justify-self: start; min-height: 44px; margin-top: 4px; }
-.math-tool { width: min(560px, 100%); text-align: left; border: 2px solid rgba(23, 50, 77, 0.3); border-radius: 8px; background: rgba(255, 253, 248, 0.94); }
-.math-tool summary { min-height: 44px; display: flex; align-items: baseline; gap: 8px; padding: 8px 12px; border-bottom: 1px dashed rgba(23, 50, 77, 0.18); color: var(--muted); font-size: 12px; font-weight: 800; cursor: pointer; }
-.math-tool summary strong { color: var(--ink); font-size: 14px; }
-.math-tool summary small { margin-left: auto; font-size: 11px; }
+.math-tool { width: min(560px, 100%); text-align: left; border: 2px solid rgba(23, 50, 77, 0.3); border-radius: 8px; background: rgba(255, 253, 248, 0.94); transition: border-color 180ms ease, box-shadow 180ms ease; }
+.math-tool.is-hint-focus { border-color: #d9a12a; box-shadow: 0 0 0 4px rgba(244, 184, 75, 0.28); }
+.math-tool summary, .math-tool-header { min-height: 44px; display: flex; align-items: baseline; gap: 8px; padding: 8px 12px; border-bottom: 1px dashed rgba(23, 50, 77, 0.18); color: var(--muted); font-size: 12px; font-weight: 800; }
+.math-tool summary strong, .math-tool-header strong { color: var(--ink); font-size: 14px; }
+.math-tool summary small, .math-tool-header small { margin-left: auto; font-size: 11px; }
 .math-tool-body { display: grid; justify-items: center; gap: 6px; padding: 10px 12px 12px; }
 .math-tool-body p { margin: 0; color: var(--muted); font-size: 12px; font-weight: 700; }
+.tens-ones-board { width: 100%; display: grid; justify-items: center; gap: 6px; }
+.tens-ones-title { color: var(--ink); font-size: 12px; font-weight: 900; text-align: center; }
+.tens-ones-columns { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.base-ten-rods, .base-ten-cubes { min-height: 42px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; padding: 4px; }
+.place-value-compare { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.place-compare-card { display: grid; justify-items: center; gap: 2px; min-width: 110px; padding: 8px 10px; border: 2px solid rgba(23, 50, 77, 0.28); border-radius: 7px; background: #fffdf8; }
+.place-compare-card strong { font-size: 20px; color: var(--ink); }
+.place-compare-card span { font-size: 12px; font-weight: 800; color: var(--muted); }
+.shapes-interactive { width: 100%; display: grid; justify-items: center; gap: 4px; }
+.shapes-interactive small { color: var(--ink); font-size: 12px; font-weight: 800; text-align: center; }
 .bar-model-visual, .number-bond-visual { width: 100%; display: grid; justify-items: center; gap: 7px; padding: 8px 0 2px; }
 .bar-model-whole, .bar-model-part { width: 100%; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 2px solid rgba(23, 50, 77, 0.35); border-radius: 6px; background: #d8e2f7; }
 .bar-model-whole { background: #ffeab6; }

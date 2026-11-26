@@ -223,10 +223,10 @@ export function buildMathQuestions(skill: Skill): ChoiceQuestion[] {
       const data = [
         ["1/5 + 2/5 = ?", "3/5", ["2/5", "3/10"], "Add the numerators and keep the denominator: 1 + 2 = 3, so 1/5 + 2/5 = 3/5.", "fraction-add-sub"],
         ["3/7 + 2/7 = ?", "5/7", ["1/7", "5/14"], "Keep the denominator: 3 + 2 = 5, so 3/7 + 2/7 = 5/7.", "fraction-add-sub"],
-        ["4/9 − 1/9 = ?", "3/9", ["5/9", "3/18"], "Subtract the numerators and keep the denominator: 4 − 1 = 3, so 4/9 − 1/9 = 3/9.", "fraction-add-sub"],
+        ["4/9 − 1/9 = ?", "3/9", ["5/9", "3/18"], "Subtract the numerators and keep the denominator: 4 − 1 = 3, so 4/9 − 1/9 = 3/9 (or 1/3 in simplest form).", "fraction-add-sub"],
         ["5/8 − 2/8 = ?", "3/8", ["7/8", "3/16"], "Keep the denominator: 5 − 2 = 3, so 5/8 − 2/8 = 3/8.", "fraction-add-sub"],
         ["2/6 + 3/6 = ?", "5/6", ["1/6", "5/12"], "Keep the denominator: 2 + 3 = 5, so 2/6 + 3/6 = 5/6.", "fraction-add-sub"],
-        ["6/10 − 4/10 = ?", "2/10", ["10/10", "2/20"], "Keep the denominator: 6 − 4 = 2, so 6/10 − 4/10 = 2/10.", "fraction-add-sub"]
+        ["6/10 − 4/10 = ?", "2/10", ["10/10", "2/20"], "Keep the denominator: 6 − 4 = 2, so 6/10 − 4/10 = 2/10 (or 1/5 in simplest form).", "fraction-add-sub"]
       ] as const;
       data.forEach(([prompt, answer, distractors, explanation, template], index) => q.push(makeMathQuestion(skill, index, prompt, answer, [...distractors], explanation, template)));
       break;
@@ -243,8 +243,32 @@ export function buildMathQuestions(skill: Skill): ChoiceQuestion[] {
       data.forEach(([prompt, answer, distractors, explanation, template], index) => q.push(makeMathQuestion(skill, index, prompt, answer, [...distractors], explanation, template)));
       break;
     }
+    case "math-scaled-picture-graph": {
+      const data = [
+        ["In a picture graph, each star stands for 2 books. The row for Monday has 4 stars. How many books were read on Monday?", "8", ["6", "4"], "4 stars × 2 books = 8 books.", "scaled-graph-read"],
+        ["In a picture graph, each apple icon stands for 5 apples. A basket row shows 3 apple icons. How many apples are there?", "15", ["8", "10"], "3 icons × 5 apples = 15 apples.", "scaled-graph-read"],
+        ["Each car icon stands for 10 cars. The red car row has 4 icons and the blue car row has 2 icons. How many more red cars than blue cars are there?", "20", ["2", "60"], "(4 − 2) × 10 = 20 more red cars.", "scaled-graph-compare"],
+        ["Each circle stands for 2 stickers. Lina has 5 circles and Ben has 3 circles. How many more stickers does Lina have?", "4", ["2", "16"], "(5 − 3) × 2 = 4 more stickers.", "scaled-graph-compare"],
+        ["Each flower icon stands for 5 flowers. There are 2 icons for roses and 4 icons for lilies. How many flowers are there altogether?", "30", ["6", "25"], "(2 + 4) × 5 = 30 flowers altogether.", "scaled-graph-total"],
+        ["Each ball icon stands for 2 balls. There are 3 icons for footballs and 4 icons for basketballs. How many balls are there altogether?", "14", ["7", "12"], "(3 + 4) × 2 = 14 balls altogether.", "scaled-graph-total"]
+      ] as const;
+      data.forEach(([prompt, answer, distractors, explanation, template], index) => q.push(makeMathQuestion(skill, index, prompt, answer, [...distractors], explanation, template)));
+      break;
+    }
+    case "math-number-patterns-1000": {
+      const data = [
+        ["Look at the ones digit of 248. Which kind of number is 248?", "even number", ["odd number", "five-ten number"], "248 ends in 8, so 248 is an even number.", "odd-even-identify"],
+        ["Look at the ones digit of 375. Which kind of number is 375?", "odd number", ["even number", "ten-group number"], "375 ends in 5, so 375 is an odd number.", "odd-even-identify"],
+        ["What is the next number in the pattern? 320, 330, 340, __", "350", ["345", "360"], "The pattern adds 10 each time: 340 + 10 = 350.", "pattern-1000"],
+        ["What is the next number in the pattern? 450, 500, 550, __", "600", ["560", "650"], "The pattern adds 50 each time: 550 + 50 = 600.", "pattern-1000"],
+        ["There are 3 boxes with 5 pencils in each box, plus 4 loose pencils. How many pencils are there altogether?", "19", ["15", "23"], "3 × 5 = 15, then 15 + 4 = 19 pencils.", "mixed-mul-add"],
+        ["There are 4 plates with 4 cakes on each plate. 3 cakes are eaten. How many cakes are left?", "13", ["16", "19"], "4 × 4 = 16, then 16 − 3 = 13 cakes left.", "mixed-mul-add"]
+      ] as const;
+      data.forEach(([prompt, answer, distractors, explanation, template], index) => q.push(makeMathQuestion(skill, index, prompt, answer, [...distractors], explanation, template)));
+      break;
+    }
   }
-  const choiceTarget = ["math-count-100", "math-add-sub-100", "math-multiply-tables"].includes(skill.id) ? 20 : ["k2-math-count-20", "k2-math-add-within-10", "math-two-step-problems"].includes(skill.id) ? 12 : ["math-time", "math-money", "math-picture-graph", "math-length-measure", "math-fractions-add-sub", "math-measurement-units", "math-place-value-1000", "math-add-sub-regroup", "math-add-sub-1000", "math-divide-tables", "math-fractions"].includes(skill.id) ? (["math-time", "math-place-value-1000", "math-add-sub-regroup", "math-add-sub-1000", "math-divide-tables", "math-fractions"].includes(skill.id) ? 16 : 17) : skill.id === "math-time-duration" ? 16 : 11;
+  const choiceTarget = ["math-count-100", "math-add-sub-100", "math-multiply-tables"].includes(skill.id) ? 20 : ["k2-math-count-20", "k2-math-add-within-10", "math-two-step-problems"].includes(skill.id) ? 12 : ["math-time", "math-money", "math-picture-graph", "math-length-measure", "math-fractions-add-sub", "math-measurement-units", "math-place-value-1000", "math-add-sub-regroup", "math-add-sub-1000", "math-divide-tables", "math-fractions", "math-scaled-picture-graph", "math-number-patterns-1000"].includes(skill.id) ? (["math-time", "math-place-value-1000", "math-add-sub-regroup", "math-add-sub-1000", "math-divide-tables", "math-fractions", "math-scaled-picture-graph", "math-number-patterns-1000"].includes(skill.id) ? 16 : 17) : skill.id === "math-time-duration" ? 16 : 11;
   const depthSeeds = buildMathDepthSeeds(skill.id);
   depthSeeds.forEach((seed, offset) => {
     q.push(makeMathQuestion(skill, q.length, seed.prompt, seed.answer, seed.distractors, seed.explanation, seed.template, seed.difficulty));
@@ -297,12 +321,12 @@ function buildMathDepthSeeds(skillId: string): MathDepthSeed[] {
         seed("What is the value of the digit 2 in 274?", 200, [20, 2, 700], "The 2 is in the hundreds place, so its value is 200.", "digit-value", 3)
       ];
     case "math-add-sub-100": {
-      const pairs: Array<[number, number]> = [[34, 25], [48, 21], [57, 18], [62, 26]];
+      const pairs: Array<[number, number]> = [[34, 25], [48, 21], [51, 24], [62, 26]];
       const stories: Array<[number, number, "add" | "subtract", string]> = [
-        [42, 18, "add", "toy cars"],
+        [42, 16, "add", "toy cars"],
         [55, 23, "add", "stickers"],
-        [63, 27, "subtract", "pages"],
-        [70, 34, "subtract", "marbles"]
+        [68, 25, "subtract", "pages"],
+        [79, 34, "subtract", "marbles"]
       ];
       return [
         ...pairs.map(([a, b], index) => {
@@ -314,14 +338,14 @@ function buildMathDepthSeeds(skillId: string): MathDepthSeed[] {
           const prompt = operation === "add" ? `${a} ${noun} are added to ${b} ${noun}. How many are there now?` : `${a} ${noun} are on the table. ${b} are taken away. How many remain?`;
           return seed(prompt, answer, [answer - 2, answer + 2, operation === "add" ? b : a + b], `${operation === "add" ? `${a} + ${b}` : `${a} − ${b}`} = ${answer}.`, "story-change", index < 1 ? 2 : 3);
         }),
-        ...[46, 54, 68].map((a, index) => {
+        ...[46, 59, 68].map((a, index) => {
           const b = 23 + index * 4;
           const answer = a - b;
           return seed(`${a} − ${b} = ?`, answer, [answer - 1, answer + 1, answer + 10], `${a} − ${b} = ${answer}.`, "horizontal-equation", 3);
         }),
-        seed("A shop has 48 apples. It sells 19, then receives 12 more. How many apples are there now?", 41, [39, 79], "48 − 19 = 29, then 29 + 12 = 41.", "story-change", 4),
-        seed("Ben has 35 stickers. He gives 18 away, then earns 9 more. How many stickers does he have now?", 26, [24, 44], "35 − 18 = 17, then 17 + 9 = 26.", "story-change", 4),
-        seed("A bus has 52 people. 17 get off, then 8 get on. How many people are on the bus now?", 43, [41, 60], "52 − 17 = 35, then 35 + 8 = 43.", "story-change", 5)
+        seed("A shop has 48 apples. It sells 15 apples. How many apples are there now?", 33, [31, 63], "48 − 15 = 33 apples.", "story-change", 3),
+        seed("Ben has 35 stickers. He gets 24 more stickers. How many stickers does he have now?", 59, [57, 49], "35 + 24 = 59 stickers.", "story-change", 3),
+        seed("A bus has 56 people. 24 people get off. How many people are on the bus now?", 32, [30, 80], "56 − 24 = 32 people.", "story-change", 4)
       ];
     }
     case "math-add-sub-regroup": {
@@ -473,16 +497,16 @@ function buildMathDepthSeeds(skillId: string): MathDepthSeed[] {
     case "math-fractions-add-sub":
       return [
         seed("A fraction bar has 2/6 shaded, then 3/6 more is shaded. What fraction is shaded in total?", "5/6", ["1/6", "5/12"], "2/6 + 3/6 = 5/6.", "visual-bar", 3),
-        seed("A fraction bar has 7/10 shaded, then 2/10 is removed. What fraction remains shaded?", "5/10", ["9/10", "5/20"], "7/10 − 2/10 = 5/10.", "visual-bar", 3),
+        seed("A fraction bar has 7/10 shaded, then 2/10 is removed. What fraction remains shaded?", "5/10", ["9/10", "5/20"], "7/10 − 2/10 = 5/10 (or 1/2 in simplest form).", "visual-bar", 3),
         seed("A pie has 3/8 eaten, then 2/8 more is eaten. What fraction is eaten altogether?", "5/8", ["1/8", "5/16"], "3/8 + 2/8 = 5/8.", "fraction-story", 3),
         seed("A bottle is 6/9 full. 2/9 is poured out. What fraction remains?", "4/9", ["8/9", "4/18"], "6/9 − 2/9 = 4/9.", "fraction-story", 3),
-        seed("2/7 + 4/7 = ?", "6/7", ["6/14", "2/7"], "Add the numerators and keep the denominator: 2 + 4 = 6, so 6/7.", "fraction-add-sub", 2),
+        seed("5/9 + 2/9 = ?", "7/9", ["7/18", "3/9"], "Add the numerators and keep the denominator: 5 + 2 = 7, so 7/9.", "fraction-add-sub", 2),
         seed("4/7 + 2/7 = ?", "6/7", ["6/14", "2/7"], "Keep the denominator: 4 + 2 = 6, so 6/7.", "fraction-add-sub", 2),
-        seed("8/10 − 3/10 = ?", "5/10", ["11/10", "5/20"], "Keep the denominator: 8 − 3 = 5, so 5/10.", "fraction-add-sub", 2),
+        seed("8/10 − 3/10 = ?", "5/10", ["11/10", "5/20"], "Keep the denominator: 8 − 3 = 5, so 5/10 (or 1/2 in simplest form).", "fraction-add-sub", 2),
         seed("3/9 + 4/9 = ?", "7/9", ["7/18", "1/9"], "Keep the denominator: 3 + 4 = 7, so 7/9.", "fraction-add-sub", 2),
-        seed("9/12 − 5/12 = ?", "4/12", ["14/12", "4/24"], "Keep the denominator: 9 − 5 = 4, so 4/12.", "fraction-add-sub", 3),
+        seed("9/12 − 5/12 = ?", "4/12", ["14/12", "4/24"], "Keep the denominator: 9 − 5 = 4, so 4/12 (or 1/3 in simplest form).", "fraction-add-sub", 3),
         seed("A garden bed has 2/8 planted with beans, then 5/8 more is planted. What fraction is planted?", "7/8", ["3/8", "7/16"], "2/8 + 5/8 = 7/8.", "fraction-story", 3),
-        seed("A tank is 9/10 full. 4/10 is used. What fraction remains?", "5/10", ["13/10", "5/20"], "9/10 − 4/10 = 5/10.", "fraction-story", 3)
+        seed("A tank is 9/10 full. 4/10 is used. What fraction remains?", "5/10", ["13/10", "5/20"], "9/10 − 4/10 = 5/10 (or 1/2 in simplest form).", "fraction-story", 3)
       ];
     case "math-measurement-units":
       return [
@@ -497,6 +521,32 @@ function buildMathDepthSeeds(skillId: string): MathDepthSeed[] {
         seed("4 metres is equal to how many centimetres?", "400 centimetres", ["40 centimetres", "4000 centimetres"], "Each metre is 100 centimetres, so 4 metres is 400 centimetres.", "unit-convert", 3),
         seed("A bottle holds 2 litres and a jug holds 9 litres. How many litres do they hold altogether?", "11 litres", ["7 litres", "12 litres"], "2 + 9 = 11 litres.", "unit-compare", 2),
         seed("A 6 kg box and a 10 kg box. How many kilograms heavier is the heavier box?", "4 kg", ["16 kg", "5 kg"], "10 − 6 = 4 kg.", "measurement-compare", 3)
+      ];
+    case "math-scaled-picture-graph":
+      return [
+        seed("In a picture graph, each symbol stands for 2 children. The swimming row has 6 symbols. How many children chose swimming?", 12, [8, 6], "6 symbols × 2 children = 12 children.", "scaled-graph-read", 2),
+        seed("In a picture graph, each star stands for 5 points. Team A has 5 stars. How many points does Team A have?", 25, [10, 20], "5 stars × 5 points = 25 points.", "scaled-graph-read", 2),
+        seed("In a picture graph, each cup stands for 10 cups of juice. Tuesday has 3 cups. How many cups of juice were sold on Tuesday?", 30, [13, 20], "3 icons × 10 = 30 cups of juice.", "scaled-graph-read", 2),
+        seed("In a picture graph, each book icon stands for 4 books. Shelf B has 4 icons. How many books are on Shelf B?", 16, [8, 12], "4 icons × 4 books = 16 books.", "scaled-graph-read", 3),
+        seed("Each symbol stands for 5 pears. Box A has 6 symbols and Box B has 3 symbols. How many more pears are in Box A?", 15, [3, 45], "(6 − 3) × 5 = 15 more pears.", "scaled-graph-compare", 3),
+        seed("Each symbol stands for 2 birds. Tree A has 7 symbols and Tree B has 4 symbols. How many fewer birds are in Tree B?", 6, [3, 22], "(7 − 4) × 2 = 6 fewer birds.", "scaled-graph-compare", 3),
+        seed("Each symbol stands for 10 marbles. Jar A has 5 symbols and Jar B has 2 symbols. How many more marbles are in Jar A?", 30, [3, 70], "(5 − 2) × 10 = 30 more marbles.", "scaled-graph-compare", 3),
+        seed("Each symbol stands for 5 buns. Morning sales show 4 symbols and afternoon sales show 3 symbols. How many buns were sold altogether?", 35, [7, 30], "(4 + 3) × 5 = 35 buns altogether.", "scaled-graph-total", 3),
+        seed("Each symbol stands for 2 fish. Tank A has 5 symbols and Tank B has 4 symbols. How many fish are there in both tanks?", 18, [9, 20], "(5 + 4) × 2 = 18 fish altogether.", "scaled-graph-total", 3),
+        seed("Each symbol stands for 10 tickets. Class 2A sold 3 symbols and Class 2B sold 5 symbols. How many tickets did they sell altogether?", 80, [8, 70], "(3 + 5) × 10 = 80 tickets altogether.", "scaled-graph-total", 4)
+      ];
+    case "math-number-patterns-1000":
+      return [
+        seed("Look at the ones digit of 516. Which kind of number is 516?", "even number", ["odd number", "hundred-odd number"], "516 ends in 6, which can be paired evenly, so 516 is an even number.", "odd-even-identify", 2),
+        seed("Look at the ones digit of 689. Which kind of number is 689?", "odd number", ["even number", "two-pair number"], "689 ends in 9, so 689 is an odd number.", "odd-even-identify", 2),
+        seed("Look at the ones digit of 740. Which kind of number is 740?", "even number", ["odd number", "three-odd number"], "740 ends in 0, so 740 is an even number.", "odd-even-identify", 2),
+        seed("Look at the ones digit of 803. Which kind of number is 803?", "odd number", ["even number", "ten-even number"], "803 ends in 3, so 803 is an odd number.", "odd-even-identify", 2),
+        seed("What is the missing number in the pattern? 210, 310, 410, __, 610", 510, [420, 500], "The pattern adds 100 each time: 410 + 100 = 510.", "pattern-1000", 2),
+        seed("What is the missing number in the pattern? 780, 760, 740, __, 700", 720, [730, 710], "The pattern subtracts 20 each time: 740 − 20 = 720.", "pattern-1000", 3),
+        seed("What is the missing number in the pattern? 125, 130, 135, __, 145", 140, [138, 150], "The pattern adds 5 each time: 135 + 5 = 140.", "pattern-1000", 2),
+        seed("5 bags have 4 oranges each, and there are 6 more oranges in a bowl. How many oranges are there altogether?", 26, [20, 24], "5 × 4 = 20, then 20 + 6 = 26 oranges.", "mixed-mul-add", 3),
+        seed("3 trays have 10 cups each. 7 cups are taken away. How many cups remain?", 23, [30, 37], "3 × 10 = 30, then 30 − 7 = 23 cups remain.", "mixed-mul-add", 3),
+        seed("6 pairs of socks and 3 single socks make how many socks altogether?", 15, [12, 18], "6 × 2 = 12, then 12 + 3 = 15 socks.", "mixed-mul-add", 4)
       ];
     default:
       return [];

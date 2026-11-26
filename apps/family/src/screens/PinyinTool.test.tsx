@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { PinyinTool } from "./PinyinTool";
 import {
   ALL_PINYIN_UNITS,
+  decomposeCharacterPinyin,
   PINYIN_FINALS,
   PINYIN_INITIALS,
   PINYIN_WHOLE_SYLLABLES,
@@ -53,7 +54,26 @@ describe("PinyinTool", () => {
     for (const unit of ALL_PINYIN_UNITS) {
       expect(getPinyinAudioKey(unit.symbol), unit.symbol).toBe(unit.audioKey);
       expect(AUDIO_ASSETS[unit.audioKey], `${unit.symbol} -> ${unit.audioKey}`).toBeTruthy();
+      expect(AUDIO_ASSETS[unit.symbol], `raw symbol ${unit.symbol}`).toBeTruthy();
     }
+  });
+
+  it("dynamically decomposes two-part, three-part, and whole-reading characters", () => {
+    const ba = decomposeCharacterPinyin("爸");
+    expect(ba.initial).toBe("b");
+    expect(ba.initialAudio).toBe("波");
+    expect(ba.final).toBe("à");
+    expect(ba.finalAudio).toBe("阿");
+    expect(ba.medial).toBeUndefined();
+
+    const hua = decomposeCharacterPinyin("花");
+    expect(hua.initial).toBe("h");
+    expect(hua.medial).toBe("u");
+    expect(hua.final).toBe("ā");
+
+    const yue = decomposeCharacterPinyin("月");
+    expect(yue.isWholeSyllable).toBe(true);
+    expect(yue.baseFinal).toBe("üe");
   });
 
   it("renders the tone coaster for mandarin-tones and plays audio on tap", () => {
@@ -75,8 +95,10 @@ describe("PinyinTool", () => {
     spy.mockRestore();
   });
 
-  it("renders the interactive blend board for initials/finals/syllables without spoiling the target character", () => {
-    const spy = vi.spyOn(audio, "playOrSpeak").mockImplementation(() => {});
+  it("dynamically adapts the blend board to the current question character while masking the tested initial and supporting 3-step auto-blend", () => {
+    const spy = vi.spyOn(audio, "playOrSpeak").mockImplementation((_text, _lang, onStatus) => {
+      onStatus?.("ended");
+    });
     render(
       <PinyinTool
         question={makePinyinQuestion({
@@ -90,16 +112,24 @@ describe("PinyinTool", () => {
 
     const board = screen.getByTestId("pinyin-blend-board");
     expect(board).toBeInTheDocument();
-    expect(board.textContent).not.toContain("猫");
+    expect(board.textContent).toContain("本题：猫");
 
-    fireEvent.click(screen.getByRole("button", { name: /声母/ }));
-    expect(spy).toHaveBeenCalledWith("波", "zh-CN");
+    // Initial block is masked as ？ so it does not leak "m" visually, but plays "摸" on tap
+    const initialBtn = screen.getByRole("button", { name: /声母/ });
+    expect(initialBtn.textContent).toContain("？");
+    fireEvent.click(initialBtn);
+    expect(spy).toHaveBeenCalledWith("摸", "zh-CN");
 
     fireEvent.click(screen.getByRole("button", { name: /韵母/ }));
-    expect(spy).toHaveBeenCalledWith("阿", "zh-CN");
+    expect(spy).toHaveBeenCalledWith("凹", "zh-CN");
 
     fireEvent.click(screen.getByRole("button", { name: /拼一拼/ }));
-    expect(spy).toHaveBeenCalledWith("八", "zh-CN");
+    expect(spy).toHaveBeenCalledWith("猫", "zh-CN");
+
+    // Auto-blend button chains initial -> final -> syllable
+    spy.mockClear();
+    fireEvent.click(screen.getByTestId("pinyin-auto-blend"));
+    expect(spy).toHaveBeenCalledWith("摸", "zh-CN", expect.any(Function));
     spy.mockRestore();
   });
 

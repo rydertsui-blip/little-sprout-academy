@@ -112,7 +112,7 @@ describe("family learning app", () => {
     return question;
   }
 
-  async function finishCurrentRound(length = 8) {
+  async function finishCurrentRound(length = 5) {
     for (let index = 0; index < length; index += 1) {
       await answerCurrentQuestion();
       fireEvent.click(screen.getByRole("button", { name: "Next question" }));
@@ -225,9 +225,9 @@ describe("family learning app", () => {
     expect(screen.getByRole("button", { name: /数学/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "华文 Mandarin" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /英语/ })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /看笔顺，亲手写/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /看笔顺，亲手写/ })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /写字练习/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /声音小游戏/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /小芽口说/ })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /华文口语小游戏/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /English Speaking/ })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /跟小芽开始/ })).toBeInTheDocument();
@@ -601,7 +601,7 @@ describe("family learning app", () => {
     await openParentSettings();
 
     expect(screen.getByText("写字练习")).toBeInTheDocument();
-    expect(screen.getByText(/1 \/ 12/)).toBeInTheDocument();
+    expect(screen.getByText(/1 \/ 100/)).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("小笔的学习年级"), { target: { value: "P1" } });
     await waitFor(async () => {
       const saved = await savedHousehold();
@@ -639,21 +639,21 @@ describe("family learning app", () => {
     await waitFor(() => expect(screen.getByText("今天谁来学习？")).toBeInTheDocument());
   });
 
-  it("runs an eight-question diagnostic and stores the child result", async () => {
+  it("runs a five-question ladder diagnostic and stores the child result", async () => {
     render(<App />);
     await createFamilyWithChild("小安");
     fireEvent.click(screen.getByRole("button", { name: /小安/ }));
     fireEvent.click(screen.getByRole("button", { name: "数学 Math" }));
     await waitFor(() => expect(screen.getByRole("heading", { name: /Mathematics starting check/ })).toBeInTheDocument());
 
-    for (let index = 0; index < 8; index += 1) {
+    for (let index = 0; index < 5; index += 1) {
       await answerCurrentQuestion();
       fireEvent.click(screen.getByRole("button", { name: "Next question" }));
     }
     await waitFor(() => expect(screen.getByRole("heading", { name: /starting check complete/ })).toBeInTheDocument());
     const saved = await savedHousehold();
     expect(saved.children[0].diagnostics.math).toBeDefined();
-    expect(saved.children[0].attempts).toHaveLength(8);
+    expect(saved.children[0].attempts).toHaveLength(5);
     fireEvent.click(screen.getByRole("button", { name: "Back to learning" }));
     fireEvent.click(screen.getByRole("button", { name: "数学 Math" }));
     await waitFor(() => expect(screen.getByRole("heading", { name: "Mathematics practice" })).toBeInTheDocument());
@@ -663,10 +663,10 @@ describe("family learning app", () => {
     render(<App />);
     await createFamilyWithChild("小芽");
     fireEvent.click(screen.getByRole("button", { name: /小芽/ }));
-    expect(screen.getAllByText("先做 8 题，找找起点").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("先做 5 题，找找起点").length).toBeGreaterThanOrEqual(1);
     fireEvent.click(screen.getByRole("button", { name: "数学 Math" }));
     await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
-    await finishCurrentRound();
+    await finishCurrentRound(5);
     await waitFor(() => expect(screen.getByRole("heading", { name: "Mathematics starting check complete" })).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: "Back to learning" }));
 
@@ -680,7 +680,7 @@ describe("family learning app", () => {
     expect(active.dailyPlan?.items).toHaveLength(8);
     expect(active.plannedQuestionIds).toHaveLength(8);
 
-    await finishCurrentRound();
+    await finishCurrentRound(8);
     await waitFor(() => expect(screen.getByRole("heading", { name: "Mathematics practice complete" })).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: "Back to learning" }));
     const completedMathCard = screen.getByRole("button", { name: "数学 Math" });
@@ -1011,7 +1011,7 @@ describe("family learning app", () => {
     await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
     const prompt = screen.getByTestId("question-prompt").textContent;
     const question = await answerCurrentQuestion();
-    expect(screen.getByText("1 / 8")).toBeInTheDocument();
+    expect(screen.getByText("1 / 5")).toBeInTheDocument();
     expect(question.subject).toBe("math");
     first.unmount();
 
@@ -1021,7 +1021,7 @@ describe("family learning app", () => {
     await waitFor(() => expect(screen.getByText("今天谁来学习？")).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: /小树/ }));
     fireEvent.click(screen.getByRole("button", { name: "数学 Math" }));
-    await waitFor(() => expect(screen.getByText("1 / 8")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("1 / 5")).toBeInTheDocument());
     const resumed = screen.getByTestId("question-prompt").textContent;
     expect(resumed).not.toBe(prompt);
     const saved = await savedHousehold();
@@ -1035,9 +1035,9 @@ describe("family learning app", () => {
     fireEvent.click(screen.getByRole("button", { name: "数学 Math" }));
     await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
 
-    for (let index = 0; index < 8; index += 1) {
+    for (let index = 0; index < 5; index += 1) {
       await answerCurrentQuestion();
-      if (index < 7) {
+      if (index < 4) {
         fireEvent.click(screen.getByRole("button", { name: "Next question" }));
         await waitFor(() => expect(screen.getByTestId("question-prompt")).toBeInTheDocument());
       }
@@ -1048,7 +1048,7 @@ describe("family learning app", () => {
     fireEvent.click(next);
     await waitFor(() => expect(screen.getByRole("heading", { name: "Mathematics starting check complete" })).toBeInTheDocument());
     const saved = await savedHousehold();
-    expect(saved.children[0].attempts).toHaveLength(8);
+    expect(saved.children[0].attempts).toHaveLength(5);
     expect(saved.children[0].sessions).toHaveLength(1);
     expect(saved.children[0].rewards.lifetimeStars).toBe(2);
     expect(saved.children[0].rewards.awardedEventKeys).toHaveLength(1);
@@ -1073,7 +1073,7 @@ describe("family learning app", () => {
     }
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("没有保存成功"));
     expect(screen.queryByTestId("answer-feedback")).not.toBeInTheDocument();
-    expect(screen.getByText("0 / 8")).toBeInTheDocument();
+    expect(screen.getByText("0 / 5")).toBeInTheDocument();
 
     writeSpy.mockRestore();
     if (question.kind === "choice") {
@@ -1082,7 +1082,7 @@ describe("family learning app", () => {
       fireEvent.click(screen.getByRole("button", { name: "Save again" }));
     }
     await waitFor(() => expect(screen.getByTestId("answer-feedback")).toBeInTheDocument());
-    expect(screen.getByText("1 / 8")).toBeInTheDocument();
+    expect(screen.getByText("1 / 5")).toBeInTheDocument();
   });
 
   it("shows a recovery screen instead of overwriting corrupt family data", () => {

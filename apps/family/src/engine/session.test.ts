@@ -7,6 +7,7 @@ import {
   completeSession,
   correctCountsForSession,
   createAdaptiveSession,
+  DIAGNOSTIC_MAX_QUESTIONS,
   recordSessionAnswer,
   recommendedNextSkills,
   selectNextQuestion
@@ -41,29 +42,69 @@ describe("adaptive session engine", () => {
     expect(correctCountsForSession(session)).toEqual({ independent: 1, hinted: 1 });
   });
 
-  it("creates a diagnostic session and selects eight distinct questions dynamically", () => {
+  it("creates a 5-question ladder diagnostic session and selects five distinct questions dynamically", () => {
     const child = createChildProfile("小星", "star");
     let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
     expect(session.kind).toBe("diagnostic");
-    expect(session.length).toBe(8);
+    expect(session.length).toBe(DIAGNOSTIC_MAX_QUESTIONS);
+    expect(session.length).toBe(5);
     const selected: string[] = [];
-    for (let index = 0; index < 8; index += 1) {
+    for (let index = 0; index < DIAGNOSTIC_MAX_QUESTIONS; index += 1) {
       const question = selectNextQuestion(child, session)!;
       selected.push(question.id);
       session = recordSessionAnswer(child, session, { questionId: question.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
     }
-    expect(new Set(selected).size).toBe(8);
+    expect(new Set(selected).size).toBe(DIAGNOSTIC_MAX_QUESTIONS);
   });
 
-  it("raises diagnostic difficulty after consecutive correct answers", () => {
+  it("climbs the prerequisite tree and raises diagnostic difficulty after consecutive correct answers", () => {
     const child = createChildProfile("小星", "star", new Date("2026-11-20T10:00:00Z"));
     let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
     const first = selectNextQuestion(child, session)!;
+    expect(first.skillId).toBe("math-count-100");
     session = recordSessionAnswer(child, session, { questionId: first.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
     const second = selectNextQuestion(child, session)!;
+    expect(second.skillId).toBe("math-add-sub-100");
     session = recordSessionAnswer(child, session, { questionId: second.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
     const third = selectNextQuestion(child, session)!;
     expect(third.difficulty).toBeGreaterThan(first.difficulty);
+  });
+
+  it("stops the diagnostic early after two mistakes and places the child at the failed skill", () => {
+    const child = createChildProfile("小安", "star", new Date("2026-11-20T10:00:00Z"));
+    let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
+    // Q1: passes root skill math-count-100
+    const q1 = selectNextQuestion(child, session)!;
+    expect(q1.skillId).toBe("math-count-100");
+    session = recordSessionAnswer(child, session, { questionId: q1.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
+    // Q2: misses depth-1 skill math-add-sub-100
+    const q2 = selectNextQuestion(child, session)!;
+    expect(q2.skillId).toBe("math-add-sub-100");
+    session = recordSessionAnswer(child, session, { questionId: q2.id, correct: false, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
+    expect(session.length).toBe(5);
+    // Q3: misses second question -> triggers early stop at 3 questions
+    const q3 = selectNextQuestion(child, session)!;
+    session = recordSessionAnswer(child, session, { questionId: q3.id, correct: false, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
+    expect(session.length).toBe(3);
+    expect(selectNextQuestion(child, session)).toBeNull();
+    const completed = completeSession(session, child);
+    expect(completed).not.toBeNull();
+    // math-count-100 is unlocked, and child starts right at math-add-sub-100
+    const nextSkills = recommendedNextSkills(child, "math", new Date("2026-11-20T10:00:00Z"));
+    expect(nextSkills[0].skill.id).toBe("math-add-sub-100");
+  });
+
+  it("unlocks passed foundational checkpoints after completing the diagnostic so the child truly fast-forwards", () => {
+    const child = createChildProfile("小星", "star", new Date("2026-11-20T10:00:00Z"));
+    let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
+    while (!completeSession(session)) {
+      const question = selectNextQuestion(child, session)!;
+      session = recordSessionAnswer(child, session, { questionId: question.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
+    }
+    completeSession(session, child);
+    const nextSkills = recommendedNextSkills(child, "math", new Date("2026-11-20T10:00:00Z"));
+    // Passed root skill math-count-100 is no longer blocking as a prerequisite-gap
+    expect(nextSkills[0].skill.id).not.toBe("math-count-100");
   });
 
   it("leads every diagnostic with a hands-on matching item", () => {
@@ -78,7 +119,7 @@ describe("adaptive session engine", () => {
     const child = createChildProfile("小星", "star", new Date("2026-11-20T10:00:00Z"));
     child.settings.enabledSkills = ["math-count-100"];
     let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
-    for (let index = 0; index < 8; index += 1) {
+    for (let index = 0; index < DIAGNOSTIC_MAX_QUESTIONS; index += 1) {
       const question = selectNextQuestion(child, session)!;
       expect(question.skillId).toBe("math-count-100");
       session = recordSessionAnswer(child, session, { questionId: question.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
@@ -89,7 +130,7 @@ describe("adaptive session engine", () => {
     const child = createChildProfile("小星", "star", new Date("2026-11-20T10:00:00Z"));
     let session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"));
     const kinds: string[] = [];
-    for (let index = 0; index < 8; index += 1) {
+    for (let index = 0; index < DIAGNOSTIC_MAX_QUESTIONS; index += 1) {
       const question = selectNextQuestion(child, session)!;
       kinds.push(question.kind);
       session = recordSessionAnswer(child, session, { questionId: question.id, correct: true, hintUsed: false, at: new Date("2026-11-20T10:00:00Z") });
@@ -113,7 +154,7 @@ describe("adaptive session engine", () => {
       const question = selectNextQuestion(child, session)!;
       session = recordSessionAnswer(child, session, { questionId: question.id, correct: true, hintUsed: false });
     }
-    const complete = completeSession(session)!;
+    const complete = completeSession(session, child)!;
     expect(complete.summary.some((row) => row.level === "secure")).toBe(false);
   });
 
@@ -129,6 +170,7 @@ describe("adaptive session engine", () => {
       dueAt: "2026-11-19T00:00:00Z"
     };
     const session = createAdaptiveSession(child, "math", new Date("2026-11-20T10:00:00Z"), { kind: "practice", length: 6 });
+    expect(session.kind).toBe("practice");
     expect(recommendedNextSkills(child, "math", new Date("2026-11-20T10:00:00Z"))[0].reason).toBe("review-due");
   });
 

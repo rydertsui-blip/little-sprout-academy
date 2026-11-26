@@ -1,7 +1,15 @@
 import { execFileSync } from "node:child_process";
-import { createWriteStream, existsSync, mkdirSync, rmSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { createWriteStream, existsSync, mkdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { AUDIO_ASSETS } from "../src/content/audioAssets";
+import { AUDIO_ASSETS, VOICE_LINES } from "../src/content/audioAssets";
+import { GENERATED_AUDIO_ASSETS } from "../src/content/audioAssets.generated";
+import { QUESTIONS } from "../src/content/catalog";
+import { subjectLocale } from "../src/content/copy";
+import { HANDWRITING_CHARACTERS } from "../src/content/handwriting";
+import { hintForQuestion, teachForQuestion } from "../src/content/hints";
+import { SPEAKING_PROMPTS } from "../src/content/speaking";
+import { preAnswerAudio } from "../src/lib/questionAudio";
 
 const CJK_OR_PINYIN_RE = /[\u4e00-\u9fffāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/;
 const PINYIN_TOKEN_RE = /[a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]+/g;
@@ -20,8 +28,143 @@ const DENOMINATOR_WORDS: Record<number, [string, string]> = {
 };
 
 const PINYIN_TO_HOMOPHONE: Record<string, string> = {
-  "qǐng": "请",
+  // 23 initials
+  "b": "波",
+  "p": "坡",
+  "m": "摸",
+  "f": "佛",
+  "d": "德",
+  "t": "特",
+  "n": "讷",
+  "l": "勒",
+  "g": "哥",
+  "k": "科",
+  "h": "喝",
+  "j": "基",
+  "q": "欺",
+  "x": "希",
+  "zh": "知",
+  "ch": "吃",
+  "sh": "诗",
+  "r": "日",
+  "z": "资",
+  "c": "疵",
+  "s": "思",
+  "y": "医",
+  "w": "屋",
+  // 24 finals
+  "a": "阿",
+  "o": "喔",
+  "e": "婀",
+  "i": "衣",
+  "u": "屋",
+  "ü": "迂",
+  "ai": "哀",
+  "ei": "诶",
+  "ui": "威",
+  "ao": "凹",
+  "ou": "欧",
+  "iu": "优",
+  "ie": "耶",
+  "üe": "约",
+  "er": "儿",
+  "an": "安",
+  "en": "恩",
+  "in": "音",
+  "un": "温",
+  "ün": "晕",
+  "ang": "肮",
+  "eng": "鞥",
+  "ing": "英",
+  "ong": "嗡",
+  // 16 whole syllables
+  "zhi": "知",
+  "chi": "吃",
+  "shi": "诗",
+  "ri": "日",
+  "zi": "资",
+  "ci": "疵",
+  "si": "丝",
+  "yi": "衣",
+  "wu": "屋",
+  "yu": "迂",
+  "ye": "耶",
+  "yue": "约",
+  "yuan": "冤",
+  "yin": "音",
+  "yun": "晕",
+  "ying": "英",
+  // Tone-marked pinyin syllables in curriculum prompts, hints & explanations
+  "ā": "阿",
+  "āo": "凹",
+  "ǎo": "袄",
+  "āi": "哀",
+  "ǒu": "偶",
+  "ān": "安",
+  "uǐ": "伟",
+  "māo": "猫",
+  "máo": "毛",
+  "mǎo": "卯",
+  "mào": "帽",
+  "gōu": "沟",
+  "gǒu": "狗",
+  "gòu": "够",
+  "shān": "山",
+  "shán": "馋",
+  "shàn": "扇",
+  "shuī": "吹",
+  "shuǐ": "水",
+  "shuì": "睡",
+  "shuí": "谁",
+  "cǎo": "草",
+  "shū": "书",
+  "rén": "人",
+  "tū": "秃",
+  "tú": "图",
+  "tù": "兔",
+  "yǔ": "雨",
+  "yuē": "约",
+  "yué": "绝",
+  "yuè": "月",
+  "huā": "花",
+  "huá": "华",
+  "huà": "画",
+  "huǒ": "火",
+  "hǒu": "吼",
+  "huò": "货",
+  "mù": "木",
+  "tián": "田",
+  "mā": "妈",
+  "má": "麻",
+  "mǎ": "马",
+  "mà": "骂",
+  "bā": "八",
+  "bá": "拔",
+  "bǎ": "把",
+  "bà": "爸",
+  "niū": "妞",
+  "niú": "牛",
+  "niù": "拗",
+  "niǎo": "鸟",
+  "rì": "日",
+  "rí": "日",
+  "rǐ": "尔",
+  "yú": "鱼",
+  "fēi": "飞",
+  "sān": "三",
+  "shǒu": "手",
+  "dà": "大",
+  "míng": "明",
   "fēng": "风",
+  "qǐng": "请",
+  "xuě": "雪",
+  "xuē": "薛",
+  "xuè": "血",
+  "kǒu": "口",
+  "pǎo": "跑",
+  "kāi": "开",
+  "bái": "白",
+  "lín": "林",
 };
 
 export function normalizeSpokenText(raw: string): { spoken: string; lang: "zh" | "en" } {
@@ -32,14 +175,21 @@ export function normalizeSpokenText(raw: string): { spoken: string; lang: "zh" |
     // e.g. "山，shān" -> "山"
     text = text.replace(/^([\u4e00-\u9fff]+)[，,]\s*[a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]+$/u, "$1");
 
-    // e.g. "“山 shān”和“手 shǒu”的声调一样吗？" -> "“山”和“手”的声调一样吗？"
-    text = text.replace(/([\u4e00-\u9fff])\s+[a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]+/gu, "$1");
+    // e.g. "“山 shān”和“手 shǒu”" -> "“山”和“手”"
+    text = text.replace(/([\u4e00-\u9fff])\s+([a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]+)/gu, (full, hanzi: string, py: string) => {
+      const mapped = PINYIN_TO_HOMOPHONE[py.toLowerCase()];
+      return mapped === hanzi ? hanzi : full;
+    });
 
-    // Replace standalone tone-marked pinyin words like qǐng / fēng with target homophone character
-    text = text.replace(PINYIN_TOKEN_RE, (token) => PINYIN_TO_HOMOPHONE[token] ?? token);
+    // Replace math/blend symbols inside Chinese text
+    text = text.replace(/\s*\+\s*/g, "加");
+    text = text.replace(/\s*=\s*/g, "等于");
+
+    // Replace all pinyin tokens (initials, finals, whole syllables, tone-marked syllables) with Chinese phonetic homophones
+    text = text.replace(PINYIN_TOKEN_RE, (token) => PINYIN_TO_HOMOPHONE[token.toLowerCase()] ?? PINYIN_TO_HOMOPHONE[token] ?? token);
 
     // Replace blank underscores with a natural pause
-    text = text.replace(/\s*_{2,}\s*/g, "……");
+    text = text.replace(/\s*_{2,}\s*/g, "，什么，");
 
     return { spoken: text, lang: "zh" };
   }
@@ -105,17 +255,92 @@ export function normalizeSpokenText(raw: string): { spoken: string; lang: "zh" |
   return { spoken: text, lang: "en" };
 }
 
+function autoKeyFor(text: string): string {
+  return `auto-${createHash("sha256").update(text, "utf8").digest("hex").slice(0, 12)}`;
+}
+
+function syncGeneratedAudioMap(): Record<string, string> {
+  const combined: Record<string, string> = { ...AUDIO_ASSETS };
+  const generated: Record<string, string> = { ...GENERATED_AUDIO_ASSETS };
+  let added = 0;
+
+  const ensure = (text?: string | null) => {
+    const trimmed = text?.trim();
+    if (!trimmed) return;
+    if (!combined[trimmed]) {
+      const key = autoKeyFor(trimmed);
+      combined[trimmed] = key;
+      generated[trimmed] = key;
+      added += 1;
+    }
+  };
+
+  for (const line of Object.values(VOICE_LINES)) {
+    ensure(line);
+  }
+  for (const entry of HANDWRITING_CHARACTERS) {
+    ensure(entry.audioText);
+    ensure(entry.introAudioText);
+  }
+  for (const prompt of SPEAKING_PROMPTS) {
+    ensure(prompt.text);
+  }
+
+  for (const q of QUESTIONS) {
+    ensure(preAnswerAudio(q));
+    ensure(q.explanation);
+    const locale = subjectLocale(q.subject);
+    ensure(hintForQuestion(q, locale));
+    const teach = teachForQuestion(q, locale);
+    if (teach) {
+      const sep = locale === "en" ? ". " : "。";
+      ensure(`${teach.title}${sep}${teach.body}${teach.example ? `${sep}${teach.example}` : ""}`);
+    }
+    if (q.kind === "choice" || q.kind === "order") {
+      ensure(q.audioText);
+    } else if (q.kind === "match") {
+      ensure(q.prompt);
+      for (const pair of q.pairs) {
+        ensure(pair.audioText);
+      }
+    }
+  }
+
+  if (added > 0) {
+    const generatedPath = resolve(process.cwd(), "src/content/audioAssets.generated.ts");
+    const lines = [
+      "// Auto-generated audio asset map for expanded curriculum items",
+      "export const GENERATED_AUDIO_ASSETS: Record<string, string> = {",
+      ...Object.entries(generated).map(([k, v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)},`),
+      "};",
+      ""
+    ];
+    writeFileSync(generatedPath, lines.join("\n"), "utf8");
+    console.log(`Added ${added} new entries to src/content/audioAssets.generated.ts (total generated: ${Object.keys(generated).length}).`);
+  }
+
+  return combined;
+}
+
 async function run(): Promise<void> {
   const dryRun = process.argv.includes("--dry-run");
+  const forceAll = process.argv.includes("--force");
   const onlyArg = process.argv.find((arg) => arg.startsWith("--only="));
   const onlySet = onlyArg ? new Set(onlyArg.slice("--only=".length).split(",").filter(Boolean)) : null;
   const concurrency = onlySet ? 2 : 6;
-  const entries = Object.entries(AUDIO_ASSETS);
+  const allAssets = syncGeneratedAudioMap();
+  const entries = Object.entries(allAssets);
+  const outDir = resolve(process.cwd(), "public/assets/audio");
+  mkdirSync(outDir, { recursive: true });
 
   // Deduplicate by asset filename
   const byAsset = new Map<string, { raw: string; spoken: string; lang: "zh" | "en" }>();
   for (const [raw, asset] of entries) {
     if (onlySet && !onlySet.has(asset)) continue;
+    const outM4a = resolve(outDir, `${asset}.m4a`);
+    if (!forceAll && !onlySet && existsSync(outM4a) && statSync(outM4a).size > 0) {
+      continue;
+    }
     if (!byAsset.has(asset)) {
       byAsset.set(asset, { raw, ...normalizeSpokenText(raw) });
     }
@@ -125,7 +350,7 @@ async function run(): Promise<void> {
   const changed = tasks.filter(([, v]) => v.raw !== v.spoken);
 
   if (dryRun) {
-    console.log(`Total unique assets: ${tasks.length}`);
+    console.log(`Total pending assets to synthesize: ${tasks.length}`);
     console.log(`Normalized spoken texts: ${changed.length}`);
     for (const [asset, v] of changed.slice(0, 40)) {
       console.log(`  [${v.lang}] ${asset}: "${v.raw}" -> "${v.spoken}"`);
@@ -133,10 +358,14 @@ async function run(): Promise<void> {
     return;
   }
 
+  if (tasks.length === 0) {
+    console.log("All audio assets are already synthesized and up to date.");
+    return;
+  }
+
+  console.log(`Synthesizing ${tasks.length} new/missing audio files...`);
   const { MsEdgeTTS, OUTPUT_FORMAT } = await import("msedge-tts");
-  const outDir = resolve(process.cwd(), "public/assets/audio");
   const tmpDir = "/tmp/little-sprout-tts";
-  mkdirSync(outDir, { recursive: true });
   mkdirSync(tmpDir, { recursive: true });
 
   let completed = 0;
@@ -183,7 +412,7 @@ async function run(): Promise<void> {
       try {
         await synthesizeOne(asset, item);
         completed += 1;
-        if (completed % 100 === 0 || completed === tasks.length) {
+        if (completed % 50 === 0 || completed === tasks.length) {
           console.log(`Progress: ${completed}/${tasks.length} (failed: ${failed})`);
         }
       } catch (err) {
@@ -200,7 +429,7 @@ async function run(): Promise<void> {
     console.error("Failed items:", JSON.stringify(failures, null, 2));
     process.exit(1);
   }
-  console.log(`Successfully rebuilt all ${completed} audio files.`);
+  console.log(`Successfully synthesized ${completed} audio files.`);
 }
 
 if (process.argv[1]?.endsWith("rebuild-audio.ts") || process.argv[1]?.endsWith("rebuild-audio.mjs")) {

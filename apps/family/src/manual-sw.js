@@ -74,7 +74,9 @@ self.addEventListener("install", (event) => {
     const manifestResponse = await fetch("./precache-manifest.json", { cache: "reload" });
     if (!manifestResponse.ok) throw new Error(`precache manifest failed: ${manifestResponse.status}`);
     const manifest = await manifestResponse.json();
-    const assetPaths = ["audio", "images", "companions", "hanzi"]
+    // Audio is cached on first playback by the fetch handler below. Keep the
+    // install fast and avoid downloading 100+ MB before the child starts.
+    const assetPaths = ["images", "companions", "hanzi"]
       .flatMap((key) => Array.isArray(manifest[key]) ? manifest[key] : [])
       .filter((path) => typeof path === "string" && path.startsWith("./"));
     if (assetPaths.length === 0) throw new Error("precache manifest has no media assets");

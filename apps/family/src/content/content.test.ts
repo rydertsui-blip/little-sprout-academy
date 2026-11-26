@@ -130,9 +130,9 @@ describe("curriculum content catalog", () => {
     }
   });
 
-  it("contains forty-eight valid matching questions with stable pair identifiers", () => {
+  it("contains fifty-eight valid matching questions with stable pair identifiers", () => {
     const matching = ["math", "mandarin", "english"].flatMap((subject) => getQuestionsForSubject(subject as "math" | "mandarin" | "english")).filter((question) => question.kind === "match");
-    expect(matching).toHaveLength(48);
+    expect(matching).toHaveLength(58);
     const issues = validateContentCatalog();
     expect(issues.filter((issue) => issue.code.startsWith("match-") || issue.code.startsWith("duplicate-match") || issue.code === "empty-match-label")).toEqual([]);
     for (const question of matching) {

@@ -45,7 +45,7 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
   },
   {
     skillId: "english-reading-inference",
-    prompt: "The sky is dark and Lina hears thunder. What will she do?",
+    prompt: "What will Lina do?",
     instruction: "Tap the best answer.",
     options: ["go indoors", "go swimming", "plant flowers"],
     correctAnswer: "go indoors",
@@ -53,7 +53,7 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
     template: "real-world-inference",
     contextKey: "storm",
     passage: "The sky is dark and Lina hears thunder.",
-    audioText: "The sky is dark and Lina hears thunder.",
+    audioText: "What will Lina do?",
     audioLanguage: "en-US"
   },
   {
@@ -81,7 +81,7 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
   },
   {
     skillId: "mandarin-reading-inference",
-    prompt: "爸爸说“外面冷”。孩子应该怎么做？",
+    prompt: "孩子应该怎么做？",
     instruction: "读一读，选择正确答案。",
     options: ["穿上外套", "开风扇", "脱掉鞋子"],
     correctAnswer: "穿上外套",
@@ -89,7 +89,7 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
     template: "real-world-inference",
     contextKey: "cold-weather",
     passage: "爸爸说“外面冷”。",
-    audioText: "爸爸说“外面冷”。",
+    audioText: "孩子应该怎么做？",
     audioLanguage: "zh-CN"
   },
   {
@@ -116,7 +116,7 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
   },
   {
     skillId: "k2-mandarin-vocabulary",
-    prompt: "妈妈说：把苹果放进书包。苹果是什么？",
+    prompt: "苹果是什么？",
     instruction: "读一读，点出答案。",
     options: ["水果", "文具", "动物"],
     correctAnswer: "水果",
@@ -124,7 +124,7 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
     template: "real-world-k2-category",
     contextKey: "pack-apple",
     passage: "妈妈说：把苹果放进书包。",
-    audioText: "妈妈说：把苹果放进书包。",
+    audioText: "苹果是什么？",
     audioLanguage: "zh-CN"
   },
   {
@@ -227,8 +227,8 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
   },
   {
     skillId: "math-divide-tables",
-    prompt: "24 cookies are shared equally into 4 boxes. Then 2 cookies are eaten from one box. How many cookies are left in that box?",
-    instruction: "Tap the number of cookies left in one box.",
+    prompt: "24 biscuits are shared equally into 4 boxes. Then 2 biscuits are eaten from one box. How many biscuits are left in that box?",
+    instruction: "Tap the number of biscuits left in one box.",
     options: ["4", "6", "2"],
     correctAnswer: "4",
     explanation: "24 ÷ 4 = 6. Then 6 − 2 = 4.",
@@ -241,7 +241,7 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
     instruction: "Tap the fraction that remains.",
     options: ["6/8", "2/8", "8/6"],
     correctAnswer: "6/8",
-    explanation: "6 of the 8 equal slices remain, so the fraction is 6/8.",
+    explanation: "6 of the 8 equal slices remain, so the fraction is 6/8 (or 3/4 in simplest form).",
     template: "real-world-fraction",
     contextKey: "pizza-slices"
   },
@@ -267,7 +267,7 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
   },
   {
     skillId: "mandarin-initials",
-    prompt: "“明天”的“明”读作 míng。它的声母是哪一个？",
+    prompt: "“明天”的“明”，它的声母是哪一个？",
     instruction: "选择声母。",
     options: ["m", "n", "b"],
     correctAnswer: "m",
@@ -278,7 +278,7 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
   },
   {
     skillId: "mandarin-finals",
-    prompt: "“风”读作 fēng。它的韵母是哪一个？",
+    prompt: "“刮风”的“风”，它的韵母是哪一个？",
     instruction: "选择韵母。",
     options: ["eng", "en", "ong"],
     correctAnswer: "eng",
@@ -289,11 +289,11 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
   },
   {
     skillId: "mandarin-tones",
-    prompt: "“请”读作 qǐng。它是第几声？",
+    prompt: "“请坐”的“请”是第几声？",
     instruction: "选择声调。",
     options: ["第三声", "第一声", "第四声"],
     correctAnswer: "第三声",
-    explanation: "qǐng 的声调是第三声。",
+    explanation: "请读作 qǐng，声调是第三声。",
     template: "far-tone",
     contextKey: "new-word-please",
     displayCharacter: "请"
@@ -358,7 +358,7 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
     explanation: "Ship starts with S.",
     template: "far-beginning-letter",
     contextKey: "transport-word",
-    audioText: "ship",
+    audioText: "Which letter starts the word “ship”?",
     audioLanguage: "en-US"
   },
   {
@@ -406,11 +406,11 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
   },
   {
     skillId: "english-a-an",
-    prompt: "Choose the correct phrase: I saw ___ old owl.",
+    prompt: "Choose the correct phrase for one owl: I saw ___.",
     instruction: "Tap the correct article phrase.",
-    options: ["an old owl", "a old owl", "two old owl"],
+    options: ["an old owl", "a old owl", "two old owls"],
     correctAnswer: "an old owl",
-    explanation: "Old begins with a vowel sound, so use an.",
+    explanation: "Old begins with a vowel sound, so use an old owl.",
     template: "sentence-article",
     contextKey: "forest-animal"
   },
@@ -433,6 +433,112 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
     explanation: "The correctly spelled word is sun.",
     template: "sentence-spelling",
     contextKey: "sky-sun"
+  },
+  {
+    skillId: "math-scaled-picture-graph",
+    prompt: "In a school recycling graph, each box icon stands for 5 boxes. Class 2A has 4 icons and Class 2B has 3 icons. Then Class 2A collects 2 more boxes. How many boxes did Class 2A and Class 2B collect altogether?",
+    instruction: "Tap the total number of boxes.",
+    options: ["37", "35", "27"],
+    correctAnswer: "37",
+    explanation: "(4 + 3) × 5 = 35 boxes, plus 2 more boxes = 37 boxes.",
+    template: "real-world-scaled-graph",
+    contextKey: "recycling-drive"
+  },
+  {
+    skillId: "math-number-patterns-1000",
+    prompt: "House numbers on one side of a street go 215, 225, 235, 245. What is the 6th house number in this pattern?",
+    instruction: "Tap the 6th house number.",
+    options: ["265", "255", "275"],
+    correctAnswer: "265",
+    explanation: "The pattern adds 10 each time: the 5th house is 255 and the 6th house is 265.",
+    template: "real-world-pattern-1000",
+    contextKey: "street-numbers"
+  },
+  {
+    skillId: "mandarin-radicals-homographs",
+    prompt: "“今天天气很 ___ 朗，小河里的水真 ___ 澈。”按顺序应该选哪两个字？",
+    instruction: "选择正确的一组形近字。",
+    options: ["晴、清", "清、晴", "睛、请"],
+    correctAnswer: "晴、清",
+    explanation: "晴朗与太阳有关用日字旁“晴”，清澈与水有关用三点水“清”。",
+    template: "far-homograph-pair",
+    contextKey: "weather-river-homograph"
+  },
+  {
+    skillId: "mandarin-synonyms-collocations",
+    prompt: "“上课时，同学们都专心地听老师讲课。”句中“专心”可以换成下面哪个词而意思不变？",
+    instruction: "选择意思相近的词语。",
+    options: ["认真", "慌张", "热闹"],
+    correctAnswer: "认真",
+    explanation: "“专心”和“认真”是近义词，都可以形容用心听讲。",
+    template: "far-synonym-context",
+    contextKey: "classroom-synonym"
+  },
+  {
+    skillId: "mandarin-conjunctions-complex",
+    prompt: "把“爷爷年纪大了”和“他每天还是坚持散步”连成一句话，最合适的是哪一组关联词？",
+    instruction: "选择合适的关联词。",
+    options: ["虽然……但是……", "因为……所以……", "如果……就……"],
+    correctAnswer: "虽然……但是……",
+    explanation: "前后两句表示转折关系，应该用“虽然爷爷年纪大了，但是他每天还是坚持散步”。",
+    template: "far-conjunction-choice",
+    contextKey: "grandpa-walk-conjunction"
+  },
+  {
+    skillId: "mandarin-passage-comprehension",
+    prompt: "读完这个小故事，小宇明白了什么道理？",
+    instruction: "读短文后选择最合适的道理。",
+    options: ["做事要有耐心，按步骤坚持照顾", "种花不需要浇水也能马上开花", "每天把种子挖出来看才能长得快"],
+    correctAnswer: "做事要有耐心，按步骤坚持照顾",
+    explanation: "小宇在妈妈提醒下耐心浇水晒太阳，小苗才顺利长高，说明做事要有耐心。",
+    template: "far-passage-moral",
+    contextKey: "planting-patience",
+    passage: "小宇种下一颗向日葵种子。第一天他看了三次，花盆里什么也没有，他着急地想把种子挖出来。妈妈说：“植物生长需要时间。”小宇每天按时浇水、晒太阳，两周后终于长出了嫩绿的小苗。",
+    audioText: "读完这个小故事，小宇明白了什么道理？",
+    audioLanguage: "zh-CN"
+  },
+  {
+    skillId: "english-tenses-agreement",
+    prompt: "Yesterday morning, Lina ___ her grandmother and they ___ a cake together.",
+    instruction: "Tap the verbs that match the past time clue.",
+    options: ["visited, baked", "visits, bakes", "is visiting, is baking"],
+    correctAnswer: "visited, baked",
+    explanation: "“Yesterday morning” is in the past, so both verbs use past tense: visited, baked.",
+    template: "far-tense-story",
+    contextKey: "yesterday-baking"
+  },
+  {
+    skillId: "english-prepositions-connectors",
+    prompt: "The library is ___ the bookshop and the post office, ___ we can return our books after buying stamps.",
+    instruction: "Tap the pair of words that completes the sentence.",
+    options: ["between, so", "under, because", "behind, but"],
+    correctAnswer: "between, so",
+    explanation: "Use “between” for a place in the middle of two places, and “so” to show the result.",
+    template: "far-preposition-connector",
+    contextKey: "town-map-errand"
+  },
+  {
+    skillId: "english-pronouns-questions",
+    prompt: "“___ umbrella is this by the door?” asked Mr Tan. “It belongs to Mei. Please give it to ___.”",
+    instruction: "Tap the question word and pronoun that fit.",
+    options: ["Whose, her", "Who, she", "Which, hers"],
+    correctAnswer: "Whose, her",
+    explanation: "“Whose” asks who owns the umbrella, and “her” is the object pronoun after “to”.",
+    template: "far-pronoun-question",
+    contextKey: "lost-umbrella"
+  },
+  {
+    skillId: "english-cloze-passage",
+    prompt: "Which two words best complete the blanks (1) and (2) in the passage?",
+    instruction: "Read the passage, then tap the best pair of words.",
+    options: ["borrowed, carefully", "lent, loudly", "borrows, careless"],
+    correctAnswer: "borrowed, carefully",
+    explanation: "Last Friday is in the past so Ravi borrowed a book, and he turned the pages carefully so they would not tear.",
+    template: "far-cloze-double",
+    contextKey: "library-care-cloze",
+    passage: "Last Friday, Ravi (1) ___ a storybook from the school library. He turned the pages (2) ___ so that they would not tear.",
+    audioText: "Which two words best complete the blanks in the passage?",
+    audioLanguage: "en-US"
   }
 ];
 

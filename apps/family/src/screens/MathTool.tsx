@@ -36,8 +36,10 @@ const TOOL_BY_SKILL: Record<string, ToolKind> = {
   "math-time-duration": "duration",
   "math-shapes": "shapes",
   "math-picture-graph": "graph",
+  "math-scaled-picture-graph": "graph",
   "math-length-measure": "ruler",
-  "math-measurement-units": "units"
+  "math-measurement-units": "units",
+  "math-number-patterns-1000": "pattern"
 };
 
 const TOOL_LABEL: Record<ToolKind, string> = {
@@ -58,15 +60,69 @@ const TOOL_LABEL: Record<ToolKind, string> = {
   "pattern": "Pattern"
 };
 
+function TensOnesVisual({ tens, ones, hideTens = false, hideTotal = false, label }: { tens: number; ones: number; hideTens?: boolean; hideTotal?: boolean; label?: string }) {
+  return (
+    <div className="tens-ones-board" data-testid="tens-ones-board" aria-hidden="true">
+      {label ? <small className="tens-ones-title">{label}</small> : null}
+      <div className="place-value-blocks tens-ones-columns">
+        <div className={`place-column${hideTens ? " is-target" : ""}`}>
+          <strong>Tens ({hideTens ? "? × 10" : `${tens} × 10`})</strong>
+          <div className="base-ten-rods">
+            {Array.from({ length: Math.min(10, tens) }, (_, idx) => <span className="block-ten" key={idx} />)}
+            {tens === 0 ? <small>0 rods</small> : null}
+          </div>
+          <small>{hideTens ? "? tens" : `${tens} tens = ${tens * 10}`}</small>
+        </div>
+        <div className={`place-column${hideTotal ? " is-target" : ""}`}>
+          <strong>Ones ({ones} × 1)</strong>
+          <div className="base-ten-cubes">
+            {Array.from({ length: Math.min(10, ones) }, (_, idx) => <span className="block-one" key={idx} />)}
+            {ones === 0 ? <small>0 ones</small> : null}
+          </div>
+          <small>{ones} {ones === 1 ? "one" : "ones"}</small>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PlaceValue({ question }: { question: Question }) {
   if (question.skillId !== "math-place-value-1000") {
-    return (
-      <div className="place-value-blocks" aria-hidden="true">
-        <div className="place-column"><strong>Hundreds</strong><span className="block-hundred" /><small>100</small></div>
-        <div className="place-column"><strong>Tens</strong><span className="block-ten" /><small>10</small></div>
-        <div className="place-column"><strong>Ones</strong><span className="block-one" /><small>1</small></div>
-      </div>
-    );
+    const prompt = question.prompt;
+    const tensInMatch = prompt.match(/how many tens are in (\d+)/i);
+    if (tensInMatch) {
+      const n = Number(tensInMatch[1]);
+      return <TensOnesVisual tens={Math.floor(n / 10)} ones={n % 10} hideTens label={`Count the tens rods in ${n}`} />;
+    }
+    const tensOnesMatch = prompt.match(/(\d+)\s+tens\s+and\s+(\d+)\s+ones/i);
+    if (tensOnesMatch) {
+      const t = Number(tensOnesMatch[1]);
+      const o = Number(tensOnesMatch[2]);
+      return <TensOnesVisual tens={t} ones={o} hideTotal label={`${t} tens (${t * 10}) and ${o} ones = ?`} />;
+    }
+    const tenMoreMatch = prompt.match(/10\s+more\s+than\s+(\d+)/i);
+    if (tenMoreMatch) {
+      const n = Number(tenMoreMatch[1]);
+      return <TensOnesVisual tens={Math.floor(n / 10)} ones={n % 10} hideTotal label={`Start with ${n} (${Math.floor(n / 10)} tens, ${n % 10} ones), then add 1 more ten rod`} />;
+    }
+    const boxesMatch = prompt.match(/four boxes and (\d+) loose/i);
+    if (boxesMatch) {
+      return <TensOnesVisual tens={4} ones={Number(boxesMatch[1])} hideTotal label="4 boxes of 10 + 7 loose pencils" />;
+    }
+    const compareNums = (prompt.match(/\b\d{2,3}\b/g) ?? []).map(Number);
+    if (compareNums.length >= 2) {
+      return (
+        <div className="place-value-compare" data-testid="place-value-compare" aria-hidden="true">
+          {compareNums.slice(0, 3).map((num) => (
+            <div className="place-compare-card" key={num}>
+              <strong>{num}</strong>
+              <span>{Math.floor(num / 10)} tens · {num % 10} ones</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return <TensOnesVisual tens={2} ones={4} label="Each green rod is 1 ten (10); each yellow cube is 1 one (1)" />;
   }
   const expanded = question.prompt.match(/(\d+)\s*\+\s*(\d+)\s*\+\s*(\d+)/);
   if (expanded) {
@@ -146,7 +202,8 @@ function JumpNumberLine({ question }: { question: Question }) {
 }
 
 function NumberLine({ max = 100, question }: { max?: number; question: Question }) {
-  if (["math-add-sub-regroup", "math-add-sub-1000"].includes(question.skillId)) {
+  const { a, b } = questionNumbers(question.prompt);
+  if (["math-add-sub-100", "math-add-sub-regroup", "math-add-sub-1000"].includes(question.skillId) && a > 0 && b > 0 && question.kind === "choice") {
     return <JumpNumberLine question={question} />;
   }
   return (
@@ -172,7 +229,7 @@ function questionNumbers(prompt: string) {
 
 function BarModel({ question }: { question: Question }) {
   const { a, b } = questionNumbers(question.prompt);
-  const subtract = /[−-]|taken away|remain|lost|left|fewer|used|empty/i.test(question.prompt);
+  const subtract = /[−-]|taken away|remain|lost|left|fewer|used|empty|sells|get off/i.test(question.prompt);
   return (
     <div className="bar-model-visual">
       <div className="bar-model-whole"><small>whole</small><strong>{subtract ? a : "?"}</strong></div>
@@ -344,14 +401,14 @@ function DivisionBoard({ question }: { question: Question }) {
   const share = question.prompt.match(/(\d+)\s+counters\s+are\s+shared\s+equally\s+into\s+(\d+)\s+groups/i);
   const array = question.prompt.match(/(\d+)\s+counters\s+in\s+(\d+)\s+equal\s+rows/i);
   const fact = question.prompt.match(/(\d+)\s*×\s*(\d+)\s*=\s*(\d+)/);
-  const story = question.prompt.match(/(\d+)\s+cookies\s+are\s+shared\s+equally\s+into\s+(\d+)\s+boxes/i);
+  const story = question.prompt.match(/(\d+)\s+(?:cookies|biscuits)\s+are\s+shared\s+equally\s+into\s+(\d+)\s+boxes/i);
   let total = 0;
   let groups = 0;
   let eaten = 0;
   if (story) {
     total = Number(story[1]);
     groups = Number(story[2]);
-    eaten = Number(question.prompt.match(/(\d+)\s+cookies\s+are\s+eaten/i)?.[1] ?? 0);
+    eaten = Number(question.prompt.match(/(\d+)\s+(?:cookies|biscuits)\s+are\s+eaten/i)?.[1] ?? 0);
   } else if (share) {
     total = Number(share[1]);
     groups = Number(share[2]);
@@ -743,6 +800,18 @@ function CountingPictures({ question }: { question: Question }) {
 
 function SequenceTool({ question }: { question: Question }) {
   const prompt = question.prompt;
+  const oddEvenMatch = prompt.match(/ones digit of (\d+)/i);
+  if (oddEvenMatch || question.template === "odd-even-identify") {
+    const numStr = oddEvenMatch?.[1] ?? (prompt.match(/\b(\d{2,3})\b/)?.[1] ?? "");
+    const prefix = numStr.slice(0, -1);
+    const ones = numStr.slice(-1);
+    return (
+      <div className="pattern-tool" data-testid="pattern-tool" data-kind="odd-even" aria-hidden="true">
+        {numStr ? <span className="pattern-chip">{prefix}<strong style={{ color: "#e85c47", textDecoration: "underline" }}>{ones}</strong></span> : null}
+        <small>Even ones: 0, 2, 4, 6, 8 · Odd ones: 1, 3, 5, 7, 9</small>
+      </div>
+    );
+  }
   const colorMatches = [...prompt.matchAll(/\b(red|blue|green|yellow|orange|purple|pink|brown)\b/gi)].map((match) => match[1].toLowerCase());
   if (colorMatches.length >= 2) {
     return (
@@ -753,7 +822,7 @@ function SequenceTool({ question }: { question: Question }) {
       </div>
     );
   }
-  const tail = prompt.split(/[?:]/).slice(-1)[0]?.trim() ?? "";
+  const tail = prompt.split(/[?:]/).slice(-1)[0]?.trim().replace(/\.$/, "") ?? "";
   const tokens = tail.split(/,\s*/).map((token) => token.trim()).filter((token) => /^\d+$|^_+$/.test(token));
   if (tokens.length >= 2) {
     return (
@@ -777,66 +846,99 @@ function SequenceTool({ question }: { question: Question }) {
   return null;
 }
 
+const SHAPE_FACTS_2D = [
+  "Shape 1: 3 straight sides and 3 corners",
+  "Shape 2: 4 equal straight sides and 4 corners",
+  "Shape 3: 4 straight sides (2 long, 2 short) and 4 corners",
+  "Shape 4: 0 straight sides — curved all around"
+];
+
+const SHAPE_FACTS_3D = [
+  "3D Shape 1: 6 flat square faces — does not roll",
+  "3D Shape 2: 6 flat rectangular faces — does not roll",
+  "3D Shape 3: 2 flat circular faces and 1 curved surface — can roll",
+  "3D Shape 4: 0 flat faces, curved all around — can roll"
+];
+
 function Shapes({ question }: { question: Question }) {
   const is3d = /3d|three-dimensional|cube|cuboid|cylinder|sphere|faces|roll/i.test(question.prompt);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  useEffect(() => {
+    setSelectedIdx(null);
+  }, [question.id]);
+
   if (is3d) {
     return (
-      <svg className="math-svg shapes-svg" data-testid="shapes-3d" viewBox="0 0 520 142" aria-hidden="true">
-        <g data-shape="cube">
-          <polygon points="38,52 58,34 98,34 78,52" fill="#ffe3a4" stroke="#17324d" strokeWidth="2" />
-          <polygon points="78,52 98,34 98,74 78,92" fill="#f4cf76" stroke="#17324d" strokeWidth="2" />
-          <rect x="38" y="52" width="40" height="40" fill="#fff0c6" stroke="#17324d" strokeWidth="2" />
-        </g>
-        <g data-shape="cuboid">
-          <polygon points="150,56 170,40 254,40 234,56" fill="#bfe5e3" stroke="#17324d" strokeWidth="2" />
-          <polygon points="234,56 254,40 254,80 234,96" fill="#9fd4d2" stroke="#17324d" strokeWidth="2" />
-          <rect x="150" y="56" width="84" height="40" fill="#dff0ef" stroke="#17324d" strokeWidth="2" />
-        </g>
-        <g data-shape="cylinder">
-          <rect x="300" y="44" width="48" height="44" fill="#d8e2f7" stroke="#17324d" strokeWidth="2" />
-          <ellipse cx="324" cy="44" rx="24" ry="9" fill="#edf2fd" stroke="#17324d" strokeWidth="2" />
-          <ellipse cx="324" cy="88" rx="24" ry="9" fill="#d8e2f7" stroke="#17324d" strokeWidth="2" />
-        </g>
-        <g data-shape="sphere">
-          <circle cx="420" cy="66" r="32" fill="#ffd4c7" stroke="#17324d" strokeWidth="2" />
-          <ellipse cx="410" cy="55" rx="12" ry="8" fill="#ffe9e3" opacity="0.8" />
-        </g>
-        <text x="58" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
-        <text x="192" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
-        <text x="324" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
-        <text x="420" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
-      </svg>
+      <div className="shapes-interactive">
+        <svg className="math-svg shapes-svg" data-testid="shapes-3d" viewBox="0 0 520 142" aria-hidden="true">
+          <g data-shape="cube" style={{ cursor: "pointer" }} onClick={() => setSelectedIdx(0)}>
+            <polygon points="38,52 58,34 98,34 78,52" fill="#ffe3a4" stroke={selectedIdx === 0 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 0 ? "3" : "2"} />
+            <polygon points="78,52 98,34 98,74 78,92" fill="#f4cf76" stroke={selectedIdx === 0 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 0 ? "3" : "2"} />
+            <rect x="38" y="52" width="40" height="40" fill="#fff0c6" stroke={selectedIdx === 0 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 0 ? "3" : "2"} />
+          </g>
+          <g data-shape="cuboid" style={{ cursor: "pointer" }} onClick={() => setSelectedIdx(1)}>
+            <polygon points="150,56 170,40 254,40 234,56" fill="#bfe5e3" stroke={selectedIdx === 1 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 1 ? "3" : "2"} />
+            <polygon points="234,56 254,40 254,80 234,96" fill="#9fd4d2" stroke={selectedIdx === 1 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 1 ? "3" : "2"} />
+            <rect x="150" y="56" width="84" height="40" fill="#dff0ef" stroke={selectedIdx === 1 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 1 ? "3" : "2"} />
+          </g>
+          <g data-shape="cylinder" style={{ cursor: "pointer" }} onClick={() => setSelectedIdx(2)}>
+            <rect x="300" y="44" width="48" height="44" fill="#d8e2f7" stroke={selectedIdx === 2 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 2 ? "3" : "2"} />
+            <ellipse cx="324" cy="44" rx="24" ry="9" fill="#edf2fd" stroke={selectedIdx === 2 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 2 ? "3" : "2"} />
+            <ellipse cx="324" cy="88" rx="24" ry="9" fill="#d8e2f7" stroke={selectedIdx === 2 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 2 ? "3" : "2"} />
+          </g>
+          <g data-shape="sphere" style={{ cursor: "pointer" }} onClick={() => setSelectedIdx(3)}>
+            <circle cx="420" cy="66" r="32" fill="#ffd4c7" stroke={selectedIdx === 3 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 3 ? "3" : "2"} />
+            <ellipse cx="410" cy="55" rx="12" ry="8" fill="#ffe9e3" opacity="0.8" />
+          </g>
+          <text x="58" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+          <text x="192" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+          <text x="324" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+          <text x="420" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+        </svg>
+        <small>{selectedIdx !== null ? SHAPE_FACTS_3D[selectedIdx] : "Tap any 3D shape above to inspect its faces and whether it can roll."}</small>
+      </div>
     );
   }
   return (
-    <svg className="math-svg shapes-svg" viewBox="0 0 520 132" aria-hidden="true">
-      <polygon points="42,96 82,28 122,96" fill="#ffe3a4" stroke="#17324d" strokeWidth="2" />
-      <rect x="152" y="34" width="66" height="66" fill="#bfe5e3" stroke="#17324d" strokeWidth="2" />
-      <rect x="248" y="50" width="96" height="50" fill="#d8e2f7" stroke="#17324d" strokeWidth="2" />
-      <circle cx="410" cy="68" r="34" fill="#ffd4c7" stroke="#17324d" strokeWidth="2" />
-      <text x="82" y="122" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
-      <text x="185" y="122" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
-      <text x="296" y="122" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
-      <text x="410" y="122" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
-    </svg>
+    <div className="shapes-interactive">
+      <svg className="math-svg shapes-svg" viewBox="0 0 520 132" aria-hidden="true">
+        <polygon points="42,96 82,28 122,96" fill="#ffe3a4" stroke={selectedIdx === 0 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 0 ? "3" : "2"} style={{ cursor: "pointer" }} onClick={() => setSelectedIdx(0)} />
+        <rect x="152" y="34" width="66" height="66" fill="#bfe5e3" stroke={selectedIdx === 1 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 1 ? "3" : "2"} style={{ cursor: "pointer" }} onClick={() => setSelectedIdx(1)} />
+        <rect x="248" y="50" width="96" height="50" fill="#d8e2f7" stroke={selectedIdx === 2 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 2 ? "3" : "2"} style={{ cursor: "pointer" }} onClick={() => setSelectedIdx(2)} />
+        <circle cx="410" cy="68" r="34" fill="#ffd4c7" stroke={selectedIdx === 3 ? "#e85c47" : "#17324d"} strokeWidth={selectedIdx === 3 ? "3" : "2"} style={{ cursor: "pointer" }} onClick={() => setSelectedIdx(3)} />
+        <text x="82" y="122" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+        <text x="185" y="122" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+        <text x="296" y="122" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+        <text x="410" y="122" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
+      </svg>
+      <small>{selectedIdx !== null ? SHAPE_FACTS_2D[selectedIdx] : "Tap any shape above to count its sides and corners."}</small>
+    </div>
   );
 }
 
 function PictureGraph({ question }: { question: Question }) {
+  const scaleMatch = question.prompt.match(/each [a-z ]+? stands for (\d+)/i);
+  const scale = scaleMatch ? Number(scaleMatch[1]) : 1;
+  const namedRows = [...question.prompt.matchAll(/((?:Class|Bus|Shelf|Team|Row) [A-Z]|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|[A-Z][a-z]+)\s+has\s+(\d+)\s+(?:stars?|apple icons?|car icons?|circles?|flower icons?|ball icons?|symbols?|cups?|book icons?|box icons?)/g)];
   const triple = question.prompt.match(/(\d+)\s+([a-z ]+?),\s+(\d+)\s+([a-z ]+?)\s+and\s+(\d+)\s+([a-z ]+?)(?:\.|\s+How|$)/i);
   const pair = question.prompt.match(/(\d+)\s+([a-z ]+?)\s+and\s+(\d+)\s+([a-z ]+?)(?:\.|\s+How|$)/i);
-  const rows = triple
-    ? [{ count: Number(triple[1]), label: triple[2] }, { count: Number(triple[3]), label: triple[4] }, { count: Number(triple[5]), label: triple[6] }]
-    : pair
-      ? [{ count: Number(pair[1]), label: pair[2] }, { count: Number(pair[3]), label: pair[4] }]
-      : [{ count: 4, label: "apples" }, { count: 2, label: "pears" }];
+  const single = question.prompt.match(/(?:has|shows)\s+(\d+)\s+(stars?|apple icons?|car icons?|circles?|flower icons?|ball icons?|symbols?|cups?|book icons?|box icons?)/i);
+  const rows = namedRows.length >= 2
+    ? namedRows.map((m) => ({ count: Number(m[2]), label: m[1] }))
+    : triple
+      ? [{ count: Number(triple[1]), label: triple[2] }, { count: Number(triple[3]), label: triple[4] }, { count: Number(triple[5]), label: triple[6] }]
+      : pair
+        ? [{ count: Number(pair[1]), label: pair[2] }, { count: Number(pair[3]), label: pair[4] }]
+        : single
+          ? [{ count: Number(single[1]), label: single[2] }]
+          : [{ count: 4, label: "apples" }, { count: 2, label: "pears" }];
   const colors = ["#ffd4c7", "#cce8c9", "#d8e2f7"];
   return (
     <div className="picture-graph" aria-hidden="true">
       {rows.map((row, rowIndex) => (
-        <div key={`${row.label}-${rowIndex}`} data-testid="graph-row"><span>{row.label.charAt(0).toUpperCase() + row.label.slice(1)}</span><div className="graph-dots">{Array.from({ length: row.count }, (_, dotIndex) => <i key={dotIndex} data-testid="graph-dot" style={{ background: colors[rowIndex % colors.length] }} />)}</div></div>
+        <div key={`${row.label}-${rowIndex}`} data-testid="graph-row"><span>{row.label.charAt(0).toUpperCase() + row.label.slice(1)}</span><div className="graph-dots">{Array.from({ length: Math.min(12, row.count) }, (_, dotIndex) => <i key={dotIndex} data-testid="graph-dot" style={{ background: colors[rowIndex % colors.length] }} />)}</div></div>
       ))}
-      <small>Each dot = 1</small>
+      <small>Each dot = {scale}</small>
     </div>
   );
 }
@@ -958,7 +1060,7 @@ function Units({ question }: { question: Question }) {
   );
 }
 
-function TwoStepTool({ question, defaultOpen = true }: { question: Question; defaultOpen?: boolean }) {
+function TwoStepTool({ question, hintActive = false }: { question: Question; hintActive?: boolean }) {
   const numbers = question.prompt.match(/\d+/g) ?? [];
   const kind = question.template === "match-two-step"
     ? "Two-step model"
@@ -970,8 +1072,8 @@ function TwoStepTool({ question, defaultOpen = true }: { question: Question; def
           ? "Two-step model"
           : "Bar model";
   return (
-    <details className="math-tool" aria-label={`Math tool: ${kind}`} open={defaultOpen}>
-      <summary><span>Math tool</span><strong>{kind}</strong><small>Open or close</small></summary>
+    <div className={`math-tool${hintActive ? " is-hint-focus" : ""}`} role="group" aria-label={`Math tool: ${kind}`}>
+      <div className="math-tool-header"><span>Math tool</span><strong>{kind}</strong><small>{hintActive ? "Look here for help" : "Visual helper"}</small></div>
       <div className="math-tool-body">
         {question.template === "match-two-step"
           ? <div className="two-step-strategy" data-testid="two-step-strategy"><p>Work from left to right. Use the first operation, then the second.</p></div>
@@ -981,7 +1083,7 @@ function TwoStepTool({ question, defaultOpen = true }: { question: Question; def
               ? <TwoStepArray question={question} />
               : <TwoStepBar question={question} />}
       </div>
-    </details>
+    </div>
   );
 }
 
@@ -1003,22 +1105,19 @@ function ToolVisual({ kind, max, question }: { kind: ToolKind; max: number; ques
   return <Units question={question} />;
 }
 
-const TOOL_CAPTION: Partial<Record<ToolKind, string>> = {
-  "place-value": "Example: 1 hundred, 1 ten and 1 one"
-};
-
-export function MathTool({ question, defaultOpen = true }: { question: Question; defaultOpen?: boolean }) {
-  if (question.skillId === "math-two-step-problems") return <TwoStepTool question={question} defaultOpen={defaultOpen} />;
+export function MathTool({ question, hintActive = false }: { question: Question; defaultOpen?: boolean; hintActive?: boolean }) {
+  if (question.skillId === "math-two-step-problems") return <TwoStepTool question={question} hintActive={hintActive} />;
   const skillKind = TOOL_BY_SKILL[question.skillId];
   if (!skillKind) return null;
   const visualKind: ToolKind =
-    question.skillId === "k2-math-count-20" && ["count-dots", "compare-groups"].includes(question.template) ? "counting"
+    question.skillId === "k2-math-count-20" && ["count-dots", "k2-count-dots", "compare-groups", "k2-compare-groups"].includes(question.template) ? "counting"
       : question.skillId === "k2-math-count-20" && question.template === "shape-identify" ? "shapes"
       : question.skillId === "k2-math-count-20" && ["k2-number-sequence", "k2-pattern"].includes(question.template) ? "pattern"
+      : question.skillId === "math-count-100" && question.template === "number-sequence" ? "pattern"
       : question.skillId === "k2-math-add-within-10" && ["k2-add-pictures", "k2-subtract-pictures"].includes(question.template) ? "counting"
       : question.skillId === "k2-math-add-within-10" && ["k2-add-story", "k2-subtract-story"].includes(question.template) ? "bar-model"
       : skillKind === "number-line" && ["number-bond", "k2-number-bond"].includes(question.template) ? "number-bond"
-      : skillKind === "number-line" && question.template.startsWith("story") ? "bar-model"
+      : skillKind === "number-line" && (question.template.startsWith("story") || question.template === "multi-step-story" || question.template === "multi-step-regroup") ? "bar-model"
       : skillKind;
   const label = visualKind === "array" && question.skillId === "math-divide-tables"
     ? "Equal groups"
@@ -1029,18 +1128,15 @@ export function MathTool({ question, defaultOpen = true }: { question: Question;
         : TOOL_LABEL[visualKind];
   const max = question.skillId === "k2-math-add-within-10" ? 10 : question.skillId === "k2-math-count-20" ? 20 : question.skillId === "math-add-sub-1000" || question.skillId === "math-place-value-1000" ? 1000 : 100;
   if (question.kind === "match" && question.skillId === "math-time") return null;
-  const jumpLine = visualKind === "number-line" && ["math-add-sub-regroup", "math-add-sub-1000"].includes(question.skillId);
-  const dynamicPlaceValue = visualKind === "place-value" && question.skillId === "math-place-value-1000";
-  const dynamicDivision = visualKind === "array" && question.skillId === "math-divide-tables";
+  const { a, b } = questionNumbers(question.prompt);
+  const jumpLine = visualKind === "number-line" && ["math-add-sub-100", "math-add-sub-regroup", "math-add-sub-1000"].includes(question.skillId) && a > 0 && b > 0 && question.kind === "choice";
   return (
-    <details className="math-tool" aria-label={`Math tool: ${label}`} open={defaultOpen}>
-      <summary><span>Math tool</span><strong>{label}</strong><small>Open or close</small></summary>
+    <div className={`math-tool${hintActive ? " is-hint-focus" : ""}`} role="group" aria-label={`Math tool: ${label}`}>
+      <div className="math-tool-header"><span>Math tool</span><strong>{label}</strong><small>{hintActive ? "Look here for help" : "Visual helper"}</small></div>
       <div className="math-tool-body">
         <ToolVisual kind={visualKind} max={max} question={question} />
         {jumpLine ? null : visualKind === "number-line" ? <p>Number line: 0 to {max}; each step is {max / 10}</p> : null}
-        {TOOL_CAPTION[visualKind] && !dynamicPlaceValue ? <p>{TOOL_CAPTION[visualKind]}</p> : null}
-        {["clock", "duration", "fraction", "graph", "money", "ruler", "units", "counting", "pattern"].includes(visualKind) || jumpLine || dynamicPlaceValue || dynamicDivision ? null : <p className="math-tool-note">Example model. Compare it with the question.</p>}
       </div>
-    </details>
+    </div>
   );
 }

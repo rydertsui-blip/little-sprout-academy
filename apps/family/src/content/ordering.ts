@@ -309,6 +309,48 @@ const ORDER_SEEDS: OrderSeed[] = [
     template: "tap-order-numbers",
     transferLevel: "near-transfer",
     contextKey: "order-100-2"
+  },
+  {
+    id: "q-order-math-pattern-1000-1",
+    skillId: "math-number-patterns-1000",
+    prompt: "Tap the numbers in pattern order, counting on by 50s.",
+    instruction: "Tap the smallest number first to build the pattern.",
+    tokens: ["450", "350", "400", "500"],
+    correctOrder: ["350", "400", "450", "500"],
+    separator: ", ",
+    explanation: "Counting on by 50s gives: 350, 400, 450, 500.",
+    difficulty: 3,
+    template: "tap-order-numbers",
+    transferLevel: "near-transfer",
+    contextKey: "order-pattern-1000-1"
+  },
+  {
+    id: "q-order-mandarin-complex-1",
+    skillId: "mandarin-conjunctions-complex",
+    prompt: "按顺序点词块，排成一句通顺的因果复句。",
+    instruction: "依次点下面的词块，把复句拼起来。",
+    tokens: ["我们留在室内。", "因为下雨了，", "所以"],
+    correctOrder: ["因为下雨了，", "所以", "我们留在室内。"],
+    separator: "",
+    explanation: "正确的因果复句是“因为下雨了，所以我们留在室内。”",
+    difficulty: 3,
+    template: "tap-order-sentence",
+    transferLevel: "near-transfer",
+    contextKey: "zh-order-complex-rain"
+  },
+  {
+    id: "q-order-english-connector-1",
+    skillId: "english-prepositions-connectors",
+    prompt: "Tap the chunks in order to make a connected sentence.",
+    instruction: "Tap each block in the right order.",
+    tokens: ["it was raining.", "inside", "We stayed", "because"],
+    correctOrder: ["We stayed", "inside", "because", "it was raining."],
+    separator: " ",
+    explanation: "The correct sentence is “We stayed inside because it was raining.”",
+    difficulty: 3,
+    template: "tap-order-sentence",
+    transferLevel: "near-transfer",
+    contextKey: "en-order-connector-rain"
   }
 ];
 

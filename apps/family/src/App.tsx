@@ -3,7 +3,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, Check, Download, Headphones, Lig
 import { CONTENT_VERSION, QUESTIONS, SKILLS } from "./content/catalog";
 import { SUBJECT_NAMES, UI_COPY, subjectLocale, subjectName, uiCopyFor, type Locale, type UiCopy } from "./content/copy";
 import { hintForQuestion, teachForQuestion } from "./content/hints";
-import { VOICE_LINES } from "./content/audioAssets";
+import { TEACHER_PRAISE_EN, TEACHER_PRAISE_ZH, TEACHER_RETRY_ENCOURAGE_EN, TEACHER_RETRY_ENCOURAGE_ZH, VOICE_LINES } from "./content/audioAssets";
 import { OFFICIAL_ACTIVITIES, OFFICIAL_OUTCOMES, OFFICIAL_SOURCES } from "./content/officialSources";
 import { classifyMastery, createSkillEvidence } from "./engine/bkt";
 import { buildChildInsights } from "./engine/insights";
@@ -15,7 +15,7 @@ import { deterministicOptions } from "./lib/options";
 import { ageYearsForProfile, birthYearForAge, enabledSkillsForLevel, hasAnnualLevelReviewDue, levelDateKey, nextLearningLevel, recommendedLevelForAge } from "./lib/levels";
 import { formatBytes, getStorageHealth, requestPersistentStorage, type StorageHealth } from "./lib/storageHealth";
 import { APP_VERSION } from "./lib/version";
-import { completeSession, correctCountsForSession, createAdaptiveSession, recordSessionAnswer, selectNextQuestion } from "./engine/session";
+import { completeSession, correctCountsForSession, createAdaptiveSession, DIAGNOSTIC_MAX_QUESTIONS, recordSessionAnswer, selectNextQuestion } from "./engine/session";
 import { createChildProfile } from "./lib/profile";
 import { hashPin, validatePin } from "./lib/pin";
 import { getCompanionById } from "./companions/companions";
@@ -40,9 +40,10 @@ import { LanguageTool } from "./screens/LanguageTool";
 import { PinyinTool } from "./screens/PinyinTool";
 import MatchingBoard from "./screens/MatchingBoard";
 import OrderBoard from "./screens/OrderBoard";
-import HandwritingScreen from "./screens/HandwritingScreen";
+import HandwritingScreen, { InlineHandwritingModal } from "./screens/HandwritingScreen";
 import SpeakingScreen from "./screens/SpeakingScreen";
-import { HANDWRITING_CHARACTERS, type HandwritingCharacter } from "./content/handwriting";
+import { findHandwritingCharacterForQuestion, HANDWRITING_CHARACTERS, type HandwritingCharacter } from "./content/handwriting";
+import { SPEAKING_PROMPTS } from "./content/speaking";
 
 type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "speaking" | "handwriting" | "companions";
 
@@ -433,7 +434,20 @@ export default function App() {
       });
       if (saved && nextSession) {
         const language = session.subject === "mandarin" ? "zh-CN" : "en-US";
-        playOrSpeak(correct ? (language === "zh-CN" ? VOICE_LINES.correctZh : VOICE_LINES.correctEn) : (language === "zh-CN" ? VOICE_LINES.wrongZh : VOICE_LINES.wrongEn), language);
+        const attemptIdx = session.attempts.length;
+        const feedbackVoice = correct
+          ? hintUsed
+            ? (language === "zh-CN" ? VOICE_LINES.retrySuccessZh : VOICE_LINES.retrySuccessEn)
+            : (language === "zh-CN"
+              ? TEACHER_PRAISE_ZH[attemptIdx % TEACHER_PRAISE_ZH.length]
+              : TEACHER_PRAISE_EN[attemptIdx % TEACHER_PRAISE_EN.length])
+          : (language === "zh-CN" ? VOICE_LINES.wrongComfortZh : VOICE_LINES.wrongComfortEn);
+        const explanationText = currentQuestion.explanation;
+        playOrSpeak(feedbackVoice, language, (status) => {
+          if (status === "ended" && !correct && explanationText) {
+            playOrSpeak(explanationText, language);
+          }
+        });
         setSession(nextSession);
         setFeedback({ correct, answer, mismatchCount });
         return true;
@@ -466,8 +480,6 @@ export default function App() {
       }
       setCurrentQuestion(selectNextQuestion(activeChild, session));
       setFeedback(null);
-      const language = session.subject === "mandarin" ? "zh-CN" : "en-US";
-      playOrSpeak(language === "zh-CN" ? VOICE_LINES.nextZh : VOICE_LINES.nextEn, language);
     } finally {
       advancingRef.current = false;
     }
@@ -602,6 +614,7 @@ export default function App() {
           feedback={feedback}
           onAnswer={answerQuestion}
           onNext={advanceSession}
+          onRecordHandwriting={recordHandwriting}
           isNewSkill={session.kind === "practice" && !(activeChild.evidence[currentQuestion.skillId]?.nEff > 0) && !session.attempts.some((attempt) => attempt.skillId === currentQuestion.skillId)}
         />
       </div>
@@ -664,7 +677,8 @@ export default function App() {
     : null;
   const homeSubject = homeInsight?.subject ?? "math";
   const homeSession = activeChild?.activeSessions[homeSubject];
-  const homeRemaining = Math.max(1, (homeSession?.length ?? activeChild?.settings.sessionLength ?? 8) - (homeSession?.attempts.length ?? 0));
+  const defaultHomeLength = activeChild?.diagnostics[homeSubject] ? (activeChild?.settings.sessionLength ?? 8) : DIAGNOSTIC_MAX_QUESTIONS;
+  const homeRemaining = Math.max(1, (homeSession?.length ?? defaultHomeLength) - (homeSession?.attempts.length ?? 0));
   const homeHasSession = Boolean(homeSession && homeSession.attempts.length < homeSession.length);
   const writingCompleted = activeChild ? HANDWRITING_CHARACTERS.filter((item) => activeChild.handwriting[item.character]).length : 0;
   const homeCards = subjectCards.map((card) => systemLocale === "en"
@@ -734,6 +748,34 @@ export default function App() {
               </button>
               );
             })}
+          </div>
+          <div className="next-actions" aria-label={systemLocale === "en" ? "Writing and speaking studio" : "小芽听说写工坊"} style={{ marginTop: "1rem" }}>
+            <button
+              type="button"
+              className="next-action next-action-mandarin"
+              style={{ cursor: "pointer", textAlign: "left", border: "none" }}
+              onClick={() => {
+                playOrSpeak(VOICE_LINES.introWrite, "zh-CN");
+                setScreen("handwriting");
+              }}
+            >
+              <span><Pencil aria-hidden="true" /> {systemLocale === "en" ? "Chinese Handwriting" : "小芽写字"}</span>
+              <strong>{systemLocale === "en" ? `Stroke Order · ${writingCompleted} / ${HANDWRITING_CHARACTERS.length} chars` : `看笔顺，亲手写 · 已写 ${writingCompleted} / ${HANDWRITING_CHARACTERS.length} 字`}</strong>
+              <small>{systemLocale === "en" ? "Listen, watch the teacher demonstrate, and trace each stroke." : "小芽老师先读字、示范笔顺，再带着你一笔一划描红。"}</small>
+            </button>
+            <button
+              type="button"
+              className="next-action next-action-english"
+              style={{ cursor: "pointer", textAlign: "left", border: "none" }}
+              onClick={() => {
+                playOrSpeak(VOICE_LINES.speakingIntro, "zh-CN");
+                setScreen("speaking");
+              }}
+            >
+              <span><Mic aria-hidden="true" /> {systemLocale === "en" ? "Speaking Studio" : "小芽口说"}</span>
+              <strong>{systemLocale === "en" ? `Listen & Speak · ${SPEAKING_PROMPTS.length} prompts` : `听示范，大声读 · ${SPEAKING_PROMPTS.length} 个声音游戏`}</strong>
+              <small>{systemLocale === "en" ? "Auto-plays teacher demo, listens hands-free, and checks your pronunciation." : "进题自动读示范、免按键自动收音，小芽老师实时听你读得准不准。"}</small>
+            </button>
           </div>
           {activeChild.settings.rewardsEnabled ? (
             <CompanionHomeCard
@@ -898,14 +940,16 @@ function SessionHeader({ child, subject, kind, answered, total, onBack }: { chil
   );
 }
 
-export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }: { question: Question; feedback: { correct: boolean; answer: string; mismatchCount?: number } | null; onAnswer: (correct: boolean, answer: string, mismatchCount?: number, hintUsed?: boolean) => Promise<boolean>; onNext: () => void; isNewSkill: boolean }) {
+export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill, onRecordHandwriting }: { question: Question; feedback: { correct: boolean; answer: string; mismatchCount?: number } | null; onAnswer: (correct: boolean, answer: string, mismatchCount?: number, hintUsed?: boolean) => Promise<boolean>; onNext: () => void; isNewSkill: boolean; onRecordHandwriting?: (entry: HandwritingCharacter, mistakes: number) => Promise<boolean> }) {
   const options = useMemo(() => question.kind === "choice" ? deterministicOptions(question) : [], [question]);
+  const matchedHandwriting = useMemo(() => findHandwritingCharacterForQuestion(question), [question]);
   const correct = Boolean(feedback?.correct);
   const feedbackRef = useRef<HTMLDivElement | null>(null);
   const retryRef = useRef<HTMLDivElement | null>(null);
   const [hintOpen, setHintOpen] = useState(false);
   const [hintUsed, setHintUsed] = useState(false);
   const [pendingWrong, setPendingWrong] = useState<string | null>(null);
+  const [showInlineTrace, setShowInlineTrace] = useState(false);
   const [audioStatus, setAudioStatus] = useState<{ id: string; status: "playing" | "error" } | null>(null);
   const locale = subjectLocale(question.subject);
   const copy = uiCopyFor(locale);
@@ -919,6 +963,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
     setHintOpen(false);
     setHintUsed(false);
     setPendingWrong(null);
+    setShowInlineTrace(false);
     setAudioStatus(null);
   }, [question.id]);
 
@@ -930,6 +975,18 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
 
   useEffect(() => {
     stopAudio();
+    const questionSpeech = preAnswerAudio(question);
+    if (teach) {
+      const sep = locale === "en" ? ". " : "。";
+      const teachText = `${teach.title}${sep}${teach.body}${teach.example ? `${sep}${teach.example}` : ""}`;
+      playOrSpeak(teachText, teachLanguage, (status) => {
+        if (status === "ended") {
+          playOrSpeak(questionSpeech, language);
+        }
+      });
+      return;
+    }
+    playOrSpeak(questionSpeech, language);
   }, [question.id]);
 
   useEffect(() => {
@@ -957,6 +1014,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
   function showHint() {
     setHintOpen(true);
     setHintUsed(true);
+    playOrSpeak(hint, language);
   }
 
   function choose(option: string) {
@@ -967,7 +1025,15 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
     }
     if (!pendingWrong) {
       setPendingWrong(option);
-      showHint();
+      setHintOpen(true);
+      setHintUsed(true);
+      const encouragePool = language === "zh-CN" ? TEACHER_RETRY_ENCOURAGE_ZH : TEACHER_RETRY_ENCOURAGE_EN;
+      const encourageLine = encouragePool[question.id.length % encouragePool.length];
+      playOrSpeak(encourageLine, language, (status) => {
+        if (status === "ended") {
+          playOrSpeak(hint, language);
+        }
+      });
       return;
     }
     void onAnswer(false, option, 0, true);
@@ -1004,14 +1070,14 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
   const teachAudioStatus = audioStateFor("teach");
   const hintAudioStatus = audioStateFor("hint");
   const feedbackAudioStatus = audioStateFor("feedback");
-  const teachInitiallyOpen = typeof window === "undefined" || (window.innerWidth >= 768 && window.innerHeight >= 700);
+  const hintActive = hintOpen || Boolean(pendingWrong);
   return (
     <main className={`quiz-layout quiz-${question.subject}${question.passage ? " quiz-reading" : ""}${matchQuestion ? " quiz-match" : ""}${feedback ? " is-feedback" : ""}`} lang={contentLanguage}>
       <section className="quiz-stage">
         <div className="quiz-skill-chip">{subjectName(question.subject, locale)}<span>{skillTitle(question.skillId, locale)}</span></div>
         <button className={`audio-button ${question.audioOnly ? "is-game-listen" : ""} ${questionAudioStatus ? `is-${questionAudioStatus}` : ""}`} type="button" onClick={() => playQuizAudio("question", preAnswerAudio(question), language)} aria-label={questionAudioStatus === "playing" ? copy.session.audioPlaying : questionAudioStatus === "error" ? copy.session.audioError : question.audioOnly ? copy.session.listenSound : copy.session.listenQuestion}><Headphones aria-hidden="true" /><span>{audioTextFor("question", question.audioOnly ? copy.session.listenSound : copy.session.listenQuestion)}</span></button>
         {teach ? (
-          <details className="skill-teach" open={teachInitiallyOpen}>
+          <details className="skill-teach" open>
             <summary>{copy.session.teachSummary}<small className="skill-teach-toggle">{copy.session.teachToggle}</small></summary>
             <div className="skill-teach-body">
               <strong>{teach.title}</strong>
@@ -1026,9 +1092,9 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
         {question.image ? <img className="question-image" src={`./assets/images/${question.image}.png`} alt="" /> : null}
         {question.kind !== "match" ? <p className="question-instruction">{question.instruction}</p> : null}
         <h2 data-testid="question-prompt" data-question-id={question.id}>{question.prompt}</h2>
-        {question.subject === "math" ? <MathTool question={question} defaultOpen={question.kind !== "match"} /> : null}
-        {question.skillId === "english-sentence-order" ? <LanguageTool question={question} /> : null}
-        {question.subject === "mandarin" ? <PinyinTool question={question} defaultOpen={question.kind !== "match"} /> : null}
+        {question.subject === "math" ? <MathTool question={question} hintActive={hintActive} /> : null}
+        {question.skillId === "english-sentence-order" || question.skillId === "mandarin-word-order" || question.skillId === "mandarin-conjunctions-complex" ? <LanguageTool question={question} hintActive={hintActive} /> : null}
+        {question.subject === "mandarin" ? <PinyinTool question={question} hintActive={hintActive} /> : null}
       </section>
       <section className="answer-panel">
         <div className="quiz-tools">
@@ -1071,8 +1137,31 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill }:
             </div>
             {question.kind === "match" && feedback.mismatchCount ? <p className="match-mismatch-note">{copy.session.matchMismatchNote(feedback.mismatchCount)}</p> : null}
             <p>{question.explanation}</p>
-            <button className={`quiet-button compact-button feedback-audio ${feedbackAudioStatus ? `is-${feedbackAudioStatus}` : ""}`} type="button" aria-label={feedbackAudioStatus === "playing" ? copy.session.audioPlaying : feedbackAudioStatus === "error" ? copy.session.audioError : copy.session.explanationAudio} onClick={() => playQuizAudio("feedback", question.explanation, language)}><Volume2 aria-hidden="true" />{audioTextFor("feedback", copy.session.listenExplanation)}</button>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+              <button className={`quiet-button compact-button feedback-audio ${feedbackAudioStatus ? `is-${feedbackAudioStatus}` : ""}`} type="button" aria-label={feedbackAudioStatus === "playing" ? copy.session.audioPlaying : feedbackAudioStatus === "error" ? copy.session.audioError : copy.session.explanationAudio} onClick={() => playQuizAudio("feedback", question.explanation, language)}><Volume2 aria-hidden="true" />{audioTextFor("feedback", copy.session.listenExplanation)}</button>
+              {matchedHandwriting ? (
+                <button
+                  className="quiet-button compact-button"
+                  type="button"
+                  data-testid="inline-handwriting-trigger"
+                  onClick={() => {
+                    playOrSpeak(VOICE_LINES.writeInviteZh, "zh-CN");
+                    setShowInlineTrace(true);
+                  }}
+                >
+                  <Pencil aria-hidden="true" />
+                  动手写一写「{matchedHandwriting.character}」
+                </button>
+              ) : null}
+            </div>
             <button className="primary-button wide-button" type="button" onClick={onNext}>{copy.session.next}<ArrowRight aria-hidden="true" /></button>
+            {showInlineTrace && matchedHandwriting ? (
+              <InlineHandwritingModal
+                entry={matchedHandwriting}
+                onClose={() => setShowInlineTrace(false)}
+                onRecord={onRecordHandwriting}
+              />
+            ) : null}
           </div>
         ) : pendingWrong ? (
           <div ref={retryRef} className="answer-feedback retry-feedback" data-testid="retry-feedback" aria-live="polite">

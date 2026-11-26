@@ -1,3 +1,5 @@
+import { pinyin } from "pinyin-pro";
+
 export type PinyinGroup = "initials" | "finals" | "whole";
 
 export interface PinyinUnit {
@@ -7,9 +9,24 @@ export interface PinyinUnit {
   subgroup?: string;
 }
 
+export interface PinyinDecomposition {
+  char: string;
+  syllable: string;
+  tone: 1 | 2 | 3 | 4;
+  isWholeSyllable: boolean;
+  initial: string;
+  initialAudio: string;
+  medial?: string;
+  medialAudio?: string;
+  final: string;
+  baseFinal: string;
+  finalAudio: string;
+  syllableAudio: string;
+}
+
 /**
  * 23 standard Mandarin initials (声母) mapped to unambiguous single-pronunciation
- * characters for natural neural TTS synthesis (standard primary school呼读音).
+ * characters for natural neural TTS synthesis (standard primary school 呼读音).
  */
 export const PINYIN_INITIALS: readonly PinyinUnit[] = [
   { symbol: "b", group: "initials", audioKey: "波" },
@@ -96,10 +113,129 @@ export const ALL_PINYIN_UNITS: readonly PinyinUnit[] = [
   ...PINYIN_WHOLE_SYLLABLES,
 ];
 
+const WHOLE_SYLLABLE_SET = new Set(PINYIN_WHOLE_SYLLABLES.map((u) => u.symbol));
+const ATOMIC_FINAL_SET = new Set(PINYIN_FINALS.map((u) => u.symbol));
+
 const PINYIN_AUDIO_LOOKUP = new Map<string, string>(
   ALL_PINYIN_UNITS.map((unit) => [unit.symbol, unit.audioKey])
 );
 
+/**
+ * Strips the 4 Mandarin tone marks (macron \u0304, acute \u0301, caron \u030c, grave \u0300)
+ * while preserving the umlaut diaeresis (\u0308) on ü!
+ */
+export function stripPinyinToneMarks(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300\u0301\u0304\u030c]/g, "")
+    .normalize("NFC")
+    .replace(/v/g, "ü")
+    .toLowerCase()
+    .trim();
+}
+
 export function getPinyinAudioKey(symbol: string): string | undefined {
-  return PINYIN_AUDIO_LOOKUP.get(symbol.trim().toLowerCase());
+  const raw = symbol.trim().toLowerCase();
+  if (PINYIN_AUDIO_LOOKUP.has(raw)) return PINYIN_AUDIO_LOOKUP.get(raw);
+  const stripped = stripPinyinToneMarks(raw);
+  return PINYIN_AUDIO_LOOKUP.get(stripped);
+}
+
+/**
+ * Preferred canonical pronunciations for characters that have multiple readings
+ * when used in primary school single-character context.
+ */
+const PREFERRED_CHAR_PINYIN: Record<string, { syllable: string; initial: string; final: string; tone: 1 | 2 | 3 | 4 }> = {
+  "大": { syllable: "dà", initial: "d", final: "à", tone: 4 },
+  "长": { syllable: "cháng", initial: "ch", final: "áng", tone: 2 },
+  "乐": { syllable: "lè", initial: "l", final: "è", tone: 4 },
+  "好": { syllable: "hǎo", initial: "h", final: "ǎo", tone: 3 },
+  "看": { syllable: "kàn", initial: "k", final: "àn", tone: 4 },
+  "空": { syllable: "kōng", initial: "k", final: "ōng", tone: 1 },
+  "正": { syllable: "zhèng", initial: "zh", final: "èng", tone: 4 },
+  "中": { syllable: "zhōng", initial: "zh", final: "ōng", tone: 1 },
+  "只": { syllable: "zhī", initial: "zh", final: "ī", tone: 1 },
+  "发": { syllable: "fā", initial: "f", final: "ā", tone: 1 },
+  "地": { syllable: "dì", initial: "d", final: "ì", tone: 4 },
+  "少": { syllable: "shǎo", initial: "sh", final: "ǎo", tone: 3 },
+};
+
+/**
+ * Dynamically decomposes any Chinese character into its initial (声母),
+ * optional medial (介母 for 三拼音节 like h-u-ā -> huā), final (韵母),
+ * complete syllable, and standard teacher phonetic audio keys.
+ */
+export function decomposeCharacterPinyin(rawChar: string): PinyinDecomposition {
+  const char = Array.from(rawChar.trim()).find((c) => /[\u4e00-\u9fff]/.test(c)) ?? "爸";
+  const preferred = PREFERRED_CHAR_PINYIN[char];
+  const info = pinyin(char, { type: "all" })[0];
+
+  const syllable = preferred?.syllable ?? info?.pinyin ?? "bà";
+  const rawTone = preferred?.tone ?? (info?.num && info.num >= 1 && info.num <= 4 ? (info.num as 1 | 2 | 3 | 4) : 4);
+  const tone: 1 | 2 | 3 | 4 = rawTone;
+  const tonelessSyllable = stripPinyinToneMarks(syllable);
+  const isWholeSyllable = WHOLE_SYLLABLE_SET.has(tonelessSyllable);
+
+  let initial = preferred?.initial ?? info?.initial ?? "";
+  let rawFinal = preferred?.final ?? info?.final ?? syllable;
+
+  // Syllables starting with y or w in Hanyu Pinyin orthography
+  if (!initial && (tonelessSyllable.startsWith("y") || tonelessSyllable.startsWith("w"))) {
+    initial = tonelessSyllable[0];
+    rawFinal = syllable.slice(1);
+  }
+
+  // Restore ü when preceded by j, q, x, y (ü 见 j q x y 去掉两点)
+  const tonelessRawFinal = stripPinyinToneMarks(rawFinal);
+  if (["j", "q", "x", "y"].includes(initial)) {
+    if (tonelessRawFinal === "u") {
+      rawFinal = rawFinal.replace(/u/i, "ü").replace(/ū/g, "ǖ").replace(/ú/g, "ǘ").replace(/ǔ/g, "ǚ").replace(/ù/g, "ǜ");
+    } else if (tonelessRawFinal === "ue") {
+      rawFinal = `ü${rawFinal.slice(1)}`;
+    } else if (tonelessRawFinal === "un") {
+      rawFinal = `ü${rawFinal.slice(1)}`;
+    } else if (tonelessRawFinal === "uan") {
+      rawFinal = `ü${rawFinal.slice(1)}`;
+    }
+  }
+
+  const normalizedFinal = stripPinyinToneMarks(rawFinal);
+  let medial: string | undefined;
+  let medialAudio: string | undefined;
+  let displayFinal = rawFinal;
+  let baseFinal = normalizedFinal;
+
+  // Check if it is a 3-part blend (三拼音节: e.g. huā -> h + u + ā, tián -> t + i + án, niǎo -> n + i + ǎo)
+  if (!isWholeSyllable && !ATOMIC_FINAL_SET.has(normalizedFinal) && normalizedFinal.length >= 2) {
+    const firstChar = normalizedFinal[0];
+    const restToneless = normalizedFinal.slice(1);
+    if ((firstChar === "i" || firstChar === "u" || firstChar === "ü") && ATOMIC_FINAL_SET.has(restToneless)) {
+      medial = firstChar;
+      medialAudio = getPinyinAudioKey(firstChar) ?? "屋";
+      displayFinal = rawFinal.slice(1);
+      baseFinal = restToneless;
+    } else if (normalizedFinal === "iong") {
+      medial = "i";
+      medialAudio = "衣";
+      displayFinal = rawFinal.slice(1);
+      baseFinal = "ong";
+    }
+  }
+
+  const initialAudio = initial ? (getPinyinAudioKey(initial) ?? "波") : (getPinyinAudioKey(baseFinal) ?? "阿");
+  const finalAudio = getPinyinAudioKey(baseFinal) ?? "阿";
+
+  return {
+    char,
+    syllable,
+    tone,
+    isWholeSyllable,
+    initial,
+    initialAudio,
+    ...(medial ? { medial, medialAudio } : {}),
+    final: displayFinal,
+    baseFinal,
+    finalAudio,
+    syllableAudio: char,
+  };
 }
