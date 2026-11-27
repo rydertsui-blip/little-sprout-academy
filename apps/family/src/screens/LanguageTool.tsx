@@ -29,6 +29,139 @@ function scrambledWords(question: ChoiceQuestion): string[] {
   return [...words.slice(offset), ...words.slice(0, offset)];
 }
 
+function IdiomClassicBoard({ question, hintActive }: { question: Question; hintActive: boolean }) {
+  const isPoem = question.template === "classic-poem" || /古诗|《/.test(question.prompt);
+  const poemTitle = question.prompt.match(/《([^》]+)》/)?.[1] ?? "经典古诗";
+  const idiomMatch = question.prompt.match(/“([^”]{4})”/)?.[1];
+
+  return (
+    <div
+      className={`math-tool language-tool${hintActive ? " is-hint-focus" : ""}`}
+      data-testid="idiom-classic-board"
+      role="group"
+      aria-label="语言教具：成语与古诗赏析卡"
+    >
+      <div className="math-tool-header">
+        <span>国学启蒙教具</span>
+        <strong>{isPoem ? `古诗意境卡 · 《${poemTitle}》` : "四字成语典故卡"}</strong>
+        <small>{isPoem ? "品画面 · 对诗句" : "看典故 · 悟道理"}</small>
+      </div>
+      <div className="math-tool-body">
+        {isPoem ? (
+          <div className="two-step-model">
+            <div className="two-step-row">
+              <span className="two-step-node">
+                <small>诗名</small>
+                <strong>《{poemTitle}》</strong>
+              </span>
+              <i aria-hidden="true">📜</i>
+              <span className="two-step-node">
+                <small>格律</small>
+                <strong>五言绝句（每句 5 字）</strong>
+              </span>
+              <i aria-hidden="true">→</i>
+              <span className="two-step-node is-answer">
+                <small>想画面</small>
+                <strong>诗中有画</strong>
+              </span>
+            </div>
+            <p>先在脑海里想象古诗描写的景色或动作，再选出最贴切的一句。</p>
+          </div>
+        ) : (
+          <div className="two-step-model">
+            <div className="two-step-row">
+              {idiomMatch
+                ? idiomMatch.split("").map((ch, idx) => (
+                    <span key={`${ch}-${idx}`} className="two-step-node">
+                      <small>第 {idx + 1} 字</small>
+                      <strong>{ch}</strong>
+                    </span>
+                  ))
+                : [
+                    <span key="s1" className="two-step-node">
+                      <small>第 1 步</small>
+                      <strong>读情境线索</strong>
+                    </span>,
+                    <i key="a1" aria-hidden="true">→</i>,
+                    <span key="s2" className="two-step-node">
+                      <small>第 2 步</small>
+                      <strong>想成语故事</strong>
+                    </span>,
+                    <i key="a2" aria-hidden="true">→</i>,
+                    <span key="s3" className="two-step-node is-answer">
+                      <small>第 3 步</small>
+                      <strong>选四字成语</strong>
+                    </span>
+                  ]}
+            </div>
+            <p>每个四字成语背后都有一个小故事：先看主角做了什么，再想它比喻什么道理。</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ScienceNatureBoard({ question, hintActive }: { question: Question; hintActive: boolean }) {
+  const isLifeCycle = question.template === "life-cycle" || /life cycle|caterpillar|tadpole|roots|sunlight|seed|feathers/i.test(question.prompt);
+  const isWeather = question.template === "plant-weather" || /freezer|evaporation|raindrops|rainbow|shadow/i.test(question.prompt);
+
+  const stages = isLifeCycle
+    ? [
+        { label: "Stage 1", title: "Egg / Seed 🌱" },
+        { label: "Stage 2", title: "Grow & Feed 🐛" },
+        { label: "Stage 3", title: "Change / Roots 🌿" },
+        { label: "Stage 4", title: "Adult / Bloom 🦋" }
+      ]
+    : isWeather
+      ? [
+          { label: "Cold ❄️", title: "Solid Ice" },
+          { label: "Warm 💧", title: "Liquid Water" },
+          { label: "Sun ☀️", title: "Vapour & Clouds" },
+          { label: "Light 🌈", title: "Rain & Shadow" }
+        ]
+      : [
+          { label: "Observe 👀", title: "Look & Listen" },
+          { label: "Test 🔬", title: "Float / Magnet" },
+          { label: "Compare ⚖️", title: "Light / Waterproof" },
+          { label: "Conclude 💡", title: "Science Fact" }
+        ];
+
+  return (
+    <div
+      className={`math-tool language-tool${hintActive ? " is-hint-focus" : ""}`}
+      data-testid="science-nature-board"
+      role="group"
+      aria-label="Science tool: Nature & experiment board"
+    >
+      <div className="math-tool-header">
+        <span>Science lab tool</span>
+        <strong>{isLifeCycle ? "Life cycle & plants" : isWeather ? "Water & weather cycle" : "Science experiment lab"}</strong>
+        <small>Observe how nature works</small>
+      </div>
+      <div className="math-tool-body">
+        <div className="two-step-model">
+          <div className="two-step-row">
+            {stages.map((stage, idx) => (
+              <span key={stage.label} className={`two-step-node${idx === stages.length - 1 ? " is-answer" : ""}`}>
+                <small>{stage.label}</small>
+                <strong>{stage.title}</strong>
+              </span>
+            ))}
+          </div>
+          <p>
+            {isLifeCycle
+              ? "Living things grow in stages and need sunlight, water, and air."
+              : isWeather
+                ? "Heating and cooling change water between ice, liquid, and vapour; light makes rainbows and shadows."
+                : "Test materials carefully: wood floats, magnets attract iron, glass lets light through, and plastic blocks water."}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function LanguageTool({ question, hintActive = false }: { question: Question; hintActive?: boolean }) {
   const [placedIds, setPlacedIds] = useState<number[]>([]);
   const questionId = question.id;
@@ -36,6 +169,14 @@ export function LanguageTool({ question, hintActive = false }: { question: Quest
   useEffect(() => {
     setPlacedIds([]);
   }, [questionId]);
+
+  if (question.skillId === "mandarin-idioms-classics") {
+    return <IdiomClassicBoard question={question} hintActive={hintActive} />;
+  }
+
+  if (question.skillId === "english-science-nature") {
+    return <ScienceNatureBoard question={question} hintActive={hintActive} />;
+  }
 
   const isSupported =
     question.kind === "choice"

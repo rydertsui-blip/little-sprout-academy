@@ -16,7 +16,8 @@ type ToolKind =
   | "ruler"
   | "units"
   | "counting"
-  | "pattern";
+  | "pattern"
+  | "olympiad";
 
 const TOOL_BY_SKILL: Record<string, ToolKind> = {
   "k2-math-count-20": "number-line",
@@ -39,7 +40,8 @@ const TOOL_BY_SKILL: Record<string, ToolKind> = {
   "math-scaled-picture-graph": "graph",
   "math-length-measure": "ruler",
   "math-measurement-units": "units",
-  "math-number-patterns-1000": "pattern"
+  "math-number-patterns-1000": "pattern",
+  "math-olympiad-reasoning": "olympiad"
 };
 
 const TOOL_LABEL: Record<ToolKind, string> = {
@@ -57,7 +59,8 @@ const TOOL_LABEL: Record<ToolKind, string> = {
   "ruler": "Centimetre ruler",
   "units": "Unit reference",
   "counting": "Counting pictures",
-  "pattern": "Pattern"
+  "pattern": "Pattern",
+  "olympiad": "Olympiad logic"
 };
 
 function TensOnesVisual({ tens, ones, hideTens = false, hideTotal = false, label }: { tens: number; ones: number; hideTens?: boolean; hideTotal?: boolean; label?: string }) {
@@ -1087,6 +1090,92 @@ function TwoStepTool({ question, hintActive = false }: { question: Question; hin
   );
 }
 
+function OlympiadVisual({ question }: { question: Question }) {
+  const prompt = question.prompt;
+  const nums = prompt.match(/\d+/g)?.map(Number) ?? [];
+
+  if (question.template === "balance-substitute" || /balance|weighs|★|▲|teapot/i.test(prompt)) {
+    const isSymbolEq = /[★▲●■]/.test(prompt);
+    return (
+      <div className="two-step-model olympiad-balance-board" data-testid="olympiad-balance-board">
+        <div className="two-step-row">
+          <span className="two-step-node">
+            <small>{isSymbolEq ? "Clue 1" : "Scale 1"}</small>
+            <strong>{isSymbolEq ? "Same symbols = equal parts" : `1 Big = ${nums[1] ?? 2} Medium`}</strong>
+          </span>
+          <i aria-hidden="true">⚖️</i>
+          <span className="two-step-node">
+            <small>{isSymbolEq ? "Clue 2" : "Scale 2"}</small>
+            <strong>{isSymbolEq ? "Plug into 2nd equation" : `1 Medium = ${nums[3] ?? nums[2] ?? 3} Small`}</strong>
+          </span>
+          <i aria-hidden="true">→</i>
+          <span className="two-step-node is-answer">
+            <small>Substitute</small>
+            <strong>?</strong>
+          </span>
+        </div>
+        <p>Olympiad substitution: replace the middle unit step by step to balance the scale.</p>
+      </div>
+    );
+  }
+
+  if (question.template === "queue-logic" || /queue|line|row|sawed|stairs/i.test(prompt)) {
+    const isCutOrStair = /sawed|cuts|stairs|floor/i.test(prompt);
+    return (
+      <div className="two-step-model olympiad-queue-board" data-testid="olympiad-queue-board">
+        <div className="two-step-row">
+          <span className="two-step-node">
+            <small>{isCutOrStair ? "Cuts / Gaps" : "Front"}</small>
+            <strong>{nums[0] ?? "A"}</strong>
+          </span>
+          <i aria-hidden="true">+</i>
+          <span className="two-step-node is-answer">
+            <small>{isCutOrStair ? "+1 Piece" : "Hero (★)"}</small>
+            <strong>1</strong>
+          </span>
+          {!isCutOrStair ? (
+            <>
+              <i aria-hidden="true">+</i>
+              <span className="two-step-node">
+                <small>Back / Rest</small>
+                <strong>{nums[1] ?? "B"}</strong>
+              </span>
+            </>
+          ) : null}
+          <i aria-hidden="true">=</i>
+          <span className="two-step-node is-answer">
+            <small>Total</small>
+            <strong>?</strong>
+          </span>
+        </div>
+        <p>{isCutOrStair ? "Interval rule: pieces = cuts + 1 (or steps = floor difference)." : "Queue rule: don't forget to count the person in the middle (or subtract 1 if counted twice)!"}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="two-step-model olympiad-backwards-board" data-testid="olympiad-backwards-board">
+      <div className="two-step-row">
+        <span className="two-step-node is-answer">
+          <small>Start</small>
+          <strong>?</strong>
+        </span>
+        <i aria-hidden="true">⇄</i>
+        <span className="two-step-node">
+          <small>Change</small>
+          <strong>{nums[0] ? `Step (${nums[0]})` : "Flip + / −"}</strong>
+        </span>
+        <i aria-hidden="true">⇄</i>
+        <span className="two-step-node">
+          <small>Known End</small>
+          <strong>{nums.at(-1) ?? "Result"}</strong>
+        </span>
+      </div>
+      <p>Work backwards from the end: flip addition (+) to subtraction (−) and multiplication (×) to division (÷).</p>
+    </div>
+  );
+}
+
 function ToolVisual({ kind, max, question }: { kind: ToolKind; max: number; question: Question }) {
   if (kind === "place-value") return <PlaceValue question={question} />;
   if (kind === "number-line") return <NumberLine max={max} question={question} />;
@@ -1102,6 +1191,7 @@ function ToolVisual({ kind, max, question }: { kind: ToolKind; max: number; ques
   if (kind === "ruler") return <Ruler question={question} />;
   if (kind === "counting") return <CountingPictures question={question} />;
   if (kind === "pattern") return <SequenceTool question={question} />;
+  if (kind === "olympiad") return <OlympiadVisual question={question} />;
   return <Units question={question} />;
 }
 

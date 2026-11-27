@@ -42,6 +42,7 @@ import MatchingBoard from "./screens/MatchingBoard";
 import OrderBoard from "./screens/OrderBoard";
 import HandwritingScreen, { InlineHandwritingModal, type HandwritingTraceTarget } from "./screens/HandwritingScreen";
 import MistakeNotebookScreen from "./screens/MistakeNotebookScreen";
+import { StreakBadgeWall } from "./screens/StreakBadgeWall";
 import { ENGLISH_HANDWRITING_ITEMS } from "./content/englishHandwriting";
 import SpeakingScreen from "./screens/SpeakingScreen";
 import ArcadeScreen from "./screens/ArcadeScreen";
@@ -888,6 +889,7 @@ export default function App() {
               locale={systemLocale}
             />
           ) : null}
+          <StreakBadgeWall child={activeChild} locale={systemLocale} />
         </main>
       ) : null}
     </div>
@@ -1196,7 +1198,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill, o
         {question.kind !== "match" ? <p className="question-instruction">{question.instruction}</p> : null}
         <h2 data-testid="question-prompt" data-question-id={question.id}>{question.prompt}</h2>
         {question.subject === "math" ? <MathTool question={question} hintActive={hintActive} /> : null}
-        {question.skillId === "english-sentence-order" || question.skillId === "mandarin-word-order" || question.skillId === "mandarin-conjunctions-complex" ? <LanguageTool question={question} hintActive={hintActive} /> : null}
+        {["english-sentence-order", "mandarin-word-order", "mandarin-conjunctions-complex", "mandarin-idioms-classics", "english-science-nature"].includes(question.skillId) ? <LanguageTool question={question} hintActive={hintActive} /> : null}
         {question.subject === "mandarin" ? <PinyinTool question={question} hintActive={hintActive} /> : null}
       </section>
       <section className="answer-panel">
@@ -1556,6 +1558,7 @@ function ParentDashboard({ household, locale, onSetSystemLocale, onBack, onAddCh
                 <strong>{completedWriting} / {HANDWRITING_CHARACTERS.length}</strong>
                 <small>{completedWriting ? copy.parent.handwritingSaved : copy.parent.handwritingEmpty}</small>
               </div>
+              <StreakBadgeWall child={child} locale={locale} compact />
               <p className="section-label">{copy.parent.settingsTitle}</p>
               <label className="parent-scope"><span>{copy.parent.learningLevel}</span><select aria-label={copy.parent.learningLevelAria(child.name)} value={child.gradeLevel} onChange={(event) => applyLearningLevel(child, event.target.value as LearningLevel)}><option value="K2">{copy.parent.levelK2}</option><option value="P1">{copy.parent.levelP1}</option><option value="P2">{copy.parent.levelP2}</option></select><small>{copy.parent.levelHint}</small></label>
               <div className="parent-controls">

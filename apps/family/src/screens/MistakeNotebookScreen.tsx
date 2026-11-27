@@ -38,6 +38,8 @@ export default function MistakeNotebookScreen({
   const [worksheetKind, setWorksheetKind] = useState<WorksheetKind>("mandarin-grid");
   const [worksheetLevel, setWorksheetLevel] = useState<"ALL" | LearningLevel>(child.gradeLevel);
   const [showAnswerKey, setShowAnswerKey] = useState(true);
+  const [prioritizeWeak, setPrioritizeWeak] = useState(true);
+  const [pageSeed, setPageSeed] = useState(0);
 
   // 1. Collect real wrong or hinted attempts from child history
   const mistakeRecords = useMemo(() => {
@@ -128,28 +130,45 @@ export default function MistakeNotebookScreen({
     [recommendedCuratedQuestions, subjectFilter]
   );
 
-  // Printable A4 Worksheet generators
+  function pickPageSlice<T>(items: T[], pageSize: number, seed: number): T[] {
+    if (items.length <= pageSize) return items;
+    const start = (seed * pageSize) % items.length;
+    const doubled = [...items, ...items];
+    return doubled.slice(start, start + pageSize);
+  }
+
+  // Printable A4 Worksheet generators with weak-first & random page rotation
   const printableMandarinChars = useMemo(() => {
     const pool = HANDWRITING_CHARACTERS.filter(
       (item) => worksheetLevel === "ALL" || item.level === worksheetLevel
     );
-    // Prioritize unpracticed or higher-mistake characters
-    const sorted = [...pool].sort((a, b) => {
-      const recA = child.handwriting[a.character];
-      const recB = child.handwriting[b.character];
-      if (!recA && recB) return -1;
-      if (recA && !recB) return 1;
-      return (recB?.bestMistakes ?? 0) - (recA?.bestMistakes ?? 0);
-    });
-    return sorted.slice(0, 10);
-  }, [child.handwriting, worksheetLevel]);
+    const sorted = prioritizeWeak
+      ? [...pool].sort((a, b) => {
+          const recA = child.handwriting[a.character];
+          const recB = child.handwriting[b.character];
+          if (!recA && recB) return -1;
+          if (recA && !recB) return 1;
+          return (recB?.bestMistakes ?? 0) - (recA?.bestMistakes ?? 0);
+        })
+      : pool;
+    return pickPageSlice(sorted, 10, pageSeed);
+  }, [child.handwriting, worksheetLevel, prioritizeWeak, pageSeed]);
 
   const printableEnglishItems = useMemo(() => {
     const pool = ENGLISH_HANDWRITING_ITEMS.filter(
       (item) => worksheetLevel === "ALL" || item.level === worksheetLevel
     );
-    return pool.slice(0, 10);
-  }, [worksheetLevel]);
+    const sorted = prioritizeWeak
+      ? [...pool].sort((a, b) => {
+          const recA = child.handwriting[a.character];
+          const recB = child.handwriting[b.character];
+          if (!recA && recB) return -1;
+          if (recA && !recB) return 1;
+          return (recB?.bestMistakes ?? 0) - (recA?.bestMistakes ?? 0);
+        })
+      : pool;
+    return pickPageSlice(sorted, 10, pageSeed);
+  }, [child.handwriting, worksheetLevel, prioritizeWeak, pageSeed]);
 
   const printableMathQuestions = useMemo(() => {
     const mathMistakes = mistakeRecords
@@ -162,18 +181,19 @@ export default function MistakeNotebookScreen({
         (q.skillId === "math-olympiad-reasoning" ||
           q.skillId === "math-add-sub-regroup" ||
           q.skillId === "math-two-step-problems" ||
-          q.skillId === "math-multiply-tables")
+          q.skillId === "math-multiply-tables" ||
+          q.skillId === "math-add-sub-1000")
     );
-    const combined: Question[] = [];
+    const orderedSource = prioritizeWeak ? [...mathMistakes, ...fallbackMath] : fallbackMath;
+    const deduped: Question[] = [];
     const seen = new Set<string>();
-    for (const q of [...mathMistakes, ...fallbackMath]) {
+    for (const q of orderedSource) {
       if (seen.has(q.id)) continue;
       seen.add(q.id);
-      combined.push(q);
-      if (combined.length >= 10) break;
+      deduped.push(q);
     }
-    return combined;
-  }, [mistakeRecords]);
+    return pickPageSlice(deduped, 10, pageSeed);
+  }, [mistakeRecords, prioritizeWeak, pageSeed]);
 
   function startTargetedBooster(targetSubject?: Subject) {
     const chosenSubject: Subject =
@@ -409,12 +429,26 @@ export default function MistakeNotebookScreen({
                       key={lvl}
                       type="button"
                       className={`speaking-deck ${worksheetLevel === lvl ? "is-active" : ""}`}
-                      onClick={() => setWorksheetLevel(lvl)}
+                      onClick={() => {
+                        setWorksheetLevel(lvl);
+                        setPageSeed(0);
+                      }}
                     >
                       {lvl === "ALL" ? "全部年级" : `${lvl} 年级`}
                     </button>
                   ))}
                 </div>
+                <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontWeight: 800 }}>
+                  <input
+                    type="checkbox"
+                    checked={prioritizeWeak}
+                    onChange={(e) => {
+                      setPrioritizeWeak(e.target.checked);
+                      setPageSeed(0);
+                    }}
+                  />
+                  优先抽取未练过字词 / 历史错题
+                </label>
                 {worksheetKind === "math-drill" ? (
                   <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontWeight: 800 }}>
                     <input
@@ -425,6 +459,14 @@ export default function MistakeNotebookScreen({
                     附带底部署名参考答案栏
                   </label>
                 ) : null}
+                <button
+                  type="button"
+                  className="quiet-button compact-button"
+                  data-testid="shuffle-worksheet-btn"
+                  onClick={() => setPageSeed((prev) => prev + 1)}
+                >
+                  <Sparkles aria-hidden="true" /> 随机换一页（第 {pageSeed + 1} 套）
+                </button>
                 <button
                   type="button"
                   className="primary-button compact-button"
