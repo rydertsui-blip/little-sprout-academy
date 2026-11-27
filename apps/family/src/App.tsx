@@ -148,7 +148,9 @@ function dailyQuestionCount(value: number): 6 | 8 | 10 {
 function completeSessionForChild(child: ChildProfile, session: SessionRecord): SessionCompletionOutcome | null {
   const completed = completeSession(session, child);
   if (!completed) return null;
-  child.diagnostics[session.subject] = { completedAt: completed.completedAt!, sessionId: completed.id };
+  if (session.kind === "diagnostic") {
+    child.diagnostics[session.subject] = { completedAt: completed.completedAt!, sessionId: completed.id };
+  }
   child.sessions.push(completed);
   delete child.activeSessions[session.subject];
 

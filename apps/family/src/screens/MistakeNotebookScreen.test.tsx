@@ -59,6 +59,7 @@ describe("MistakeNotebookScreen, A4 dynamic generator, enrichment tools & Streak
     fireEvent.click(screen.getByRole("button", { name: /3\. 数学口算与思维巩固练习卷/ }));
     expect(screen.getByText(/数学口算与奥数思维巩固练习卷/)).toBeInTheDocument();
     expect(screen.getByText(/家长核对参考答案/)).toBeInTheDocument();
+    expect(document.querySelectorAll("input, textarea, [contenteditable='true']")).toHaveLength(0);
   });
 
   it("switches between Chinese Rice-Grid (100 chars) and English 4-Line Grid (36 items) in HandwritingScreen", () => {

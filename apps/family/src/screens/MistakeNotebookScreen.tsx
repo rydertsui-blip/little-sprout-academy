@@ -438,26 +438,28 @@ export default function MistakeNotebookScreen({
                     </button>
                   ))}
                 </div>
-                <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontWeight: 800 }}>
-                  <input
-                    type="checkbox"
-                    checked={prioritizeWeak}
-                    onChange={(e) => {
-                      setPrioritizeWeak(e.target.checked);
-                      setPageSeed(0);
-                    }}
-                  />
-                  优先抽取未练过字词 / 历史错题
-                </label>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={prioritizeWeak}
+                  className={`speaking-deck ${prioritizeWeak ? "is-active" : ""}`}
+                  onClick={() => {
+                    setPrioritizeWeak((prev) => !prev);
+                    setPageSeed(0);
+                  }}
+                >
+                  {prioritizeWeak ? "✓ 已开启：未练过/错题优先" : "未练过/错题优先"}
+                </button>
                 {worksheetKind === "math-drill" ? (
-                  <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontWeight: 800 }}>
-                    <input
-                      type="checkbox"
-                      checked={showAnswerKey}
-                      onChange={(e) => setShowAnswerKey(e.target.checked)}
-                    />
-                    附带底部署名参考答案栏
-                  </label>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={showAnswerKey}
+                    className={`speaking-deck ${showAnswerKey ? "is-active" : ""}`}
+                    onClick={() => setShowAnswerKey((prev) => !prev)}
+                  >
+                    {showAnswerKey ? "✓ 附带底部参考答案栏" : "隐藏底部参考答案栏"}
+                  </button>
                 ) : null}
                 <button
                   type="button"

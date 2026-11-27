@@ -1,6 +1,7 @@
 import { Award, Check, Flame, Volume2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { buildSevenDayStreak, evaluateChildBadges, type AchievementBadgeStatus } from "../content/achievements";
+import { VOICE_LINES } from "../content/audioAssets";
 import type { Locale } from "../content/copy";
 import { playOrSpeak } from "../lib/audio";
 import type { ChildProfile } from "../lib/types";
@@ -23,8 +24,12 @@ export function StreakBadgeWall({
     setSelectedBadge(badge);
     const speech =
       locale === "en"
-        ? `${badge.titleEn}. ${badge.descEn}. ${badge.unlocked ? "Unlocked!" : badge.progressLabelEn}`
-        : `${badge.titleZh}。${badge.descZh}。${badge.unlocked ? "太棒啦，已经点亮这枚勋章！" : `当前进度：${badge.progressLabelZh}`}`;
+        ? badge.unlocked
+          ? VOICE_LINES.praiseEn2
+          : VOICE_LINES.retryEncourageEn1
+        : badge.unlocked
+          ? VOICE_LINES.praiseZh2
+          : VOICE_LINES.retryEncourageZh1;
     playOrSpeak(speech, locale === "en" ? "en-US" : "zh-CN");
   }
 
