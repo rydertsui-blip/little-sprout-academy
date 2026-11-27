@@ -20,8 +20,8 @@ const toneFromMark = (value: string): string => {
 };
 
 describe("zero-error content audit gate", () => {
-  it("ensures all 998 questions have unique options (case-insensitive), explicit audioLanguage, no visual leaks, no placeholders, and valid audio assets for prompts, hints, teach cards, and explanations", () => {
-    expect(QUESTIONS).toHaveLength(998);
+  it("ensures all 1052 questions have unique options (case-insensitive), explicit audioLanguage, no visual leaks, no placeholders, and valid audio assets for prompts, hints, teach cards, and explanations", () => {
+    expect(QUESTIONS).toHaveLength(1052);
     expect(validateContentCatalog()).toEqual([]);
 
     for (const q of QUESTIONS) {
@@ -102,6 +102,6 @@ describe("zero-error content audit gate", () => {
       const diagCount = QUESTIONS.filter((q) => q.subject === subject && q.diagnostic).length;
       expect(diagCount).toBeGreaterThanOrEqual(8);
     }
-    expect(SKILLS.length).toBe(56);
+    expect(SKILLS.length).toBe(59);
   });
 });

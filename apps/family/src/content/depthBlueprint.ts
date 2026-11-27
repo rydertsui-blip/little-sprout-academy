@@ -42,6 +42,7 @@ export const SKILL_DEPTH_BLUEPRINTS: SkillDepthBlueprint[] = [
   blueprint("math-measurement-units", "math", 18, ["measurement-unit", "unit-select", "unit-convert"], 3),
   blueprint("math-scaled-picture-graph", "math", 18, ["scaled-graph-read", "scaled-graph-compare", "scaled-graph-total"]),
   blueprint("math-number-patterns-1000", "math", 18, ["odd-even-identify", "pattern-1000", "mixed-mul-add"]),
+  blueprint("math-olympiad-reasoning", "math", 18, ["balance-substitute", "queue-logic", "work-backwards"]),
   blueprint("k2-mandarin-listen", "mandarin", 12, ["listen-animal", "listen-color", "listen-number"]),
   blueprint("k2-mandarin-vocabulary", "mandarin", 12, ["category-word", "context-word", "meaning"]),
   blueprint("mandarin-initials", "mandarin", 18, ["initial", "initial-family", "picture-initial", "same-initial"]),
@@ -59,6 +60,7 @@ export const SKILL_DEPTH_BLUEPRINTS: SkillDepthBlueprint[] = [
   blueprint("mandarin-synonyms-collocations", "mandarin", 18, ["synonym-word", "antonym-word", "word-collocation"]),
   blueprint("mandarin-conjunctions-complex", "mandarin", 18, ["conjunction-cloze", "complex-clause", "sequence-clauses"]),
   blueprint("mandarin-passage-comprehension", "mandarin", 18, ["passage-main-idea", "passage-cause", "passage-lesson"]),
+  blueprint("mandarin-idioms-classics", "mandarin", 18, ["idiom-meaning", "idiom-story-cloze", "classic-poem"]),
   blueprint("k2-english-listen", "english", 12, ["listen-animal", "listen-color", "listen-number"]),
   blueprint("k2-english-letters", "english", 12, ["letter-case", "alphabet-order", "beginning-letter"]),
   blueprint("english-letters", "english", 12, ["beginning-letter", "letter-name", "letter-case"]),
@@ -76,7 +78,8 @@ export const SKILL_DEPTH_BLUEPRINTS: SkillDepthBlueprint[] = [
   blueprint("english-tenses-agreement", "english", 18, ["subject-verb-agreement", "present-continuous", "past-tense"]),
   blueprint("english-prepositions-connectors", "english", 18, ["preposition-place", "connector-clause", "preposition-time"]),
   blueprint("english-pronouns-questions", "english", 18, ["pronoun-case", "possessive-pronoun", "wh-question-word"]),
-  blueprint("english-cloze-passage", "english", 18, ["grammar-cloze", "vocabulary-cloze", "connector-cloze"])
+  blueprint("english-cloze-passage", "english", 18, ["grammar-cloze", "vocabulary-cloze", "connector-cloze"]),
+  blueprint("english-science-nature", "english", 18, ["life-cycle", "plant-weather", "science-experiment"])
 ];
 
 const BLUEPRINT_BY_ID = new Map(SKILL_DEPTH_BLUEPRINTS.map((item) => [item.skillId, item]));

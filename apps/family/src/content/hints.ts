@@ -57,7 +57,10 @@ const SKILL_HINTS: Record<string, string> = {
   "english-tenses-agreement": "先找句子里的时间线索词：every day 看主语单复数（单数加 -s），now/Look! 用 am/is/are + -ing，yesterday/last night 用过去式。",
   "english-prepositions-connectors": "表示在两个物体中间用 between，时间点前用 at、星期几前用 on；讲原因用 because、讲转折用 but、讲结果用 so。",
   "english-pronouns-questions": "动词前面做主语用 He/She/We/They，动词或介词后面用 him/her/us/them，名词前面表示“谁的”用 his/her/their；问所属用 Whose。",
-  "english-cloze-passage": "先读【Read】框里的前后两句话，圈出时间词（如 Yesterday / right now）和因果线索，再选最符合语境的词。"
+  "english-cloze-passage": "先读【Read】框里的前后两句话，圈出时间词（如 Yesterday / right now）和因果线索，再选最符合语境的词。",
+  "math-olympiad-reasoning": "天平代换题先把1个大物品换成几个小物品；排队题记得把主角自己也算进去（前+后+1，或第几+第几-1）；倒推题从最后的结果反着算（加变减、减变加）。",
+  "mandarin-idioms-classics": "想一想这个成语小故事里主角做了什么、结果怎样，或者把古诗上下句连起来默读一遍。",
+  "english-science-nature": "Think about how living things grow (egg → young → adult) or how water and materials behave in real life."
 };
 
 const SKILL_HINTS_EN: Record<string, string> = {
@@ -99,7 +102,10 @@ const SKILL_HINTS_EN: Record<string, string> = {
   "english-tenses-agreement": "Spot the time clue first: 'every day' needs -s for he/she/it; 'right now / Look!' needs am/is/are + -ing; 'yesterday / last night' needs past tense.",
   "english-prepositions-connectors": "Check position or time: use 'between' for two things, 'at' for clock times, 'on' for days; use 'because' for reason, 'but' for contrast, and 'so' for result.",
   "english-pronouns-questions": "Use He/She/We/They before a verb, him/her/us/them after a verb or preposition, and his/her/their before a noun; use Whose to ask about ownership.",
-  "english-cloze-passage": "Read the whole passage in the Read box above: check the time words and context clues in both sentences before choosing the word."
+  "english-cloze-passage": "Read the whole passage in the Read box above: check the time words and context clues in both sentences before choosing the word.",
+  "math-olympiad-reasoning": "For balance scales, substitute one big item with smaller ones; for queues, remember to count the person in the middle once; for mystery numbers, work backwards from the final number.",
+  "mandarin-idioms-classics": "Think of the story behind the four-character idiom or read the classical poem lines together to feel the rhyme.",
+  "english-science-nature": "Think about how plants and animals grow, how water changes with heat or cold, and how everyday materials work."
 };
 
 export interface SkillTeach {
@@ -388,6 +394,21 @@ const SKILL_TEACH: Record<string, SkillTeach> = {
     title: "Use clues across sentences",
     body: "Read both sentences in the passage before choosing. Check time clues for grammar blanks and meaning clues for vocabulary blanks.",
     example: "The baby was sleeping, so we spoke quietly."
+  },
+  "math-olympiad-reasoning": {
+    title: "代换、排队与倒推三法宝",
+    body: "1. 等量代换：把 1 个大物品换成几个小物品；2. 排队问题：前面人数 + 后面人数 + 自己 1 人 = 总人数；3. 还原倒推：从结果倒着算，加变减、乘变除。",
+    example: "前有 4 人、后有 3 人 → 4 + 3 + 1 = 8 人。"
+  },
+  "mandarin-idioms-classics": {
+    title: "成语典故与经典古诗",
+    body: "每一个四字成语背后都有一个小故事和道理；读古诗时注意诗句描绘的画面（如白鹅戏水、抬头望月、春晨听鸟、爱惜粮食）。",
+    example: "井底之蛙（见识短浅）/ 亡羊补牢（及时改正）/ 铁杵成针（坚持不懈）"
+  },
+  "english-science-nature": {
+    title: "Explore Life Cycles, Weather & Materials",
+    body: "Observe how animals and plants grow (egg → caterpillar → pupa → butterfly), how water freezes or evaporates, and which materials float, let light through, or attract magnets.",
+    example: "Roots take in water; magnets attract iron; heat speeds up evaporation."
   }
 };
 

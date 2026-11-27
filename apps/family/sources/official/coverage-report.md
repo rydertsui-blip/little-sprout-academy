@@ -18,11 +18,11 @@
 - 官方来源：4 份 MOE PDF
 - 官方 P1/P2 outcome：44 条
 - 依產品範圍排除的書寫 outcome：5 条
-- 当前技能：56 个
+- 当前技能：59 个
 - 非测验活动：6 组
 - 至少有一个 exact 映射的技能：36 个
 - 只有 broad 映射的技能：12 个
-- 不纳入官方覆盖的课外补充技能：8 个
+- 不纳入官方覆盖的课外补充技能：11 个
 
 ## 数学
 
@@ -89,12 +89,15 @@
 |---|---|---|
 | k2-math-count-20 | 数学 | Count, compare and continue simple patterns within 20. |
 | k2-math-add-within-10 | 数学 | Use pictures, number bonds and one more or one less to add and subtract within 10. |
+| math-olympiad-reasoning | 数学 | Solve balance-scale substitutions, queue puzzles, age differences and working-backwards problems. |
 | k2-mandarin-listen | 华文 | Listen and point to familiar animals, colours, numbers, actions, family words and fruit. |
 | k2-mandarin-vocabulary | 华文 | Understand and name everyday categories, body parts, opposites and action words. |
 | mandarin-classifiers | 华文 | Use common classifiers such as 只, 朵 and 座. |
 | mandarin-word-order | 华文 | Choose complete and natural Mandarin sentences. |
+| mandarin-idioms-classics | 华文 | Understand common four-character idioms, fables and classic Tang poems in context. |
 | k2-english-listen | 英语 | Listen and tap familiar animals, colours, numbers, actions, family words and fruit. |
 | k2-english-letters | 英语 | Recognise upper and lower case letters, alphabet order and beginning sounds. |
+| english-science-nature | 英语 | Explore animal life cycles, plant parts, weather, water states and everyday science in English. |
 
 這些技能可以保留作練習，但不能列入 MOE outcome 的已覆蓋數量。
 

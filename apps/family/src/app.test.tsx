@@ -225,7 +225,7 @@ describe("family learning app", () => {
     expect(screen.getByRole("button", { name: /数学/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "华文 Mandarin" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /英语/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /看笔顺，亲手写/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /小芽写字工坊/ })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /写字练习/ })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /小芽口说/ })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /华文口语小游戏/ })).not.toBeInTheDocument();
@@ -937,7 +937,7 @@ describe("family learning app", () => {
     await openParentSettings();
     expect(screen.getByText("到了复习时间", { exact: false })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "导出答题记录" })).toBeInTheDocument();
-    expect(screen.getByText(/课程参考 4 份新加坡教育部（MOE）资料，覆盖 44 条学习目标；0 条游戏内容还在补充，5 条书写目标暂不纳入，8 个知识点为课外补充/)).toBeInTheDocument();
+    expect(screen.getByText(/课程参考 4 份新加坡教育部（MOE）资料，覆盖 44 条学习目标；0 条游戏内容还在补充，5 条书写目标暂不纳入，11 个知识点为课外补充/)).toBeInTheDocument();
     expect(screen.getByText(/尚未逐条人工复核/)).toBeInTheDocument();
   });
 

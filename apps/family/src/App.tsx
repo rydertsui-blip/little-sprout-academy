@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, Check, Download, Gamepad2, Headphones, Lightbulb, Lock, Mic, Pencil, Plus, ShieldCheck, Star, Trash2, Upload, Volume2, X } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Check, Download, Gamepad2, Headphones, Lightbulb, Lock, Mic, Pencil, Plus, Printer, ShieldCheck, Star, Trash2, Upload, Volume2, X } from "lucide-react";
 import { CONTENT_VERSION, QUESTIONS, SKILLS } from "./content/catalog";
 import { SUBJECT_NAMES, UI_COPY, subjectLocale, subjectName, uiCopyFor, type Locale, type UiCopy } from "./content/copy";
 import { hintForQuestion, teachForQuestion } from "./content/hints";
@@ -40,13 +40,15 @@ import { LanguageTool } from "./screens/LanguageTool";
 import { PinyinTool } from "./screens/PinyinTool";
 import MatchingBoard from "./screens/MatchingBoard";
 import OrderBoard from "./screens/OrderBoard";
-import HandwritingScreen, { InlineHandwritingModal } from "./screens/HandwritingScreen";
+import HandwritingScreen, { InlineHandwritingModal, type HandwritingTraceTarget } from "./screens/HandwritingScreen";
+import MistakeNotebookScreen from "./screens/MistakeNotebookScreen";
+import { ENGLISH_HANDWRITING_ITEMS } from "./content/englishHandwriting";
 import SpeakingScreen from "./screens/SpeakingScreen";
 import ArcadeScreen from "./screens/ArcadeScreen";
 import { findHandwritingCharacterForQuestion, HANDWRITING_CHARACTERS, type HandwritingCharacter } from "./content/handwriting";
 import { SPEAKING_PROMPTS } from "./content/speaking";
 
-type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "speaking" | "handwriting" | "companions" | "arcade";
+type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "speaking" | "handwriting" | "companions" | "arcade" | "notebook";
 
 interface SessionCompletionOutcome {
   session: SessionRecord;
@@ -189,6 +191,7 @@ export default function App() {
   const systemLocale: Locale = household?.uiLocale ?? "zh";
   const ui = uiCopyFor(systemLocale);
   const [screen, setScreen] = useState<Screen>("profiles");
+  const [notebookTab, setNotebookTab] = useState<"notebook" | "worksheet">("notebook");
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
   const [showParentGate, setShowParentGate] = useState(false);
   const [setupError, setSetupError] = useState("");
@@ -498,7 +501,7 @@ export default function App() {
 
 
 
-  async function recordHandwriting(entry: HandwritingCharacter, mistakes: number): Promise<boolean> {
+  async function recordHandwriting(entry: HandwritingTraceTarget, mistakes: number): Promise<boolean> {
     if (!activeChild) return false;
     const childId = activeChild.id;
     return updateChild(childId, (child) => {
@@ -515,6 +518,34 @@ export default function App() {
 
   function openCompanions() {
     setScreen("companions");
+  }
+
+  async function startBoosterSession(subject: Subject, questionIds: string[]) {
+    if (!activeChild || questionIds.length === 0) return;
+    const boosterSession: SessionRecord = {
+      id: `session-booster-${Date.now()}`,
+      childId: activeChild.id,
+      subject,
+      kind: "practice",
+      length: questionIds.length,
+      startedAt: new Date().toISOString(),
+      completedAt: null,
+      plannedQuestionIds: questionIds,
+      attempts: [],
+      summary: []
+    };
+    const saved = await updateChild(activeChild.id, (child) => {
+      child.activeSessions[subject] = boosterSession;
+      return child;
+    });
+    if (!saved) return;
+    const firstQuestion = selectNextQuestion(activeChild, boosterSession);
+    setSessionReward(null);
+    setSession(boosterSession);
+    setCurrentQuestion(firstQuestion);
+    setFeedback(null);
+    setSummary(null);
+    setScreen("assessment");
   }
 
   async function recordArcadeReward(eventKey: string): Promise<number> {
@@ -595,7 +626,7 @@ export default function App() {
   };
 
   if (screen === "parent") {
-    return <>{storageBanner}<ParentDashboard household={household} locale={systemLocale} onSetSystemLocale={(locale) => commitHousehold((current) => ({ ...current, uiLocale: locale }))} onBack={backToProfiles} onAddChild={addChild} onDeleteChild={deleteChild} onUpdateChild={updateChild} onLock={lockHousehold} onImport={importBackup} /></>;
+    return <>{storageBanner}<ParentDashboard household={household} locale={systemLocale} onSetSystemLocale={(locale) => commitHousehold((current) => ({ ...current, uiLocale: locale }))} onBack={backToProfiles} onAddChild={addChild} onDeleteChild={deleteChild} onUpdateChild={updateChild} onLock={lockHousehold} onImport={importBackup} onOpenChildNotebook={(childId, tab) => { setActiveChildId(childId); setNotebookTab(tab); setScreen("notebook"); }} /></>;
   }
 
   if (screen === "handwriting" && activeChild) {
@@ -608,6 +639,10 @@ export default function App() {
 
   if (screen === "arcade" && activeChild) {
     return <>{storageBanner}<ArcadeScreen child={activeChild} onBack={() => setScreen("child")} onLock={lockHousehold} onCompleteGame={recordArcadeReward} /></>;
+  }
+
+  if (screen === "notebook" && activeChild) {
+    return <>{storageBanner}<MistakeNotebookScreen child={activeChild} initialTab={notebookTab} onBack={() => setScreen("child")} onLock={lockHousehold} onStartBooster={(subject, ids) => void startBoosterSession(subject, ids)} /></>;
   }
 
   if (screen === "companions" && activeChild) {
@@ -703,6 +738,8 @@ export default function App() {
   const homeRemaining = Math.max(1, (homeSession?.length ?? defaultHomeLength) - (homeSession?.attempts.length ?? 0));
   const homeHasSession = Boolean(homeSession && homeSession.attempts.length < homeSession.length);
   const writingCompleted = activeChild ? HANDWRITING_CHARACTERS.filter((item) => activeChild.handwriting[item.character]).length : 0;
+  const enWritingCompleted = activeChild ? ENGLISH_HANDWRITING_ITEMS.filter((item) => activeChild.handwriting[item.character]).length : 0;
+  const mistakeCount = activeChild ? new Set(activeChild.attempts.filter((a) => !a.correct || a.hintUsed).map((a) => a.questionId)).size : 0;
   const homeCards = subjectCards.map((card) => systemLocale === "en"
     ? {
         ...card,
@@ -786,8 +823,8 @@ export default function App() {
                 </div>
                 <div className="studio-hub-copy">
                   <span className="studio-hub-pill"><Pencil aria-hidden="true" /> {systemLocale === "en" ? "Chinese Handwriting" : "小芽写字工坊"}</span>
-                  <strong>{systemLocale === "en" ? `Stroke Order · ${writingCompleted} / ${HANDWRITING_CHARACTERS.length} chars` : `看笔顺，亲手写 · 已写 ${writingCompleted} / ${HANDWRITING_CHARACTERS.length} 字`}</strong>
-                  <small>{systemLocale === "en" ? "Listen, blend pinyin, watch teacher stroke demos and trace." : "每个字配齐动态拼音连拼与笔顺动画，小芽老师手把手带你描红。"}</small>
+                  <strong>{systemLocale === "en" ? `Chinese ${writingCompleted}/${HANDWRITING_CHARACTERS.length} · English ${enWritingCompleted}/${ENGLISH_HANDWRITING_ITEMS.length}` : `华文 ${writingCompleted}/${HANDWRITING_CHARACTERS.length} 字 · 英文四线三格 ${enWritingCompleted}/${ENGLISH_HANDWRITING_ITEMS.length}`}</strong>
+                  <small>{systemLocale === "en" ? "Chinese rice-grid stroke order + English 4-line A-Z and phonics words." : "华文米字格 100 字笔顺 + 英文四线三格 A-Z 与自然拼读单词描红。"}</small>
                 </div>
               </button>
 
@@ -821,6 +858,24 @@ export default function App() {
                   <span className="studio-hub-pill"><Gamepad2 aria-hidden="true" /> {systemLocale === "en" ? "Sprout Arcade" : "小芽游乐园"}</span>
                   <strong>{systemLocale === "en" ? "4 Mini-Games · Memory, Sorting, Monster & Story Quest" : "四大闯关小游戏 · 翻牌、投篮、喂怪兽与绘本闯关"}</strong>
                   <small>{systemLocale === "en" ? "Play interactive games and earn bonus growth stars!" : "边玩边学奥数思维、成语字谜、自然科普与速算，通关赢成长星！"}</small>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className="studio-hub-card is-notebook"
+                onClick={() => {
+                  setNotebookTab("notebook");
+                  setScreen("notebook");
+                }}
+              >
+                <div className="studio-hub-art" aria-hidden="true">
+                  <img src="./assets/images/studio-notebook.svg" alt="" />
+                </div>
+                <div className="studio-hub-copy">
+                  <span className="studio-hub-pill"><BookOpen aria-hidden="true" /> {systemLocale === "en" ? "Mistakes & A4 Print" : "错题本与打印字帖"}</span>
+                  <strong>{systemLocale === "en" ? `Review ${mistakeCount} Mistakes & Print A4 Worksheets` : `我的错题特训（${mistakeCount} 题）与一键打印 A4 练习卷`}</strong>
+                  <small>{systemLocale === "en" ? "Targeted weak-skill booster quiz + printable A4 rice-grid, 4-line & math sheets." : "错题听解析、一键开启 6 题专项特训，支持生成并打印 A4 描红字帖与口算卷。"}</small>
                 </div>
               </button>
             </div>
@@ -988,7 +1043,7 @@ function SessionHeader({ child, subject, kind, answered, total, onBack }: { chil
   );
 }
 
-export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill, onRecordHandwriting }: { question: Question; feedback: { correct: boolean; answer: string; mismatchCount?: number } | null; onAnswer: (correct: boolean, answer: string, mismatchCount?: number, hintUsed?: boolean) => Promise<boolean>; onNext: () => void; isNewSkill: boolean; onRecordHandwriting?: (entry: HandwritingCharacter, mistakes: number) => Promise<boolean> }) {
+export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill, onRecordHandwriting }: { question: Question; feedback: { correct: boolean; answer: string; mismatchCount?: number } | null; onAnswer: (correct: boolean, answer: string, mismatchCount?: number, hintUsed?: boolean) => Promise<boolean>; onNext: () => void; isNewSkill: boolean; onRecordHandwriting?: (entry: HandwritingTraceTarget, mistakes: number) => Promise<boolean> }) {
   const options = useMemo(() => question.kind === "choice" ? deterministicOptions(question) : [], [question]);
   const matchedHandwriting = useMemo(() => findHandwritingCharacterForQuestion(question), [question]);
   const correct = Boolean(feedback?.correct);
@@ -1274,7 +1329,7 @@ function SessionResult({ child, subject, kind, session, summary, reward, onDone,
   );
 }
 
-function ParentDashboard({ household, locale, onSetSystemLocale, onBack, onAddChild, onDeleteChild, onUpdateChild, onLock, onImport }: { household: HouseholdState; locale: Locale; onSetSystemLocale: (locale: Locale) => Promise<boolean>; onBack: () => void; onAddChild: (child: ChildProfile) => Promise<boolean>; onDeleteChild: (childId: string) => Promise<boolean>; onUpdateChild: (childId: string, update: (child: ChildProfile) => ChildProfile) => Promise<boolean>; onLock: () => void | Promise<void>; onImport: (household: HouseholdState) => void }) {
+function ParentDashboard({ household, locale, onSetSystemLocale, onBack, onAddChild, onDeleteChild, onUpdateChild, onLock, onImport, onOpenChildNotebook }: { household: HouseholdState; locale: Locale; onSetSystemLocale: (locale: Locale) => Promise<boolean>; onBack: () => void; onAddChild: (child: ChildProfile) => Promise<boolean>; onDeleteChild: (childId: string) => Promise<boolean>; onUpdateChild: (childId: string, update: (child: ChildProfile) => ChildProfile) => Promise<boolean>; onLock: () => void | Promise<void>; onImport: (household: HouseholdState) => void; onOpenChildNotebook?: (childId: string, tab: "notebook" | "worksheet") => void }) {
   const copy = uiCopyFor(locale);
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingChild, setEditingChild] = useState<ChildProfile | null>(null);
@@ -1440,6 +1495,12 @@ function ParentDashboard({ household, locale, onSetSystemLocale, onBack, onAddCh
                 <ChildAvatar avatar={child.avatar} small />
                 <div className="parent-child-title"><h2>{child.name}</h2><p>{ageLabel(currentAge, locale)} · {learningLevelLabel(child.gradeLevel, locale)} · {child.attempts.length ? copy.parent.childActivity(child.attempts.length, Object.keys(child.diagnostics).length) : copy.parent.notStarted}</p></div>
                 <div className="child-profile-actions">
+                  {onOpenChildNotebook ? (
+                    <>
+                      <button className="quiet-button compact-button" type="button" onClick={() => onOpenChildNotebook(child.id, "notebook")}><BookOpen aria-hidden="true" />{locale === "en" ? "Mistake Notebook" : "错题本特训"}</button>
+                      <button className="quiet-button compact-button" type="button" onClick={() => onOpenChildNotebook(child.id, "worksheet")}><Printer aria-hidden="true" />{locale === "en" ? "Print A4 Worksheet" : "打印 A4 练习卷"}</button>
+                    </>
+                  ) : null}
                   <button className="quiet-button compact-button" type="button" onClick={() => setEditingChild(child)}><Pencil aria-hidden="true" />{copy.parent.editChild}</button>
                   <button className="quiet-button compact-button" type="button" onClick={() => exportAttemptsCsv(child)}><Download aria-hidden="true" />{copy.parent.exportCsv}</button>
                 </div>

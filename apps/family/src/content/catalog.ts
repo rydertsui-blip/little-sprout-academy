@@ -54,6 +54,10 @@ const FACTUAL_MATH_TEMPLATES = new Set([
   ,"real-world-fraction"
   ,"real-world-shape"
   ,"odd-even-identify"
+  ,"balance-substitute"
+  ,"queue-logic"
+  ,"work-backwards"
+  ,"real-world-olympiad"
 ]);
 
 rawQuestions.forEach((question) => {

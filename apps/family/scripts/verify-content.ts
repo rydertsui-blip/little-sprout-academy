@@ -14,8 +14,8 @@ if (process.argv.includes("--depth")) {
   console.log(`Depth verified for ${SKILLS.length} skills and ${QUESTIONS.length} questions.`);
   if (!process.argv.includes("--update")) process.exit(0);
 }
-if (QUESTIONS.length !== 998) {
-  console.error(`Expected 998 questions, found ${QUESTIONS.length}`);
+if (QUESTIONS.length !== 1052) {
+  console.error(`Expected 1052 questions, found ${QUESTIONS.length}`);
   process.exit(1);
 }
 

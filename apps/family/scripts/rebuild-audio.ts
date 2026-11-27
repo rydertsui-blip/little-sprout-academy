@@ -7,6 +7,7 @@ import { GENERATED_AUDIO_ASSETS } from "../src/content/audioAssets.generated";
 import { QUESTIONS } from "../src/content/catalog";
 import { subjectLocale } from "../src/content/copy";
 import { HANDWRITING_CHARACTERS } from "../src/content/handwriting";
+import { ENGLISH_HANDWRITING_ITEMS } from "../src/content/englishHandwriting";
 import { hintForQuestion, teachForQuestion } from "../src/content/hints";
 import { SPEAKING_PROMPTS } from "../src/content/speaking";
 import { MEMORY_FLIP_DECKS, MONSTER_STAGES, SORTING_ROUNDS, STORY_QUESTS } from "../src/content/arcade";
@@ -282,6 +283,11 @@ function syncGeneratedAudioMap(): Record<string, string> {
   for (const entry of HANDWRITING_CHARACTERS) {
     ensure(entry.audioText);
     ensure(entry.introAudioText);
+  }
+  for (const enItem of ENGLISH_HANDWRITING_ITEMS) {
+    ensure(enItem.introAudioText);
+    ensure(enItem.audioText);
+    ensure(enItem.word);
   }
   for (const prompt of SPEAKING_PROMPTS) {
     ensure(prompt.text);

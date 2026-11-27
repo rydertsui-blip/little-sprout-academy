@@ -351,6 +351,48 @@ const ORDER_SEEDS: OrderSeed[] = [
     template: "tap-order-sentence",
     transferLevel: "near-transfer",
     contextKey: "en-order-connector-rain"
+  },
+  {
+    id: "q-order-math-olympiad-1",
+    skillId: "math-olympiad-reasoning",
+    prompt: "Tap the numbers to complete the growing step pattern (+2, +3, +4).",
+    instruction: "Tap the numbers from smallest to largest in the pattern.",
+    tokens: ["10", "3", "6", "1"],
+    correctOrder: ["1", "3", "6", "10"],
+    separator: ", ",
+    explanation: "1 + 2 = 3, 3 + 3 = 6, and 6 + 4 = 10.",
+    difficulty: 3,
+    template: "tap-order-numbers",
+    transferLevel: "near-transfer",
+    contextKey: "order-olympiad-steps"
+  },
+  {
+    id: "q-order-mandarin-poem-1",
+    skillId: "mandarin-idioms-classics",
+    prompt: "按顺序点古诗词块，拼出《静夜思》里的名句。",
+    instruction: "依次点下面的词块，排成完整的两句古诗。",
+    tokens: ["低头思故乡。", "举头", "望明月，"],
+    correctOrder: ["举头", "望明月，", "低头思故乡。"],
+    separator: "",
+    explanation: "《静夜思》后两句是“举头望明月，低头思故乡。”",
+    difficulty: 3,
+    template: "tap-order-sentence",
+    transferLevel: "near-transfer",
+    contextKey: "zh-order-poem-moon"
+  },
+  {
+    id: "q-order-english-science-1",
+    skillId: "english-science-nature",
+    prompt: "Tap the stages in order to show the life cycle of a butterfly.",
+    instruction: "Start from the tiny egg on a leaf.",
+    tokens: ["butterfly", "egg", "pupa", "caterpillar"],
+    correctOrder: ["egg", "caterpillar", "pupa", "butterfly"],
+    separator: " → ",
+    explanation: "A butterfly grows in order: egg → caterpillar → pupa → butterfly.",
+    difficulty: 3,
+    template: "tap-order-sentence",
+    transferLevel: "near-transfer",
+    contextKey: "en-order-butterfly-cycle"
   }
 ];
 

@@ -38,7 +38,9 @@ const LANGUAGE_DEPTH_TARGETS: Record<string, number> = {
   "english-tenses-agreement": 16,
   "english-prepositions-connectors": 15,
   "english-pronouns-questions": 16,
-  "english-cloze-passage": 16
+  "english-cloze-passage": 16,
+  "mandarin-idioms-classics": 15,
+  "english-science-nature": 15
 };
 
 function orderedOptions(answer: string, options: string[]): string[] {
@@ -923,6 +925,42 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
         cloze("First, wash the strawberries in clean water. ___, place them neatly on top of the yoghurt.", "Which sequence word best completes the blank?", "Next", ["Next", "Because", "Although"], "After “First”, use “Next” to show the second step in order.", "connector-cloze", 2)
       ];
     }
+    case "mandarin-idioms-classics":
+      return [
+        zh("成语“井底之蛙”用来形容下面哪一种情况？", "待在井里只看到头顶一小片天，见识很短浅", ["待在井里只看到头顶一小片天，见识很短浅", "青蛙跳得非常高", "井里的水非常清澈"], "“井底之蛙”比喻眼界狭窄、见识短浅。", "idiom-meaning", undefined, 2),
+        zh("成语“守株待兔”告诉我们什么道理？", "不能存侥幸心理，要靠自己勤劳努力", ["不能存侥幸心理，要靠自己勤劳努力", "每天坐在树下就能捡到兔子", "种庄稼不需要浇水"], "“守株待兔”告诉我们不能不劳而获、干等运气。", "idiom-meaning", undefined, 2),
+        zh("成语“拔苗助长”中的农夫把禾苗往上拔高，结果禾苗怎么样了？", "全部枯死了，因为急于求成反而坏事", ["全部枯死了，因为急于求成反而坏事", "第二天就结出了大米", "长得比大树还要高"], "植物生长有规律，急于求成把苗拔高反而会让禾苗枯死。", "idiom-meaning", undefined, 3),
+        zh("成语“亡羊补牢”里，丢了羊之后赶紧把羊圈修好，说明什么？", "做错了事及时改正还不算晚", ["做错了事及时改正还不算晚", "羊丢了就不用再管了", "羊圈破了也不用修"], "“亡羊补牢，为时未晚”说明发现错误及时补救依然来得及。", "idiom-meaning", undefined, 3),
+        zh("成语“铁杵成针”讲李白看到老婆婆把粗铁棒磨成细针，比喻什么？", "只要有恒心、肯下苦功，难事也能做成", ["只要有恒心、肯下苦功，难事也能做成", "铁棒比绣花针更好用", "河边的水可以把铁融化"], "“只要功夫深，铁杵磨成针”比喻持之以恒就能成功。", "idiom-meaning", undefined, 3),
+        zh("选成语填空：狐狸走在老虎前面，借着老虎的威风吓跑百兽，这就叫“___”。", "狐假虎威", ["狐假虎威", "井底之蛙", "守株待兔"], "借着别人的威势吓唬人叫“狐假虎威”。", "idiom-story-cloze", undefined, 3),
+        zh("选成语填空：小华看书特别投入，连妈妈叫他吃饭都没听见，真是“___”。", "专心致志", ["专心致志", "半途而废", "东张西望"], "注意力高度集中、一心一意叫“专心致志”。", "idiom-story-cloze", undefined, 2),
+        zh("选成语填空：春天到了，花园里的花儿全部盛开了，真是“___”、五颜六色。", "百花齐放", ["百花齐放", "鹅毛大雪", "骄阳似火"], "形容春天各种各样的花一起盛开用“百花齐放”。", "idiom-story-cloze", undefined, 2),
+        zh("选成语填空：做事情如果刚做一半就放弃，叫“___”，那样什么也学不成。", "半途而废", ["半途而废", "坚持不懈", "专心致志"], "路走了一半就停下来放弃叫“半途而废”。", "idiom-story-cloze", undefined, 3),
+        zh("选成语填空：大家团结起来一起使劲，再重的大石头也能搬动，这就叫“___”。", "齐心协力", ["齐心协力", "自言自语", "东张西望"], "大家心往一处想、劲往一处使叫“齐心协力”。", "idiom-story-cloze", undefined, 2),
+        zh("古诗《咏鹅》：“鹅，鹅，鹅，曲项向天歌。白毛浮绿水，___。”最后一句是什么？", "红掌拨清波", ["红掌拨清波", "处处闻啼鸟", "低头思故乡"], "骆宾王《咏鹅》后两句是“白毛浮绿水，红掌拨清波”。", "classic-poem", undefined, 2),
+        zh("古诗《静夜思》：“床前明月光，疑是地上霜。举头望明月，___。”表达了诗人对家乡的思念。", "低头思故乡", ["低头思故乡", "粒粒皆辛苦", "红掌拨清波"], "李白《静夜思》最后一句是“低头思故乡”。", "classic-poem", undefined, 2),
+        zh("古诗《春晓》：“春眠不觉晓，处处闻啼鸟。夜来风雨声，___。”描写了春天的早晨。", "花落知多少", ["花落知多少", "更上一层楼", "疑是地上霜"], "孟浩然《春晓》最后一句是“花落知多少”。", "classic-poem", undefined, 2),
+        zh("古诗《悯农》：“谁知盘中餐，粒粒皆辛苦。”这首诗劝告我们要养成什么好习惯？", "爱惜粮食，不浪费每一粒米", ["爱惜粮食，不浪费每一粒米", "挑食只吃零食", "把吃不完的饭倒掉"], "农民伯伯种粮非常辛苦，我们要爱惜粮食。", "classic-poem", undefined, 3),
+        zh("古诗《登鹳雀楼》：“欲穷千里目，更上一层楼。”意思是想看得更远，就要怎么做？", "再往上登高一层，比喻不断努力进步", ["再往上登高一层，比喻不断努力进步", "站在原地闭上眼睛", "往山下走"], "站得更高才能看得更远，激励我们不断进取。", "classic-poem", undefined, 3)
+      ];
+    case "english-science-nature":
+      return [
+        en("In the life cycle of a butterfly, what does a hungry caterpillar turn into before becoming an adult butterfly?", "a pupa (chrysalis)", ["a pupa (chrysalis)", "a tadpole", "a bird's nest"], "A butterfly grows from egg → caterpillar → pupa (chrysalis) → adult butterfly.", "life-cycle", 2),
+        en("A baby frog hatches from an egg in water and swims with a tail. What is this young frog called?", "a tadpole", ["a tadpole", "a caterpillar", "a puppy"], "A young frog with a tail that lives in water is called a tadpole.", "life-cycle", 2),
+        en("What do green plants need from the sun to make their own food?", "sunlight", ["sunlight", "plastic", "loud music"], "Plants use sunlight, water, and air to make food in their green leaves.", "life-cycle", 2),
+        en("Which part of a plant grows under the soil and takes in water and minerals?", "the roots", ["the roots", "the petals", "the fruit"], "Roots hold the plant in the soil and absorb water.", "life-cycle", 2),
+        en("Which animal lays eggs and has feathers and wings?", "a bird", ["a bird", "a rabbit", "a bear"], "Birds have feathers and wings, and they lay eggs.", "life-cycle", 2),
+        en("When liquid water is put in a very cold freezer, what does it turn into?", "solid ice", ["solid ice", "hot steam", "dry sand"], "Freezing turns liquid water into solid ice.", "plant-weather", 2),
+        en("When the sun warms puddles after rain, the water slowly disappears into the air. What is this called?", "evaporation", ["evaporation", "freezing", "digging"], "Warmth turns liquid water into water vapour in the air (evaporation).", "plant-weather", 3),
+        en("Where do raindrops fall from when dark clouds become heavy with water?", "from clouds in the sky", ["from clouds in the sky", "from under the ground", "from tree trunks"], "Rain falls from water-filled clouds in the sky.", "plant-weather", 2),
+        en("When sunlight shines through raindrops in the sky, what colourful arc can we see?", "a rainbow", ["a rainbow", "a shadow", "a snowflake"], "Sunlight passing through raindrops creates a colourful rainbow.", "plant-weather", 2),
+        en("In the morning, the sun rises in the east. Which way does a tree's shadow point in the morning?", "away from the sun (toward the west)", ["away from the sun (toward the west)", "straight towards the sun", "shadows do not need light"], "A shadow always forms on the side opposite to the light source.", "plant-weather", 3),
+        en("If you put a wooden block and a metal coin into a tub of water, which one floats on top?", "the wooden block", ["the wooden block", "the metal coin", "both sink to the bottom"], "Wood is less dense than water so it floats, while a metal coin sinks.", "science-experiment", 3),
+        en("Which object will be pulled and attracted by a magnet?", "an iron paperclip", ["an iron paperclip", "a wooden ruler", "a rubber eraser"], "Magnets attract iron and steel objects such as an iron paperclip.", "science-experiment", 2),
+        en("Which of our five senses do we use when we listen to a bird singing?", "hearing (ears)", ["hearing (ears)", "smell (nose)", "taste (tongue)"], "We use our ears and the sense of hearing to listen to sounds.", "science-experiment", 1),
+        en("Why do we use glass to make classroom window panes?", "because glass is transparent and lets light through", ["because glass is transparent and lets light through", "because glass is soft like cotton", "because glass can grow like a plant"], "Glass is transparent, so daylight can pass through the window.", "science-experiment", 3),
+        en("Why is a raincoat made of waterproof plastic or rubber instead of paper?", "so water cannot soak through it", ["so water cannot soak through it", "so it will melt in the rain", "so it is heavier than a stone"], "Waterproof materials keep rain out and keep us dry.", "science-experiment", 3)
+      ];
     default:
       return [];
   }

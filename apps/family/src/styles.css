@@ -1565,7 +1565,7 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
 .studio-hub-section { margin-top: 6px; }
 .studio-hub-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 .studio-hub-card {
@@ -1960,4 +1960,159 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
   .arcade-flip-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .arcade-hoops-grid { grid-template-columns: 1fr; }
   .arcade-food-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+
+.studio-hub-card.is-notebook { background: linear-gradient(135deg, #fffdf7 0%, #eaf7e8 100%); }
+.studio-hub-card.is-notebook .studio-hub-art { background: #cce8c9; }
+
+/* Mistake Notebook & Booster List */
+.mistake-card-list { display: grid; gap: 12px; }
+.mistake-item-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px;
+  border: var(--border);
+  border-radius: 14px;
+  background: #fffdf8;
+  box-shadow: 0 5px 0 rgba(23, 50, 77, 0.1);
+}
+.mistake-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.mistake-item-head small { color: var(--muted); font-weight: 900; font-size: 12px; }
+.mistake-item-card h3 { margin: 0; font-size: 19px; line-height: 1.4; }
+.mistake-item-answer, .mistake-item-explanation { margin: 0; font-size: 15px; line-height: 1.5; }
+.mistake-item-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+
+/* A4 Printable Worksheet Studio */
+.worksheet-toolbar {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 2px dashed rgba(23, 50, 77, 0.2);
+}
+.a4-printable-sheet {
+  max-width: 794px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 28px 32px;
+  border: 2px solid #17324d;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #17324d;
+  box-shadow: 0 8px 20px rgba(23, 50, 77, 0.1);
+}
+.a4-sheet-header {
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 2.5px solid #17324d;
+  text-align: center;
+}
+.a4-sheet-header h2 { margin: 0 0 8px; font-size: 24px; }
+.a4-sheet-header p { margin: 0; font-size: 14px; color: #365068; }
+
+.a4-hanzi-rows, .a4-english-rows { display: grid; gap: 10px; }
+.a4-hanzi-row, .a4-english-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(23, 50, 77, 0.18);
+}
+.a4-hanzi-meta { display: grid; gap: 2px; }
+.a4-hanzi-meta strong { font-size: 20px; }
+.a4-hanzi-meta small { font-size: 14px; color: #e85c47; }
+.a4-hanzi-meta span { font-size: 12px; color: #5e7080; font-weight: 800; }
+
+.a4-mizige-boxes {
+  display: grid;
+  grid-template-columns: repeat(6, 56px);
+  gap: 8px;
+}
+.a4-mizige-cell {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border: 1.8px solid #c94a38;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(to right, transparent 48%, rgba(201, 74, 56, 0.25) 49%, rgba(201, 74, 56, 0.25) 51%, transparent 52%),
+    linear-gradient(to bottom, transparent 48%, rgba(201, 74, 56, 0.25) 49%, rgba(201, 74, 56, 0.25) 51%, transparent 52%);
+}
+.a4-mizige-cell span {
+  font-family: "Kaiti SC", "STKaiti", "HanziPen SC", serif;
+  font-size: 40px;
+  line-height: 1;
+}
+.a4-mizige-cell.is-model span { color: #17324d; font-weight: 900; }
+.a4-mizige-cell.is-ghost span { color: rgba(23, 50, 77, 0.22); }
+
+.a4-fourline-strip {
+  height: 54px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border-top: 1.8px solid #5076bc;
+  border-bottom: 1.8px solid #5076bc;
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 31%,
+      #5076bc 32%,
+      #5076bc 34%,
+      transparent 35%,
+      transparent 65%,
+      #e85c47 66%,
+      #e85c47 69%,
+      transparent 70%
+    );
+  font-family: "Andika", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+}
+.a4-fourline-strip .is-model { color: #17324d; }
+.a4-fourline-strip .is-ghost { color: rgba(23, 50, 77, 0.23); }
+
+.a4-math-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.a4-math-box {
+  padding: 12px 14px;
+  border: 1.5px solid #17324d;
+  border-radius: 10px;
+  display: grid;
+  gap: 8px;
+}
+.a4-math-qhead { display: flex; justify-content: space-between; font-size: 13px; color: #5e7080; }
+.a4-math-box p { margin: 0; font-size: 15px; font-weight: 800; line-height: 1.45; }
+.a4-math-options { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; font-weight: 700; }
+.a4-math-workarea { margin-top: 4px; font-size: 13px; color: #5e7080; }
+.a4-answer-key {
+  margin-top: 18px;
+  padding-top: 10px;
+  border-top: 1.5px dashed #17324d;
+  font-size: 12px;
+  color: #5e7080;
+}
+
+@media print {
+  body, .app-shell { background: #ffffff !important; }
+  .no-print, .app-header, .session-header { display: none !important; }
+  .handwriting-screen, .arcade-stage-card { padding: 0 !important; border: 0 !important; box-shadow: none !important; }
+  .a4-printable-sheet {
+    max-width: 100% !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
 }

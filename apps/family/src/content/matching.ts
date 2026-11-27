@@ -827,6 +827,48 @@ const SPECS: MatchSeed[] = [
       { left: "Dark clouds filled the sky, so we carried an ___.", right: "umbrella" },
       { left: "Ana practised the piano every day and played ___.", right: "well" }
     ]
+  },
+  {
+    skillId: "math-olympiad-reasoning",
+    prompt: "Match each logic puzzle clue with its correct number.",
+    instruction: "Tap a logic clue on the left, then its matching value on the right.",
+    explanation: "If ★ + ★ = 10 then ★ = 5; 4th from front and 4th from back is 4 + 4 − 1 = 7; a number minus 4 equals 6 starts at 10.",
+    template: "match-olympiad",
+    leftLabel: "Logic clue",
+    rightLabel: "Answer",
+    pairs: [
+      { left: "★ + ★ = 10, find ★", right: "5" },
+      { left: "4th from front and 4th from back", right: "7" },
+      { left: "Number − 4 = 6, find the number", right: "10" }
+    ]
+  },
+  {
+    skillId: "mandarin-idioms-classics",
+    prompt: "把成语或诗句和它表达的意思配成一对。",
+    instruction: "先点左边的成语或诗句，再点右边对应的意思。",
+    explanation: "井底之蛙比喻见识短浅，亡羊补牢比喻及时改正错误，粒粒皆辛苦劝告爱惜粮食。",
+    template: "match-idiom-meaning",
+    leftLabel: "成语或诗句",
+    rightLabel: "意思与道理",
+    pairs: [
+      { left: "井底之蛙", right: "眼界狭窄、见识短浅" },
+      { left: "亡羊补牢", right: "做错事及时补救还不晚" },
+      { left: "谁知盘中餐，粒粒皆辛苦", right: "爱惜粮食，不浪费米饭" }
+    ]
+  },
+  {
+    skillId: "english-science-nature",
+    prompt: "Match each nature clue with the correct science word.",
+    instruction: "Tap a clue on the left, then its matching science word on the right.",
+    explanation: "Roots take in water from soil, a tadpole grows into a frog, and solid ice forms when water freezes.",
+    template: "match-science-fact",
+    leftLabel: "Nature clue",
+    rightLabel: "Science word",
+    pairs: [
+      { left: "Takes in water under the soil", right: "roots" },
+      { left: "A baby frog swimming in water", right: "tadpole" },
+      { left: "Water frozen in a cold freezer", right: "solid ice" }
+    ]
   }
 ];
 

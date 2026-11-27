@@ -78,7 +78,7 @@ describe("curriculum content catalog", () => {
   it("keeps every child answer tap-based without a typing task", () => {
     const forbiddenEnglish = /\b(type|enter|fill in|write your|write the answer|input|keyboard)\b/i;
     const forbiddenChinese = /打字|输入答案|填写答案|写出答案/;
-    const tapCue = /tap|choose|select|match|read|点|选择|选|读/i;
+    const tapCue = /tap|choose|select|match|read|start|点|选择|选|读/i;
     for (const question of QUESTIONS) {
       expect(["choice", "match", "order"], question.id).toContain(question.kind);
       const childText = `${question.instruction ?? ""} ${question.prompt}`;
@@ -130,9 +130,9 @@ describe("curriculum content catalog", () => {
     }
   });
 
-  it("contains fifty-eight valid matching questions with stable pair identifiers", () => {
+  it("contains sixty-one valid matching questions with stable pair identifiers", () => {
     const matching = ["math", "mandarin", "english"].flatMap((subject) => getQuestionsForSubject(subject as "math" | "mandarin" | "english")).filter((question) => question.kind === "match");
-    expect(matching).toHaveLength(58);
+    expect(matching).toHaveLength(61);
     const issues = validateContentCatalog();
     expect(issues.filter((issue) => issue.code.startsWith("match-") || issue.code.startsWith("duplicate-match") || issue.code === "empty-match-label")).toEqual([]);
     for (const question of matching) {

@@ -539,6 +539,36 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
     passage: "Last Friday, Ravi (1) ___ a storybook from the school library. He turned the pages (2) ___ so that they would not tear.",
     audioText: "Which two words best complete the blanks in the passage?",
     audioLanguage: "en-US"
+  },
+  {
+    skillId: "math-olympiad-reasoning",
+    prompt: "On a bus, 5 passengers get off at the first stop and 8 get on. There are now 20 passengers on the bus. How many passengers were on the bus before the first stop?",
+    instruction: "Work backwards and tap the starting number of passengers.",
+    options: ["17", "23", "15"],
+    correctAnswer: "17",
+    explanation: "Work backwards from 20: subtract the 8 who got on (20 − 8 = 12), then add back the 5 who got off (12 + 5 = 17).",
+    template: "real-world-olympiad",
+    contextKey: "bus-work-backwards"
+  },
+  {
+    skillId: "mandarin-idioms-classics",
+    prompt: "小宇第一次学骑自行车摔了一跤，就想把车推回家再也不练了。你会用下面哪句话鼓励他坚持下去？",
+    instruction: "选择最恰当的成语或俗语。",
+    options: ["只要功夫深，铁杵磨成针，不能半途而废", "做一只井底之蛙最舒服", "像农夫一样守株待兔就能学会"],
+    correctAnswer: "只要功夫深，铁杵磨成针，不能半途而废",
+    explanation: "“铁杵成针”鼓励人持之以恒，不要“半途而废”。",
+    template: "far-idiom-application",
+    contextKey: "bike-perseverance-idiom"
+  },
+  {
+    skillId: "english-science-nature",
+    prompt: "Mia puts two identical wet towels outside. Towel A is spread open in the warm sun, and Towel B is folded up in a dark corner. Which towel dries faster, and why?",
+    instruction: "Read the science experiment and tap the best answer.",
+    options: ["Towel A, because warmth and open air speed up evaporation", "Towel B, because dark corners freeze the water", "Both towels turn into solid ice in the sun"],
+    correctAnswer: "Towel A, because warmth and open air speed up evaporation",
+    explanation: "Heat from the sun and a larger open surface help liquid water evaporate into the air much faster.",
+    template: "far-science-inquiry",
+    contextKey: "wet-towel-evaporation"
   }
 ];
 

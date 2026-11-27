@@ -267,8 +267,19 @@ export function buildMathQuestions(skill: Skill): ChoiceQuestion[] {
       data.forEach(([prompt, answer, distractors, explanation, template], index) => q.push(makeMathQuestion(skill, index, prompt, answer, [...distractors], explanation, template)));
       break;
     }
+    case "math-olympiad-reasoning": {
+      const data = [
+        ["On a balance scale, 1 pineapple weighs as much as 2 mangoes, and 1 mango weighs as much as 3 apples. How many apples balance 1 pineapple?", "6", ["5", "4"], "1 pineapple = 2 mangoes, and 2 × 3 apples = 6 apples.", "balance-substitute"],
+        ["1 teapot holds as much water as 3 mugs. Each mug holds 2 small cups. How many small cups fill 1 teapot?", "6", ["5", "8"], "3 mugs × 2 small cups = 6 small cups.", "balance-substitute"],
+        ["Children stand in a line. Lina has 4 children in front of her and 3 children behind her. How many children are in the line?", "8", ["7", "9"], "4 in front + 3 behind + Lina herself = 8 children.", "queue-logic"],
+        ["In a queue, Ben is 5th from the front and 4th from the back. How many people are in the queue?", "8", ["9", "7"], "5 + 4 − 1 (Ben is counted twice) = 8 people.", "queue-logic"],
+        ["A mystery number adds 7 and becomes 20. What is the mystery number?", "13", ["12", "27"], "Work backwards from 20: 20 − 7 = 13.", "work-backwards"]
+      ] as const;
+      data.forEach(([prompt, answer, distractors, explanation, template], index) => q.push(makeMathQuestion(skill, index, prompt, answer, [...distractors], explanation, template, index < 2 ? 2 : 3)));
+      break;
+    }
   }
-  const choiceTarget = ["math-count-100", "math-add-sub-100", "math-multiply-tables"].includes(skill.id) ? 20 : ["k2-math-count-20", "k2-math-add-within-10", "math-two-step-problems"].includes(skill.id) ? 12 : ["math-time", "math-money", "math-picture-graph", "math-length-measure", "math-fractions-add-sub", "math-measurement-units", "math-place-value-1000", "math-add-sub-regroup", "math-add-sub-1000", "math-divide-tables", "math-fractions", "math-scaled-picture-graph", "math-number-patterns-1000"].includes(skill.id) ? (["math-time", "math-place-value-1000", "math-add-sub-regroup", "math-add-sub-1000", "math-divide-tables", "math-fractions", "math-scaled-picture-graph", "math-number-patterns-1000"].includes(skill.id) ? 16 : 17) : skill.id === "math-time-duration" ? 16 : 11;
+  const choiceTarget = ["math-count-100", "math-add-sub-100", "math-multiply-tables"].includes(skill.id) ? 20 : ["k2-math-count-20", "k2-math-add-within-10", "math-two-step-problems"].includes(skill.id) ? 12 : skill.id === "math-olympiad-reasoning" ? 15 : ["math-time", "math-money", "math-picture-graph", "math-length-measure", "math-fractions-add-sub", "math-measurement-units", "math-place-value-1000", "math-add-sub-regroup", "math-add-sub-1000", "math-divide-tables", "math-fractions", "math-scaled-picture-graph", "math-number-patterns-1000"].includes(skill.id) ? (["math-time", "math-place-value-1000", "math-add-sub-regroup", "math-add-sub-1000", "math-divide-tables", "math-fractions", "math-scaled-picture-graph", "math-number-patterns-1000"].includes(skill.id) ? 16 : 17) : skill.id === "math-time-duration" ? 16 : 11;
   const depthSeeds = buildMathDepthSeeds(skill.id);
   depthSeeds.forEach((seed, offset) => {
     q.push(makeMathQuestion(skill, q.length, seed.prompt, seed.answer, seed.distractors, seed.explanation, seed.template, seed.difficulty));
@@ -547,6 +558,19 @@ function buildMathDepthSeeds(skillId: string): MathDepthSeed[] {
         seed("5 bags have 4 oranges each, and there are 6 more oranges in a bowl. How many oranges are there altogether?", 26, [20, 24], "5 × 4 = 20, then 20 + 6 = 26 oranges.", "mixed-mul-add", 3),
         seed("3 trays have 10 cups each. 7 cups are taken away. How many cups remain?", 23, [30, 37], "3 × 10 = 30, then 30 − 7 = 23 cups remain.", "mixed-mul-add", 3),
         seed("6 pairs of socks and 3 single socks make how many socks altogether?", 15, [12, 18], "6 × 2 = 12, then 12 + 3 = 15 socks.", "mixed-mul-add", 4)
+      ];
+    case "math-olympiad-reasoning":
+      return [
+        seed("If ★ + ★ = 14 and ★ + ● = 11, what number is ●?", 4, [7, 5], "★ = 7 because 7 + 7 = 14. Then 7 + ● = 11, so ● = 4.", "balance-substitute", 3),
+        seed("1 watermelon weighs as much as 2 papayas. 1 papaya weighs as much as 4 pears. How many pears balance 1 watermelon?", 8, [6, 10], "2 × 4 pears = 8 pears.", "balance-substitute", 3),
+        seed("If ▲ + ▲ + ▲ = 15 and ▲ + ■ = 13, what number is ■?", 8, [5, 9], "▲ = 5 because 5 + 5 + 5 = 15. Then 5 + ■ = 13, so ■ = 8.", "balance-substitute", 3),
+        seed("12 children stand in a row. Tom has 5 children in front of him. How many children are behind Tom?", 6, [7, 5], "12 − 5 − 1 (Tom himself) = 6 children behind Tom.", "queue-logic", 3),
+        seed("In a race line, Mei is 6th from the front and 6th from the back. How many runners are in the line?", 11, [12, 10], "6 + 6 − 1 = 11 runners.", "queue-logic", 3),
+        seed("A wooden log is sawed 3 times into straight pieces. How many pieces of wood are there?", 4, [3, 5], "Each cut adds 1 piece, so 3 cuts make 3 + 1 = 4 pieces.", "queue-logic", 4),
+        seed("Sam gives 6 stickers to his sister and then buys 4 more. He now has 15 stickers. How many stickers did Sam have at first?", 17, [13, 19], "Work backwards from 15: 15 − 4 + 6 = 17 stickers at first.", "work-backwards", 4),
+        seed("A number is doubled (× 2) and then 3 is added to get 13. What was the starting number?", 5, [6, 8], "Work backwards: 13 − 3 = 10, then 10 ÷ 2 = 5.", "work-backwards", 4),
+        seed("Lina is 7 years old and her brother is 11 years old. In 5 years, how many years older than Lina will her brother be?", 4, [9, 5], "The age difference never changes: 11 − 7 = 4 years.", "work-backwards", 3),
+        seed("A box of sweets has half eaten, leaving 8 sweets. How many sweets were in the box at first?", 16, [12, 10], "Work backwards: 8 × 2 = 16 sweets.", "work-backwards", 3)
       ];
     default:
       return [];
