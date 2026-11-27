@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, Check, Download, Headphones, Lightbulb, Lock, Mic, Pencil, Plus, ShieldCheck, Star, Trash2, Upload, Volume2, X } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Check, Download, Gamepad2, Headphones, Lightbulb, Lock, Mic, Pencil, Plus, ShieldCheck, Star, Trash2, Upload, Volume2, X } from "lucide-react";
 import { CONTENT_VERSION, QUESTIONS, SKILLS } from "./content/catalog";
 import { SUBJECT_NAMES, UI_COPY, subjectLocale, subjectName, uiCopyFor, type Locale, type UiCopy } from "./content/copy";
 import { hintForQuestion, teachForQuestion } from "./content/hints";
@@ -42,10 +42,11 @@ import MatchingBoard from "./screens/MatchingBoard";
 import OrderBoard from "./screens/OrderBoard";
 import HandwritingScreen, { InlineHandwritingModal } from "./screens/HandwritingScreen";
 import SpeakingScreen from "./screens/SpeakingScreen";
+import ArcadeScreen from "./screens/ArcadeScreen";
 import { findHandwritingCharacterForQuestion, HANDWRITING_CHARACTERS, type HandwritingCharacter } from "./content/handwriting";
 import { SPEAKING_PROMPTS } from "./content/speaking";
 
-type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "speaking" | "handwriting" | "companions";
+type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "speaking" | "handwriting" | "companions" | "arcade";
 
 interface SessionCompletionOutcome {
   session: SessionRecord;
@@ -218,7 +219,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (screen !== "assessment" && screen !== "speaking") stopAudio();
+    if (screen !== "assessment" && screen !== "speaking" && screen !== "arcade") stopAudio();
   }, [screen]);
 
   useEffect(() => {
@@ -516,6 +517,23 @@ export default function App() {
     setScreen("companions");
   }
 
+  async function recordArcadeReward(eventKey: string): Promise<number> {
+    if (!activeChild || !activeChild.settings.rewardsEnabled) return 0;
+    let awarded = 0;
+    await updateChild(activeChild.id, (child) => {
+      const before = child.rewards.lifetimeStars;
+      child.rewards = applyRewardEvent(child.rewards, {
+        kind: "session-complete",
+        eventKey,
+        amount: 1,
+        at: new Date()
+      });
+      awarded = child.rewards.lifetimeStars - before;
+      return child;
+    });
+    return awarded;
+  }
+
   async function handleRedeemCompanion(companionId: string): Promise<boolean> {
     if (!activeChild) return false;
     return updateChild(activeChild.id, (child) => {
@@ -586,6 +604,10 @@ export default function App() {
 
   if (screen === "speaking" && activeChild) {
     return <>{storageBanner}<SpeakingScreen child={activeChild} onBack={() => setScreen("child")} onLock={lockHousehold} /></>;
+  }
+
+  if (screen === "arcade" && activeChild) {
+    return <>{storageBanner}<ArcadeScreen child={activeChild} onBack={() => setScreen("child")} onLock={lockHousehold} onCompleteGame={recordArcadeReward} /></>;
   }
 
   if (screen === "companions" && activeChild) {
@@ -749,34 +771,60 @@ export default function App() {
               );
             })}
           </div>
-          <div className="next-actions" aria-label={systemLocale === "en" ? "Writing and speaking studio" : "小芽听说写工坊"} style={{ marginTop: "1rem" }}>
-            <button
-              type="button"
-              className="next-action next-action-mandarin"
-              style={{ cursor: "pointer", textAlign: "left", border: "none" }}
-              onClick={() => {
-                playOrSpeak(VOICE_LINES.introWrite, "zh-CN");
-                setScreen("handwriting");
-              }}
-            >
-              <span><Pencil aria-hidden="true" /> {systemLocale === "en" ? "Chinese Handwriting" : "小芽写字"}</span>
-              <strong>{systemLocale === "en" ? `Stroke Order · ${writingCompleted} / ${HANDWRITING_CHARACTERS.length} chars` : `看笔顺，亲手写 · 已写 ${writingCompleted} / ${HANDWRITING_CHARACTERS.length} 字`}</strong>
-              <small>{systemLocale === "en" ? "Listen, watch the teacher demonstrate, and trace each stroke." : "小芽老师先读字、示范笔顺，再带着你一笔一划描红。"}</small>
-            </button>
-            <button
-              type="button"
-              className="next-action next-action-english"
-              style={{ cursor: "pointer", textAlign: "left", border: "none" }}
-              onClick={() => {
-                playOrSpeak(VOICE_LINES.speakingIntro, "zh-CN");
-                setScreen("speaking");
-              }}
-            >
-              <span><Mic aria-hidden="true" /> {systemLocale === "en" ? "Speaking Studio" : "小芽口说"}</span>
-              <strong>{systemLocale === "en" ? `Listen & Speak · ${SPEAKING_PROMPTS.length} prompts` : `听示范，大声读 · ${SPEAKING_PROMPTS.length} 个声音游戏`}</strong>
-              <small>{systemLocale === "en" ? "Auto-plays teacher demo, listens hands-free, and checks your pronunciation." : "进题自动读示范、免按键自动收音，小芽老师实时听你读得准不准。"}</small>
-            </button>
-          </div>
+          <section className="studio-hub-section" aria-label={systemLocale === "en" ? "Writing, speaking and arcade studio" : "小芽听说写与游乐园"}>
+            <div className="studio-hub-grid">
+              <button
+                type="button"
+                className="studio-hub-card is-writing"
+                onClick={() => {
+                  playOrSpeak(VOICE_LINES.introWrite, "zh-CN");
+                  setScreen("handwriting");
+                }}
+              >
+                <div className="studio-hub-art" aria-hidden="true">
+                  <img src="./assets/images/studio-writing.svg" alt="" />
+                </div>
+                <div className="studio-hub-copy">
+                  <span className="studio-hub-pill"><Pencil aria-hidden="true" /> {systemLocale === "en" ? "Chinese Handwriting" : "小芽写字工坊"}</span>
+                  <strong>{systemLocale === "en" ? `Stroke Order · ${writingCompleted} / ${HANDWRITING_CHARACTERS.length} chars` : `看笔顺，亲手写 · 已写 ${writingCompleted} / ${HANDWRITING_CHARACTERS.length} 字`}</strong>
+                  <small>{systemLocale === "en" ? "Listen, blend pinyin, watch teacher stroke demos and trace." : "每个字配齐动态拼音连拼与笔顺动画，小芽老师手把手带你描红。"}</small>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className="studio-hub-card is-speaking"
+                onClick={() => {
+                  playOrSpeak(VOICE_LINES.speakingIntro, "zh-CN");
+                  setScreen("speaking");
+                }}
+              >
+                <div className="studio-hub-art" aria-hidden="true">
+                  <img src="./assets/images/scene-speaking.png" alt="" />
+                </div>
+                <div className="studio-hub-copy">
+                  <span className="studio-hub-pill"><Mic aria-hidden="true" /> {systemLocale === "en" ? "Speaking Studio" : "小芽口说工坊"}</span>
+                  <strong>{systemLocale === "en" ? `Listen & Speak · ${SPEAKING_PROMPTS.length} prompts` : `听示范，大声读 · ${SPEAKING_PROMPTS.length} 个声音小游戏`}</strong>
+                  <small>{systemLocale === "en" ? "Auto-plays teacher demo, listens hands-free, and checks your pronunciation." : "进题自动读示范、免按键自动收音，双引擎智能听你读得准不准。"}</small>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className="studio-hub-card is-arcade"
+                onClick={() => setScreen("arcade")}
+              >
+                <div className="studio-hub-art" aria-hidden="true">
+                  <img src="./assets/images/arcade-hero.svg" alt="" />
+                </div>
+                <div className="studio-hub-copy">
+                  <span className="studio-hub-pill"><Gamepad2 aria-hidden="true" /> {systemLocale === "en" ? "Sprout Arcade" : "小芽游乐园"}</span>
+                  <strong>{systemLocale === "en" ? "4 Mini-Games · Memory, Sorting, Monster & Story Quest" : "四大闯关小游戏 · 翻牌、投篮、喂怪兽与绘本闯关"}</strong>
+                  <small>{systemLocale === "en" ? "Play interactive games and earn bonus growth stars!" : "边玩边学奥数思维、成语字谜、自然科普与速算，通关赢成长星！"}</small>
+                </div>
+              </button>
+            </div>
+          </section>
           {activeChild.settings.rewardsEnabled ? (
             <CompanionHomeCard
               rewards={activeChild.rewards}

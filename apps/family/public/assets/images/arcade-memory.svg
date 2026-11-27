@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 200" width="240" height="200">
+    <rect x="28" y="28" width="96" height="128" rx="16" transform="rotate(-11 76 92)" fill="#d8e2f7" stroke="#17324d" stroke-width="5"/>
+    <polygon points="76,66 83,81 99,83 87,94 90,110 76,102 62,110 65,94 53,83 69,81" fill="#f4b84b" stroke="#17324d" stroke-width="4" transform="rotate(-11 76 92)"/>
+    <rect x="114" y="34" width="96" height="128" rx="16" transform="rotate(9 162 98)" fill="#ffe3a4" stroke="#17324d" stroke-width="5"/>
+    <text x="140" y="106" font-family="Kaiti SC, PingFang SC, sans-serif" font-size="44" font-weight="900" fill="#17324d" transform="rotate(9 162 98)">花</text>
+    <text x="139" y="138" font-family="Andika, sans-serif" font-size="22" font-weight="900" fill="#f1775e" transform="rotate(9 162 98)">huā</text>
+  </svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 260" width="360" height="260">
+    <defs>
+      <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffeab6" stop-opacity="0.95"/>
+        <stop offset="100%" stop-color="#afdce2" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <circle cx="180" cy="135" r="122" fill="url(#glow)"/>
+    <ellipse cx="180" cy="228" rx="132" ry="20" fill="#cce8c9" stroke="#17324d" stroke-width="5"/>
+    <circle cx="180" cy="122" r="74" fill="none" stroke="#17324d" stroke-width="5.5" stroke-dasharray="12 6"/>
+    <circle cx="180" cy="122" r="52" fill="#fffdf7" stroke="#17324d" stroke-width="5"/>
+    <rect x="42" y="78" width="66" height="82" rx="14" transform="rotate(-10 75 119)" fill="#d8e2f7" stroke="#17324d" stroke-width="5"/>
+    <text x="58" y="132" font-family="PingFang SC, sans-serif" font-size="34" font-weight="900" fill="#17324d">山</text>
+    <rect x="252" y="78" width="68" height="82" rx="14" transform="rotate(10 286 119)" fill="#ffd4c7" stroke="#17324d" stroke-width="5"/>
+    <text x="268" y="132" font-family="Andika, sans-serif" font-size="30" font-weight="900" fill="#17324d">12</text>
+    <circle cx="180" cy="136" r="50" fill="#f1775e" stroke="#17324d" stroke-width="5.5"/>
+    <path d="M142 98 Q132 72 154 86" fill="#f4b84b" stroke="#17324d" stroke-width="5" stroke-linecap="round"/>
+    <path d="M218 98 Q228 72 206 86" fill="#f4b84b" stroke="#17324d" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="162" cy="124" r="10" fill="#fffdf7" stroke="#17324d" stroke-width="4"/>
+    <circle cx="164" cy="124" r="5" fill="#17324d"/>
+    <circle cx="198" cy="124" r="10" fill="#fffdf7" stroke="#17324d" stroke-width="4"/>
+    <circle cx="196" cy="124" r="5" fill="#17324d"/>
+    <path d="M158 148 Q180 170 202 148 Z" fill="#17324d"/>
+    <polygon points="180,26 189,44 209,47 194,61 198,80 180,71 162,80 166,61 151,47 171,44" fill="#f4b84b" stroke="#17324d" stroke-width="4.5" stroke-linejoin="round"/>
+  </svg>

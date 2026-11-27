@@ -9,6 +9,7 @@ import { subjectLocale } from "../src/content/copy";
 import { HANDWRITING_CHARACTERS } from "../src/content/handwriting";
 import { hintForQuestion, teachForQuestion } from "../src/content/hints";
 import { SPEAKING_PROMPTS } from "../src/content/speaking";
+import { MEMORY_FLIP_DECKS, MONSTER_STAGES, SORTING_ROUNDS, STORY_QUESTS } from "../src/content/arcade";
 import { preAnswerAudio } from "../src/lib/questionAudio";
 
 const CJK_OR_PINYIN_RE = /[\u4e00-\u9fffāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/;
@@ -284,6 +285,33 @@ function syncGeneratedAudioMap(): Record<string, string> {
   }
   for (const prompt of SPEAKING_PROMPTS) {
     ensure(prompt.text);
+  }
+  for (const deck of MEMORY_FLIP_DECKS) {
+    ensure(deck.introAudio);
+    for (const pair of deck.pairs) {
+      ensure(pair.leftAudio);
+      ensure(pair.rightAudio);
+    }
+  }
+  for (const round of SORTING_ROUNDS) {
+    ensure(round.introAudio);
+    for (const item of round.items) {
+      ensure(item.audioText);
+    }
+  }
+  for (const stage of MONSTER_STAGES) {
+    ensure(stage.cravingAudio);
+    ensure(stage.successAudio);
+    for (const food of stage.foods) {
+      ensure(food.audioText);
+    }
+  }
+  for (const quest of STORY_QUESTS) {
+    ensure(quest.introAudio);
+    ensure(quest.completionAudio);
+    for (const scene of quest.scenes) {
+      ensure(scene.storyAudio);
+    }
   }
 
   for (const q of QUESTIONS) {
