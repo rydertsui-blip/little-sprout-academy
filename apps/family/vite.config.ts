@@ -35,7 +35,7 @@ export default defineConfig({
   build: {
     outDir: resolve(import.meta.dirname, "../../family"),
     emptyOutDir: true,
-    chunkSizeWarningLimit: 500,
+    chunkSizeWarningLimit: 650,
     rolldownOptions: {
       output: {
         manualChunks(id) {
@@ -43,6 +43,9 @@ export default defineConfig({
           if (id.includes("/src/content/audioAssets")) return "audio-assets";
           if (id.includes("/src/content/handwriting") || id.includes("/src/content/englishHandwriting") || id.includes("/src/content/speaking") || id.includes("/src/content/arcade")) {
             return "studio-content";
+          }
+          if (id.includes("/src/content/hints") || id.includes("/src/content/copy") || id.includes("/src/content/pinyinChart") || id.includes("/src/content/achievements")) {
+            return "curriculum-helpers";
           }
           if (id.includes("/src/content/language") || id.includes("/src/content/farTransfer")) {
             return "curriculum-language";

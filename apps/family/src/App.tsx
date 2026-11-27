@@ -1490,6 +1490,7 @@ function ParentDashboard({ household, locale, onSetSystemLocale, onBack, onAddCh
           const weeklyStable = subjectViews.reduce((total, view) => total + view.stableCount, 0);
           const weeklyDue = subjectViews.reduce((total, view) => total + view.dueReviewCount, 0);
           const completedWriting = HANDWRITING_CHARACTERS.filter((item) => child.handwriting[item.character]).length;
+          const completedEnWriting = ENGLISH_HANDWRITING_ITEMS.filter((item) => child.handwriting[item.character]).length;
           const started = child.attempts.length > 0 || Object.keys(child.diagnostics).length > 0;
           const currentAge = ageYearsForProfile(child, now);
           const levelReviewDue = hasAnnualLevelReviewDue(child, now);
@@ -1557,8 +1558,8 @@ function ParentDashboard({ household, locale, onSetSystemLocale, onBack, onAddCh
               </> : <div className="child-start-panel"><strong>{copy.parent.startTitle}</strong><p>{copy.parent.startHint}</p></div>}
               <div className="child-extra-practice" aria-label={copy.parent.extraAria(child.name)}>
                 <span><Pencil aria-hidden="true" />{copy.parent.handwriting}</span>
-                <strong>{completedWriting} / {HANDWRITING_CHARACTERS.length}</strong>
-                <small>{completedWriting ? copy.parent.handwritingSaved : copy.parent.handwritingEmpty}</small>
+                <strong>{completedWriting} / {HANDWRITING_CHARACTERS.length} · EN {completedEnWriting} / {ENGLISH_HANDWRITING_ITEMS.length}</strong>
+                <small>{completedWriting || completedEnWriting ? copy.parent.handwritingSaved : copy.parent.handwritingEmpty}</small>
               </div>
               <StreakBadgeWall child={child} locale={locale} compact />
               <p className="section-label">{copy.parent.settingsTitle}</p>
