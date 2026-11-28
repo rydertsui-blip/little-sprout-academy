@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, Volume2 } from "lucide-react";
 import { playOrSpeak, stopAudio } from "../lib/audio";
+import { playSfx } from "../lib/sfx";
 import {
   decomposeCharacterPinyin,
   PINYIN_FINALS,
@@ -157,6 +158,7 @@ export function PinyinBlendBar({
         return;
       }
       setActivePart(step.part);
+      playSfx("blend-step", idx);
       let advanced = false;
       const next = () => {
         if (advanced || tokenRef.current !== myToken) return;
@@ -194,6 +196,7 @@ export function PinyinBlendBar({
               onClick={() => {
                 clearTimers();
                 setActivePart("initial");
+                playSfx("blend-step", 0);
                 playOrSpeak(decomp.initialAudio, "zh-CN");
               }}
             >
@@ -213,6 +216,7 @@ export function PinyinBlendBar({
               onClick={() => {
                 clearTimers();
                 setActivePart("medial");
+                playSfx("blend-step", 1);
                 playOrSpeak(decomp.medialAudio ?? "屋", "zh-CN");
               }}
             >
@@ -230,6 +234,7 @@ export function PinyinBlendBar({
           onClick={() => {
             clearTimers();
             setActivePart("final");
+            playSfx("blend-step", 2);
             playOrSpeak(decomp.finalAudio, "zh-CN");
           }}
         >
@@ -246,6 +251,7 @@ export function PinyinBlendBar({
           onClick={() => {
             clearTimers();
             setActivePart("blend");
+            playSfx("blend-step", 3);
             playOrSpeak(decomp.syllableAudio, "zh-CN");
           }}
         >
@@ -338,6 +344,7 @@ export function PinyinTool({ question, hintActive = false }: { question: Questio
                   aria-pressed={active}
                   onClick={() => {
                     setActiveTone(item.tone);
+                    playSfx("blend-step", item.tone - 1);
                     playOrSpeak(item.audioKey, "zh-CN");
                   }}
                 >
@@ -461,6 +468,7 @@ export function PinyinTool({ question, hintActive = false }: { question: Questio
                     aria-pressed={isActive}
                     onClick={() => {
                       setActiveSymbol(unit.symbol);
+                      playSfx("pop");
                       playOrSpeak(unit.audioKey, "zh-CN");
                     }}
                   >

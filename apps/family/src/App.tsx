@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Check, Download, Gamepad2, Headphones, Lightbulb, Lock, Mic, Pencil, Plus, Printer, ShieldCheck, Star, Trash2, Upload, Volume2, X } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Check, Download, Flame, Gamepad2, Gift, Headphones, Lightbulb, Lock, Mic, Pencil, Plus, Printer, ShieldCheck, Sparkles, Star, Trash2, Upload, Volume2, X } from "lucide-react";
 import { CONTENT_VERSION, QUESTIONS, SKILLS } from "./content/catalog";
-import { SUBJECT_NAMES, UI_COPY, subjectLocale, subjectName, uiCopyFor, type Locale, type UiCopy } from "./content/copy";
+import { SUBJECT_NAMES, UI_COPY, subjectLocale, subjectName, uiCopyFor, type Locale } from "./content/copy";
 import { hintForQuestion, teachForQuestion } from "./content/hints";
 import { TEACHER_PRAISE_EN, TEACHER_PRAISE_ZH, TEACHER_RETRY_ENCOURAGE_EN, TEACHER_RETRY_ENCOURAGE_ZH, VOICE_LINES } from "./content/audioAssets";
 import { OFFICIAL_ACTIVITIES, OFFICIAL_OUTCOMES, OFFICIAL_SOURCES } from "./content/officialSources";
@@ -10,6 +10,7 @@ import { buildChildInsights } from "./engine/insights";
 import { buildDailyPlan, createDailySession, singaporeDateKey } from "./engine/dailyPlan";
 import { buildSubjectProgressView } from "./engine/progressView";
 import { playOrSpeak, stopAudio } from "./lib/audio";
+import { playSfx, setSfxMuted } from "./lib/sfx";
 import { preAnswerAudio } from "./lib/questionAudio";
 import { deterministicOptions } from "./lib/options";
 import { ageYearsForProfile, birthYearForAge, enabledSkillsForLevel, hasAnnualLevelReviewDue, levelDateKey, nextLearningLevel, recommendedLevelForAge } from "./lib/levels";
@@ -19,7 +20,8 @@ import { completeSession, correctCountsForSession, createAdaptiveSession, DIAGNO
 import { createChildProfile } from "./lib/profile";
 import { hashPin, validatePin } from "./lib/pin";
 import { getCompanionById } from "./companions/companions";
-import { applyRewardEvent, getRedeemableCompanionIds, redeemCompanion, setActiveCompanion } from "./rewards/rewardState";
+import { COMPANION_ACCESSORIES } from "./companions/accessories";
+import { applyRewardEvent, getRedeemableCompanionIds, redeemCompanion, setActiveCompanion, toggleEquippedAccessory } from "./rewards/rewardState";
 import {
   clearHousehold,
   createEncryptedHousehold,
@@ -31,9 +33,10 @@ import {
   writeEncryptedEnvelope,
   type EncryptedEnvelope
 } from "./lib/storage";
-import type { ChildProfile, ChoiceQuestion, HouseholdState, LearningLevel, Question, SessionRecord, Subject } from "./lib/types";
+import type { Attempt, ChildProfile, HouseholdState, LearningLevel, Question, SessionRecord, Subject } from "./lib/types";
 import { CompanionHomeCard } from "./screens/CompanionHomeCard";
 import { CompanionShop } from "./screens/CompanionShop";
+import { ConfettiBurst } from "./screens/ConfettiBurst";
 import { DailyMissionCard } from "./screens/DailyMissionCard";
 import { MathTool } from "./screens/MathTool";
 import { LanguageTool } from "./screens/LanguageTool";
@@ -42,20 +45,35 @@ import MatchingBoard from "./screens/MatchingBoard";
 import OrderBoard from "./screens/OrderBoard";
 import HandwritingScreen, { InlineHandwritingModal, type HandwritingTraceTarget } from "./screens/HandwritingScreen";
 import MistakeNotebookScreen from "./screens/MistakeNotebookScreen";
+import StorybookScreen from "./screens/StorybookScreen";
+import { READ_ALONG_STORYBOOKS } from "./content/storybooks";
 import { StreakBadgeWall } from "./screens/StreakBadgeWall";
 import { ENGLISH_HANDWRITING_ITEMS } from "./content/englishHandwriting";
 import SpeakingScreen from "./screens/SpeakingScreen";
 import ArcadeScreen from "./screens/ArcadeScreen";
-import { findHandwritingCharacterForQuestion, HANDWRITING_CHARACTERS, type HandwritingCharacter } from "./content/handwriting";
+import { findHandwritingCharacterForQuestion, HANDWRITING_CHARACTERS } from "./content/handwriting";
 import { SPEAKING_PROMPTS } from "./content/speaking";
 
-type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "speaking" | "handwriting" | "companions" | "arcade" | "notebook";
+type Screen = "profiles" | "child" | "assessment" | "result" | "parent" | "speaking" | "handwriting" | "companions" | "arcade" | "notebook" | "storybooks";
 
 interface SessionCompletionOutcome {
   session: SessionRecord;
   starsAwarded: number;
   lifetimeStars: number;
   newlyRedeemableCompanionIds: string[];
+}
+
+function computeComboStreak(attempts: Attempt[]): number {
+  let streak = 0;
+  for (let i = attempts.length - 1; i >= 0; i -= 1) {
+    const item = attempts[i];
+    if (item && item.correct && !item.hintUsed) {
+      streak += 1;
+    } else {
+      break;
+    }
+  }
+  return streak;
 }
 
 const avatars = [
@@ -208,9 +226,15 @@ export default function App() {
   const advancingRef = useRef(false);
   const startingSubjectRef = useRef(false);
 
+  const activeChild = household?.children.find((child) => child.id === activeChildId) ?? null;
+
   useEffect(() => {
     document.documentElement.lang = systemLocale === "zh" ? "zh-Hans" : "en";
   }, [systemLocale]);
+
+  useEffect(() => {
+    setSfxMuted(activeChild?.settings.soundEffectsEnabled === false);
+  }, [activeChild?.settings.soundEffectsEnabled]);
 
   useEffect(() => {
     const stopOnHide = () => stopAudio();
@@ -225,7 +249,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (screen !== "assessment" && screen !== "speaking" && screen !== "arcade") stopAudio();
+    if (screen !== "assessment" && screen !== "speaking" && screen !== "arcade" && screen !== "storybooks") stopAudio();
   }, [screen]);
 
   useEffect(() => {
@@ -233,7 +257,6 @@ export default function App() {
     document.body.scrollTop = 0;
   }, [screen]);
 
-  const activeChild = household?.children.find((child) => child.id === activeChildId) ?? null;
   const storageBanner = storageError ? <div className="storage-banner" role="alert">{ui.storageError}</div> : null;
 
   function applyHousehold(next: HouseholdState | null) {
@@ -440,8 +463,15 @@ export default function App() {
         return child;
       });
       if (saved && nextSession) {
+        const updatedSession = nextSession as SessionRecord;
+        const streak = computeComboStreak(updatedSession.attempts);
+        if (correct) {
+          playSfx(streak >= 3 ? "combo" : "correct");
+        } else {
+          playSfx("gentle-retry");
+        }
         const language = session.subject === "mandarin" ? "zh-CN" : "en-US";
-        const attemptIdx = session.attempts.length;
+        const attemptIdx = updatedSession.attempts.length;
         const feedbackVoice = correct
           ? hintUsed
             ? (language === "zh-CN" ? VOICE_LINES.retrySuccessZh : VOICE_LINES.retrySuccessEn)
@@ -455,7 +485,7 @@ export default function App() {
             playOrSpeak(explanationText, language);
           }
         });
-        setSession(nextSession);
+        setSession(updatedSession);
         setFeedback({ correct, answer, mismatchCount });
         return true;
       }
@@ -478,6 +508,7 @@ export default function App() {
         });
         const outcome = completion.outcome;
         if (!saved || !outcome) return;
+        playSfx("combo");
         setSession(outcome.session);
         setSummary(outcome.session.summary);
         setSessionReward(outcome);
@@ -501,8 +532,6 @@ export default function App() {
     playOrSpeak(voice, "zh-CN");
     startSubject(subject);
   }
-
-
 
   async function recordHandwriting(entry: HandwritingTraceTarget, mistakes: number): Promise<boolean> {
     if (!activeChild) return false;
@@ -584,6 +613,17 @@ export default function App() {
     });
   }
 
+  async function handleToggleAccessory(accessoryId: string): Promise<boolean> {
+    if (!activeChild) return false;
+    const target = COMPANION_ACCESSORIES.find((a) => a.id === accessoryId);
+    if (!target) return false;
+    const sameSlotIds = COMPANION_ACCESSORIES.filter((a) => a.slot === target.slot).map((a) => a.id);
+    return updateChild(activeChild.id, (child) => {
+      child.rewards = toggleEquippedAccessory(child.rewards, accessoryId, sameSlotIds);
+      return child;
+    });
+  }
+
   if (encryptedEnvelope && !household) {
     return <SecureUnlockScreen envelope={encryptedEnvelope} onUnlocked={(state, key) => {
       encryptionKeyRef.current = key;
@@ -644,6 +684,10 @@ export default function App() {
     return <>{storageBanner}<ArcadeScreen child={activeChild} onBack={() => setScreen("child")} onLock={lockHousehold} onCompleteGame={recordArcadeReward} /></>;
   }
 
+  if (screen === "storybooks" && activeChild) {
+    return <>{storageBanner}<StorybookScreen child={activeChild} locale={systemLocale} onBack={() => setScreen("child")} onLock={lockHousehold} onCompleteBook={recordArcadeReward} /></>;
+  }
+
   if (screen === "notebook" && activeChild) {
     return <>{storageBanner}<MistakeNotebookScreen child={activeChild} initialTab={notebookTab} onBack={() => setScreen("child")} onLock={lockHousehold} onStartBooster={(subject, ids) => void startBoosterSession(subject, ids)} /></>;
   }
@@ -659,16 +703,19 @@ export default function App() {
           onBack={() => setScreen("child")}
           onRedeem={handleRedeemCompanion}
           onSetActive={handleSetActiveCompanion}
+          onToggleAccessory={handleToggleAccessory}
         />
       </div>
     );
   }
 
   if (screen === "assessment" && activeChild && session && currentQuestion) {
+    const comboStreak = computeComboStreak(session.attempts);
     return (
       <div className={childSurfaceClass(activeChild)}>
         {storageBanner}
-        <SessionHeader child={activeChild} subject={session.subject} kind={session.kind} answered={session.attempts.length} total={session.length} onBack={() => setScreen("child")} />
+        <ConfettiBurst active={Boolean(feedback?.correct && comboStreak >= 3)} triggerKey={session.attempts.length} />
+        <SessionHeader child={activeChild} subject={session.subject} kind={session.kind} answered={session.attempts.length} total={session.length} comboStreak={comboStreak} onBack={() => setScreen("child")} />
         <QuizScreen
           question={currentQuestion}
           feedback={feedback}
@@ -743,6 +790,7 @@ export default function App() {
   const writingCompleted = activeChild ? HANDWRITING_CHARACTERS.filter((item) => activeChild.handwriting[item.character]).length : 0;
   const enWritingCompleted = activeChild ? ENGLISH_HANDWRITING_ITEMS.filter((item) => activeChild.handwriting[item.character]).length : 0;
   const mistakeCount = activeChild ? new Set(activeChild.attempts.filter((a) => !a.correct || a.hintUsed).map((a) => a.questionId)).size : 0;
+  const storybooksReadCount = activeChild ? READ_ALONG_STORYBOOKS.filter((b) => activeChild.rewards.awardedEventKeys.includes(`storybook:${b.id}`)).length : 0;
   const homeCards = subjectCards.map((card) => systemLocale === "en"
     ? {
         ...card,
@@ -866,6 +914,25 @@ export default function App() {
 
               <button
                 type="button"
+                className="studio-hub-card is-storybook"
+                data-testid="open-storybook-hub"
+                onClick={() => {
+                  playSfx("page-turn");
+                  setScreen("storybooks");
+                }}
+              >
+                <div className="studio-hub-art" aria-hidden="true">
+                  <img src="./assets/images/studio-storybook.svg" alt="" />
+                </div>
+                <div className="studio-hub-copy">
+                  <span className="studio-hub-pill"><BookOpen aria-hidden="true" /> {systemLocale === "en" ? "Bilingual Storybooks" : "双语有声绘本馆"}</span>
+                  <strong>{systemLocale === "en" ? `Read-Along Library · ${storybooksReadCount}/${READ_ALONG_STORYBOOKS.length} Read` : `点读伴读绘本馆 · 已读 ${storybooksReadCount}/${READ_ALONG_STORYBOOKS.length} 本`}</strong>
+                  <small>{systemLocale === "en" ? "Karaoke sentence highlighting, tap-to-read & word breakdown." : "老师逐句高亮伴读、点句即读、重点字词拼音/自然拼读拆解。"}</small>
+                </div>
+              </button>
+
+              <button
+                type="button"
                 className="studio-hub-card is-notebook"
                 onClick={() => {
                   setNotebookTab("notebook");
@@ -876,7 +943,7 @@ export default function App() {
                   <img src="./assets/images/studio-notebook.svg" alt="" />
                 </div>
                 <div className="studio-hub-copy">
-                  <span className="studio-hub-pill"><BookOpen aria-hidden="true" /> {systemLocale === "en" ? "Mistakes & A4 Print" : "错题本与打印字帖"}</span>
+                  <span className="studio-hub-pill"><Printer aria-hidden="true" /> {systemLocale === "en" ? "Mistakes & A4 Print" : "错题本与打印字帖"}</span>
                   <strong>{systemLocale === "en" ? `Review ${mistakeCount} Mistakes & Print A4 Worksheets` : `我的错题特训（${mistakeCount} 题）与一键打印 A4 练习卷`}</strong>
                   <small>{systemLocale === "en" ? "Targeted weak-skill booster quiz + printable A4 rice-grid, 4-line & math sheets." : "错题听解析、一键开启 6 题专项特训，支持生成并打印 A4 描红字帖与口算卷。"}</small>
                 </div>
@@ -992,7 +1059,6 @@ function RecoveryScreen({ recovery, onReset }: { recovery: { raw: string; error:
 }
 
 function ParentPinDialog({ household, onCancel, onSuccess, locale }: { household: HouseholdState; onCancel: () => void; onSuccess: () => void; locale: Locale }) {
-  const copy = uiCopyFor(locale);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -1035,14 +1101,22 @@ function TopBar({ title, subtitle, onBack, onParent, onLock, locale }: { title: 
   );
 }
 
-function SessionHeader({ child, subject, kind, answered, total, onBack }: { child: ChildProfile; subject: Subject; kind: "diagnostic" | "practice"; answered: number; total: number; onBack: () => void }) {
+function SessionHeader({ child, subject, kind, answered, total, comboStreak = 0, onBack }: { child: ChildProfile; subject: Subject; kind: "diagnostic" | "practice"; answered: number; total: number; comboStreak?: number; onBack: () => void }) {
   const locale = subjectLocale(subject);
   const copy = uiCopyFor(locale);
   return (
     <header className="session-header">
       <button className="quiet-button compact-button" type="button" onClick={onBack}><ChevronLeft aria-hidden="true" />{copy.session.exit}</button>
       <div><p className="eyebrow">{copy.child.sessionBrand(child.name)}</p><h1>{copy.session.sessionTitle(subjectName(subject, locale), kind)}</h1></div>
-      <div className="session-progress"><span>{answered} / {total}</span><div><i style={{ width: `${(answered / total) * 100}%` }} /></div></div>
+      <div className="session-progress-cluster">
+        {comboStreak >= 2 ? (
+          <div className={`combo-streak-pill ${comboStreak >= 3 ? "is-super-combo" : ""}`} data-testid="combo-streak-pill">
+            <Flame aria-hidden="true" />
+            <strong>{locale === "en" ? `${comboStreak} Streak!` : `${comboStreak} 连对！`}</strong>
+          </div>
+        ) : null}
+        <div className="session-progress"><span>{answered} / {total}</span><div><i style={{ width: `${(answered / total) * 100}%` }} /></div></div>
+      </div>
     </header>
   );
 }
@@ -1119,6 +1193,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill, o
   }, [pendingWrong]);
 
   function showHint() {
+    playSfx("pop");
     setHintOpen(true);
     setHintUsed(true);
     playOrSpeak(hint, language);
@@ -1131,6 +1206,7 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill, o
       return;
     }
     if (!pendingWrong) {
+      playSfx("gentle-retry");
       setPendingWrong(option);
       setHintOpen(true);
       setHintUsed(true);
@@ -1288,12 +1364,23 @@ export function QuizScreen({ question, feedback, onAnswer, onNext, isNewSkill, o
 function SessionResult({ child, subject, kind, session, summary, reward, onDone, onParent }: { child: ChildProfile; subject: Subject; kind: "diagnostic" | "practice"; session: SessionRecord; summary: SessionRecord["summary"]; reward: SessionCompletionOutcome | null; onDone: () => void; onParent: () => void }) {
   const locale = subjectLocale(subject);
   const copy = uiCopyFor(locale);
+  const [chestOpened, setChestOpened] = useState(false);
   const newlyRedeemableNames = reward?.newlyRedeemableCompanionIds.map((id) => getCompanionById(id)?.name).filter((name): name is string => Boolean(name)) ?? [];
   const correctCounts = correctCountsForSession(session);
   const practicedRows = summary.slice(0, 3);
   const extraCount = Math.max(0, summary.length - practicedRows.length);
+
+  function openMysteryChest() {
+    if (chestOpened) return;
+    setChestOpened(true);
+    playSfx("chest-open");
+    const praisePool = locale === "en" ? TEACHER_PRAISE_EN : TEACHER_PRAISE_ZH;
+    playOrSpeak(praisePool[0]!, locale === "en" ? "en-US" : "zh-CN");
+  }
+
   return (
     <main className="result-screen">
+      <ConfettiBurst active={true} triggerKey={`${session.id}-${chestOpened ? "chest" : "init"}`} />
       <div className="result-hero">
         <div className="result-hero-copy"><p className="eyebrow">{kind === "diagnostic" ? copy.session.diagnosticResult : copy.session.practiceResult}</p><h1>{copy.session.resultTitle(subjectName(subject, locale), kind)}</h1><p>{kind === "diagnostic" ? copy.session.diagnosticResultBody : copy.session.practiceResultBody}</p></div>
         <div className="result-hero-art" aria-hidden="true"><img src="./assets/images/scene-result.png" alt="" /></div>
@@ -1309,6 +1396,39 @@ function SessionResult({ child, subject, kind, session, summary, reward, onDone,
           <div className="result-reward-total"><Star aria-hidden="true" /><strong>{copy.session.rewardAward(reward.starsAwarded)}</strong><span>{copy.session.rewardTotal(reward.lifetimeStars)}</span></div>
           {reward.starsAwarded === 0 ? <p>{copy.session.rewardDailyCap}</p> : null}
           {newlyRedeemableNames.map((name) => <p className="result-reward-unlock" key={name}>{copy.session.rewardUnlocked(name)}</p>)}
+          <div className={`mystery-chest-card ${chestOpened ? "is-opened" : ""}`} data-testid="mystery-star-chest">
+            {!chestOpened ? (
+              <button
+                type="button"
+                className="mystery-chest-trigger"
+                data-testid="open-mystery-chest-btn"
+                onClick={openMysteryChest}
+              >
+                <span className="mystery-chest-icon" aria-hidden="true">🎁</span>
+                <div className="mystery-chest-copy">
+                  <strong>{locale === "en" ? "Tap to Open Today's Sprout Treasure Chest!" : "点一点，敲开今日小芽神秘果实宝箱！"}</strong>
+                  <small>{locale === "en" ? "See your celebration fireworks & companion wardrobe progress!" : "开启满屏烟花彩带，看看离下一件豆豆新衣裳还差几颗星！"}</small>
+                </div>
+                <Gift aria-hidden="true" />
+              </button>
+            ) : (
+              <div className="mystery-chest-opened-body" data-testid="mystery-chest-opened">
+                <Sparkles aria-hidden="true" />
+                <div>
+                  <strong>
+                    {locale === "en"
+                      ? `🎉 Treasure Unlocked! You have ${reward.lifetimeStars} Growth Stars!`
+                      : `🎉 宝箱开启成功！你已经攒下 ${reward.lifetimeStars} 颗闪亮成长星！`}
+                  </strong>
+                  <small>
+                    {locale === "en"
+                      ? "Visit the Companion Wardrobe on your home screen to dress up Doudou!"
+                      : "回到首页打开「装扮小衣橱」，就能给小狗豆豆换上新花冠、竹蜻蜓或魔法帽啦！"}
+                  </small>
+                </div>
+              </div>
+            )}
+          </div>
         </section>
       ) : null}
       {practicedRows.length ? (
@@ -1378,7 +1498,7 @@ function ParentDashboard({ household, locale, onSetSystemLocale, onBack, onAddCh
     applyLearningLevel(child, level);
   }
 
-  function changeChildSetting(child: ChildProfile, key: "highContrast" | "largeText" | "rewardsEnabled" | "companionAnimationsEnabled", enabled: boolean) {
+  function changeChildSetting(child: ChildProfile, key: "highContrast" | "largeText" | "rewardsEnabled" | "companionAnimationsEnabled" | "soundEffectsEnabled", enabled: boolean) {
     void onUpdateChild(child.id, (next) => {
       next.settings[key] = enabled;
       return next;
@@ -1572,6 +1692,7 @@ function ParentDashboard({ household, locale, onSetSystemLocale, onBack, onAddCh
                   <label><input type="checkbox" checked={child.settings.largeText} onChange={(event) => changeChildSetting(child, "largeText", event.target.checked)} />{copy.parent.largeText}</label>
                   <label><input type="checkbox" checked={child.settings.rewardsEnabled} onChange={(event) => changeChildSetting(child, "rewardsEnabled", event.target.checked)} />{copy.parent.rewardsEnabled}</label>
                   <label><input type="checkbox" checked={child.settings.companionAnimationsEnabled} onChange={(event) => changeChildSetting(child, "companionAnimationsEnabled", event.target.checked)} />{copy.parent.companionAnimations}</label>
+                  <label><input type="checkbox" checked={child.settings.soundEffectsEnabled !== false} onChange={(event) => changeChildSetting(child, "soundEffectsEnabled", event.target.checked)} />{locale === "en" ? "Game sound effects" : "游戏互动音效"}</label>
                 </div>
               </div>
               <div className="child-danger-zone"><button className="delete-child-link" type="button" onClick={() => deleteChild(child)}><Trash2 aria-hidden="true" />{copy.parent.deleteChild}</button></div>

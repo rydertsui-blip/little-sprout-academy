@@ -103,6 +103,7 @@ const rewardStateSchema = z.object({
   redeemedCompanionIds: z.array(z.string()),
   redeemedAtByCompanionId: z.record(z.string(), z.string()),
   activeCompanionId: z.string().nullable(),
+  equippedAccessoryIds: z.array(z.string()).optional(),
   dailyAwardKey: z.string().nullable(),
   dailyStars: z.number().int().nonnegative()
 });
@@ -128,7 +129,8 @@ const childSchema = z.object({
     highContrast: z.boolean().default(false),
     largeText: z.boolean().default(false),
     rewardsEnabled: z.boolean().default(true),
-    companionAnimationsEnabled: z.boolean().default(true)
+    companionAnimationsEnabled: z.boolean().default(true),
+    soundEffectsEnabled: z.boolean().optional()
   })
 });
 const householdSchema = z.object({

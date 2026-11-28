@@ -183,6 +183,7 @@ export interface GrowthRewardState {
   redeemedCompanionIds: string[];
   redeemedAtByCompanionId: Record<string, string>;
   activeCompanionId: string | null;
+  equippedAccessoryIds?: string[];
   dailyAwardKey: string | null;
   dailyStars: number;
 }
@@ -210,6 +211,7 @@ export interface ChildProfile {
     largeText: boolean;
     rewardsEnabled: boolean;
     companionAnimationsEnabled: boolean;
+    soundEffectsEnabled?: boolean;
   };
 }
 

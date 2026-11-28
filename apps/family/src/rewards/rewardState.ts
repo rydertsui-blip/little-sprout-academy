@@ -84,3 +84,18 @@ export function setActiveCompanion(state: GrowthRewardState, companionId: string
   if (!state.redeemedCompanionIds.includes(companionId)) throw new Error("Companion is not redeemed");
   return { ...state, activeCompanionId: companionId };
 }
+
+export function toggleEquippedAccessory(state: GrowthRewardState, accessoryId: string, sameSlotIds: string[]): GrowthRewardState {
+  const current = state.equippedAccessoryIds ?? [];
+  if (current.includes(accessoryId)) {
+    return {
+      ...state,
+      equippedAccessoryIds: current.filter((id) => id !== accessoryId)
+    };
+  }
+  const withoutSameSlot = current.filter((id) => !sameSlotIds.includes(id));
+  return {
+    ...state,
+    equippedAccessoryIds: [...withoutSameSlot, accessoryId]
+  };
+}

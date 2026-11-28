@@ -11,6 +11,8 @@ import { ENGLISH_HANDWRITING_ITEMS } from "../src/content/englishHandwriting";
 import { hintForQuestion, teachForQuestion } from "../src/content/hints";
 import { SPEAKING_PROMPTS } from "../src/content/speaking";
 import { MEMORY_FLIP_DECKS, MONSTER_STAGES, SORTING_ROUNDS, STORY_QUESTS } from "../src/content/arcade";
+import { READ_ALONG_STORYBOOKS } from "../src/content/storybooks";
+import { COMPANION_ACCESSORIES, PET_TOUCH_VOICES_EN, PET_TOUCH_VOICES_ZH } from "../src/companions/accessories";
 import { preAnswerAudio } from "../src/lib/questionAudio";
 
 const CJK_OR_PINYIN_RE = /[\u4e00-\u9fffāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/;
@@ -319,6 +321,30 @@ function syncGeneratedAudioMap(): Record<string, string> {
       ensure(scene.storyAudio);
     }
   }
+  for (const book of READ_ALONG_STORYBOOKS) {
+    ensure(book.introAudio);
+    ensure(book.completionAudio);
+    ensure(book.quiz.audioText);
+    ensure(book.quiz.explanation);
+    for (const page of book.pages) {
+      for (const sentence of page.sentences) {
+        ensure(sentence.audioText);
+      }
+      for (const kw of page.keywords) {
+        ensure(kw.audioText);
+      }
+    }
+  }
+  for (const acc of COMPANION_ACCESSORIES) {
+    ensure(acc.voiceZh);
+    ensure(acc.voiceEn);
+  }
+  for (const line of PET_TOUCH_VOICES_ZH) {
+    ensure(line);
+  }
+  for (const line of PET_TOUCH_VOICES_EN) {
+    ensure(line);
+  }
 
   for (const q of QUESTIONS) {
     ensure(preAnswerAudio(q));
@@ -429,8 +455,16 @@ async function run(): Promise<void> {
         }
         return;
       } catch (err) {
-        if (attempt === 3) {
-          throw err;
+        if (attempt === 1) {
+          const tmpAiff = resolve(tmpDir, `${asset}.aiff`);
+          const macVoice = item.lang === "zh" ? "Tingting" : "Samantha";
+          const rate = item.lang === "zh" ? "165" : "160";
+          execFileSync("/usr/bin/say", ["-v", macVoice, "-r", rate, "-o", tmpAiff, item.spoken], { stdio: "ignore" });
+          execFileSync("ffmpeg", ["-y", "-i", tmpAiff, "-c:a", "aac", "-b:a", "96k", outM4a], { stdio: "ignore" });
+          if (!existsSync(outM4a) || statSync(outM4a).size === 0) {
+            throw err;
+          }
+          return;
         }
         await new Promise((r) => setTimeout(r, 400 * attempt));
       }

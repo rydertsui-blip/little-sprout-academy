@@ -41,7 +41,13 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes("node_modules")) return "vendor";
           if (id.includes("/src/content/audioAssets")) return "audio-assets";
-          if (id.includes("/src/content/handwriting") || id.includes("/src/content/englishHandwriting") || id.includes("/src/content/speaking") || id.includes("/src/content/arcade")) {
+          if (
+            id.includes("/src/content/handwriting") ||
+            id.includes("/src/content/englishHandwriting") ||
+            id.includes("/src/content/speaking") ||
+            id.includes("/src/content/arcade") ||
+            id.includes("/src/content/storybooks")
+          ) {
             return "studio-content";
           }
           if (id.includes("/src/content/hints") || id.includes("/src/content/copy") || id.includes("/src/content/pinyinChart") || id.includes("/src/content/achievements")) {
@@ -55,7 +61,8 @@ export default defineConfig({
             id.includes("/src/screens/HandwritingScreen") ||
             id.includes("/src/screens/SpeakingScreen") ||
             id.includes("/src/screens/ArcadeScreen") ||
-            id.includes("/src/screens/MistakeNotebookScreen")
+            id.includes("/src/screens/MistakeNotebookScreen") ||
+            id.includes("/src/screens/StorybookScreen")
           ) {
             return "studios";
           }
