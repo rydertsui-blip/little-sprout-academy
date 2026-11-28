@@ -21,6 +21,14 @@ function StorySpreadArt({ page, accent }: { page: StorybookPage; accent: string 
   const bgTop = isNight ? "#1e2952" : isOcean ? "#cbe8f8" : "#fdf4dc";
   const bgBottom = isNight ? "#334785" : isOcean ? "#8fd0f2" : "#d9f0d1";
 
+  if (page.image) {
+    return (
+      <div className="storybook-spread-illustration has-art" style={{ "--book-accent": accent } as React.CSSProperties}>
+        <img className="storybook-scene-art" src={`./assets/images/${page.image}.png`} alt="" />
+      </div>
+    );
+  }
+
   return (
     <div className="storybook-spread-illustration" style={{ "--book-accent": accent } as React.CSSProperties}>
       <svg viewBox="0 0 480 260" className="storybook-scene-svg" aria-hidden="true">
@@ -277,9 +285,13 @@ export default function StorybookScreen({
                         {en ? "Read" : "已读完"}
                       </span>
                     ) : null}
-                    <div className="storybook-cover-emoji" aria-hidden="true">{book.coverEmoji}</div>
+                    {book.coverImage ? (
+                      <img className="storybook-cover-image" src={`./assets/images/${book.coverImage}.png`} alt="" />
+                    ) : (
+                      <div className="storybook-cover-emoji" aria-hidden="true">{book.coverEmoji}</div>
+                    )}
                   </div>
-                  <div className="storybook-cover-info">
+                  <div className="storybook-cover-copy">
                     <small>{book.subtitle}</small>
                     <strong>{book.title}</strong>
                     <span className="storybook-open-cta">

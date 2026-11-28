@@ -2556,6 +2556,63 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
   display: grid;
   gap: 16px;
 }
+
+.storybook-open-spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.storybook-spread-left,
+.storybook-spread-right {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.storybook-page-indicator {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-weight: 900;
+  color: var(--muted);
+}
+.storybook-sentences-box {
+  display: grid;
+  gap: 10px;
+}
+.storybook-nav-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+}
+.storybook-quiz-options {
+  display: grid;
+  gap: 10px;
+}
+@media (max-width: 767px) {
+  .storybook-open-spread { grid-template-columns: 1fr; }
+}
+
+.storybook-spread-illustration {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fdf4dc;
+}
+.storybook-spread-illustration.has-art {
+  border: 2px solid rgba(23, 50, 77, 0.16);
+  box-shadow: 0 6px 0 rgba(23, 50, 77, 0.08);
+}
+.storybook-scene-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
 .storybook-filter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -2583,6 +2640,13 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
 }
 .storybook-cover-card.is-completed {
   border-color: #2d7147;
+}
+.storybook-cover-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .storybook-cover-art {
   position: relative;
@@ -2638,6 +2702,32 @@ input { min-height: 52px; padding: 10px 14px; border: var(--border); border-radi
   color: var(--muted);
   font-size: 13px;
   font-weight: 800;
+}
+.storybook-level-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--paper-bright);
+  border: 2px solid var(--ink);
+  font-size: 11px;
+  font-weight: 900;
+}
+.storybook-cover-emoji {
+  font-size: 56px;
+  line-height: 1;
+}
+.storybook-open-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+}
+.storybook-open-cta svg {
+  width: 16px;
+  height: 16px;
 }
 .storybook-cover-copy p {
   margin: 4px 0 0;

@@ -17,6 +17,8 @@ export interface StorybookKeyword {
 
 export interface StorybookPage {
   id: string;
+  /** 静态插画（public/assets/images/<name>.png）；有图时优先显示，不再用 emoji 占位 */
+  image?: string;
   sceneTheme: "forest-morning" | "rainy-leaf" | "rainbow-sky" | "lantern-river" | "moon-bridge" | "star-sleep" | "sun-garden" | "watering-pot" | "tall-sunflower" | "red-bus" | "school-gate" | "park-friends" | "kitchen-pot" | "sweet-apple" | "dinner-table" | "cloud-mountain" | "rain-river" | "blue-ocean";
   illustrationEmoji: string;
   sentences: StorybookSentence[];
@@ -34,6 +36,8 @@ export interface StorybookQuiz {
 
 export interface ReadAlongStorybook {
   id: string;
+  /** 封面插画（public/assets/images/<name>.png）；有图时不再用 emoji 占位 */
+  coverImage?: string;
   language: "zh" | "en";
   level: LearningLevel;
   title: string;
@@ -49,6 +53,7 @@ export interface ReadAlongStorybook {
 export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
   {
     id: "book-zh-rain-rainbow",
+    coverImage: "story-cover-rain",
     language: "zh",
     level: "K2",
     title: "小雨点找朋友",
@@ -60,6 +65,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
     pages: [
       {
         id: "p1",
+        image: "story-rain-p1",
         sceneTheme: "forest-morning",
         illustrationEmoji: "☁️🌧️🌿",
         sentences: [
@@ -84,6 +90,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p2",
+        image: "story-rain-p2",
         sceneTheme: "rainy-leaf",
         illustrationEmoji: "🌺🐸💧",
         sentences: [
@@ -107,6 +114,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p3",
+        image: "story-rain-p3",
         sceneTheme: "rainbow-sky",
         illustrationEmoji: "☀️🌈🐦",
         sentences: [
@@ -140,6 +148,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
   },
   {
     id: "book-zh-moon-boat",
+    coverImage: "story-cover-moon",
     language: "zh",
     level: "P1",
     title: "月亮船去旅行",
@@ -151,6 +160,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
     pages: [
       {
         id: "p1",
+        image: "story-moon-p1",
         sceneTheme: "lantern-river",
         illustrationEmoji: "🌙✨🌊",
         sentences: [
@@ -174,6 +184,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p2",
+        image: "story-moon-p2",
         sceneTheme: "moon-bridge",
         illustrationEmoji: "⭐🦉🌲",
         sentences: [
@@ -197,6 +208,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p3",
+        image: "story-moon-p3",
         sceneTheme: "star-sleep",
         illustrationEmoji: "🏡💤🌟",
         sentences: [
@@ -230,6 +242,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
   },
   {
     id: "book-zh-apple-share",
+    coverImage: "story-cover-apple",
     language: "zh",
     level: "P2",
     title: "小松鼠的分果果",
@@ -241,6 +254,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
     pages: [
       {
         id: "p1",
+        image: "story-apple-p1",
         sceneTheme: "kitchen-pot",
         illustrationEmoji: "🐿️🧺🍎",
         sentences: [
@@ -264,6 +278,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p2",
+        image: "story-apple-p2",
         sceneTheme: "sweet-apple",
         illustrationEmoji: "🐰🦔🍎",
         sentences: [
@@ -287,6 +302,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p3",
+        image: "story-apple-p3",
         sceneTheme: "dinner-table",
         illustrationEmoji: "🥧🍵🎶",
         sentences: [
@@ -320,6 +336,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
   },
   {
     id: "book-en-little-seed",
+    coverImage: "story-cover-seed",
     language: "en",
     level: "K2",
     title: "The Little Sun Seed",
@@ -331,6 +348,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
     pages: [
       {
         id: "p1",
+        image: "story-seed-p1",
         sceneTheme: "sun-garden",
         illustrationEmoji: "🌱🤎🏡",
         sentences: [
@@ -354,6 +372,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p2",
+        image: "story-seed-p2",
         sceneTheme: "watering-pot",
         illustrationEmoji: "🚿💧☀️",
         sentences: [
@@ -377,6 +396,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p3",
+        image: "story-seed-p3",
         sceneTheme: "tall-sunflower",
         illustrationEmoji: "🌻🐝💛",
         sentences: [
@@ -410,6 +430,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
   },
   {
     id: "book-en-red-bus",
+    coverImage: "story-cover-bus",
     language: "en",
     level: "P1",
     title: "The Red Bus to School",
@@ -421,6 +442,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
     pages: [
       {
         id: "p1",
+        image: "story-bus-p1",
         sceneTheme: "red-bus",
         illustrationEmoji: "🚌🐶🧢",
         sentences: [
@@ -444,6 +466,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p2",
+        image: "story-bus-p2",
         sceneTheme: "school-gate",
         illustrationEmoji: "🐱🐷🎒",
         sentences: [
@@ -467,6 +490,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p3",
+        image: "story-bus-p3",
         sceneTheme: "park-friends",
         illustrationEmoji: "🏫🔔📚",
         sentences: [
@@ -500,6 +524,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
   },
   {
     id: "book-en-cloud-journey",
+    coverImage: "story-cover-cloud",
     language: "en",
     level: "P2",
     title: "Where Does the Rain Go?",
@@ -511,6 +536,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
     pages: [
       {
         id: "p1",
+        image: "story-cloud-p1",
         sceneTheme: "blue-ocean",
         illustrationEmoji: "🌊☀️💨",
         sentences: [
@@ -534,6 +560,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p2",
+        image: "story-cloud-p2",
         sceneTheme: "cloud-mountain",
         illustrationEmoji: "🏔️☁️❄️",
         sentences: [
@@ -557,6 +584,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
       },
       {
         id: "p3",
+        image: "story-cloud-p3",
         sceneTheme: "rain-river",
         illustrationEmoji: "🌧️🏞️🌊",
         sentences: [

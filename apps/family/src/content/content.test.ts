@@ -12,6 +12,7 @@ import {
   validateContentCatalog
 } from "./catalog";
 import { canonicalContentPayload } from "./identity";
+import { READ_ALONG_STORYBOOKS } from "./storybooks";
 import { classifyMastery, createSkillEvidence, updateBktEvidence } from "../engine/bkt";
 import type { ChoiceQuestion, Question } from "../lib/types";
 
@@ -182,6 +183,20 @@ describe("curriculum content catalog", () => {
       const path = resolve(process.cwd(), `public/assets/images/${image}.png`);
       const bytes = readFileSync(path);
       expect(bytes.byteLength, `${image}.png is empty`).toBeGreaterThan(2000);
+    }
+  });
+
+  it("ships a real illustration for every storybook page and cover", () => {
+    for (const book of READ_ALONG_STORYBOOKS) {
+      expect(book.coverImage, `${book.id} has no cover art`).toBeTruthy();
+      const coverPath = resolve(process.cwd(), `public/assets/images/${book.coverImage}.png`);
+      expect(readFileSync(coverPath).byteLength, `${book.coverImage}.png is too small`).toBeGreaterThan(20000);
+      for (const page of book.pages) {
+        expect(page.image, `${book.id} ${page.id} has no illustration`).toBeTruthy();
+        const path = resolve(process.cwd(), `public/assets/images/${page.image}.png`);
+        const bytes = readFileSync(path);
+        expect(bytes.byteLength, `${page.image}.png is too small`).toBeGreaterThan(20000);
+      }
     }
   });
 });
