@@ -271,7 +271,7 @@ export function PinyinBlendBar({
           <Sparkles aria-hidden="true" />
           {isAutoBlending
             ? "小芽老师连拼中…"
-            : `老师带我拼（${decomp.initial ? `${decomp.initialAudio}—` : ""}${decomp.medialAudio ? `${decomp.medialAudio}—` : ""}${decomp.finalAudio}→${decomp.char}）`}
+            : `老师带我拼（${decomp.initial ? `${maskInitial ? "？" : decomp.initialAudio}—` : ""}${decomp.medialAudio ? `${maskFinal ? "？" : decomp.medialAudio}—` : ""}${maskFinal ? "？" : decomp.finalAudio}→${maskSyllable ? "？" : decomp.char}）`}
         </button>
         {decomp.isWholeSyllable ? (
           <small className="eyebrow" style={{ margin: 0 }}>整体认读音节 · 可以直接读出整字</small>
@@ -329,7 +329,7 @@ export function PinyinTool({ question, hintActive = false }: { question: Questio
       <div className={`math-tool pinyin-tool${hintActive ? " is-hint-focus" : ""}`} role="group" aria-label="拼音教具：声调过山车">
         <div className="math-tool-header">
           <span>拼音教具</span>
-          <strong>声调过山车 · 本题「{targetChars.primary}」</strong>
+          <strong>{targetChars.isTargetFromQuestion ? `声调过山车 · 四声示范（对比本题「${targetChars.primary}」）` : "声调过山车 · 四声升降示范"}</strong>
           <small>{hintActive ? "点四声对比本题" : "点一下听四声"}</small>
         </div>
         <div className="math-tool-body pinyin-tool-body" data-testid="pinyin-tone-coaster">
@@ -376,7 +376,7 @@ export function PinyinTool({ question, hintActive = false }: { question: Questio
     <div className={`math-tool pinyin-tool${hintActive ? " is-hint-focus" : ""}`} role="group" aria-label="拼音教具：拼读积木台">
       <div className="math-tool-header">
         <span>拼音教具</span>
-        <strong>拼读积木台 · 本题「{targetChars.primary}」</strong>
+        <strong>{targetChars.isTargetFromQuestion ? `拼读积木台 · 本题「${targetChars.primary}」` : "拼读积木台 · 点选项汉字听拼读"}</strong>
         <small>{hintActive ? "点拼音听标准音" : "分开点或让老师带拼"}</small>
       </div>
       <div className="math-tool-body pinyin-tool-body" data-testid="pinyin-blend-board">

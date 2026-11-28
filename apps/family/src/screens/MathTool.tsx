@@ -112,6 +112,11 @@ function PlaceValue({ question }: { question: Question }) {
     if (boxesMatch) {
       return <TensOnesVisual tens={4} ones={Number(boxesMatch[1])} hideTotal label="4 boxes of 10 + 7 loose pencils" />;
     }
+    const afterMatch = prompt.match(/after\s+(\d+)/i);
+    if (afterMatch) {
+      const n = Number(afterMatch[1]);
+      return <TensOnesVisual tens={Math.floor(n / 10)} ones={n % 10} hideTotal label={`Start with ${n} (${Math.floor(n / 10)} tens, ${n % 10} ones), then count 1 more`} />;
+    }
     const compareNums = (prompt.match(/\b\d{2,3}\b/g) ?? []).map(Number);
     if (compareNums.length >= 2) {
       return (
@@ -136,6 +141,19 @@ function PlaceValue({ question }: { question: Question }) {
           index < 2 ? <i key={`plus-${index}`}>+</i> : <i key="equals">=</i>
         ])}
         <b>?</b>
+      </div>
+    );
+  }
+  const wordHto = question.prompt.match(/(\d+)\s+hundreds?,\s*(\d+)\s+tens?\s+and\s+(\d+)\s+ones?/i);
+  if (wordHto) {
+    const h = Number(wordHto[1]);
+    const t = Number(wordHto[2]);
+    const o = Number(wordHto[3]);
+    return (
+      <div className="place-value-blocks place-value-chart" data-testid="place-value-chart" aria-hidden="true">
+        <div className="place-column"><strong>Hundreds</strong><span className="place-digit">{h}</span><small>{h} × 100 = {h * 100}</small></div>
+        <div className="place-column"><strong>Tens</strong><span className="place-digit">{t}</span><small>{t} × 10 = {t * 10}</small></div>
+        <div className="place-column"><strong>Ones</strong><span className="place-digit">{o}</span><small>{o} × 1 = {o}</small></div>
       </div>
     );
   }
@@ -167,9 +185,11 @@ function PlaceValue({ question }: { question: Question }) {
 }
 
 function JumpNumberLine({ question }: { question: Question }) {
+  const allNums = question.prompt.match(/\d+/g)?.map(Number) ?? [];
+  if (allNums.length >= 3) return <TwoStepBar question={question} />;
   const { a, b } = questionNumbers(question.prompt);
   if (!a || !b) return null;
-  const subtract = /[−-]|taken away|remain|lost|left|fewer/i.test(question.prompt);
+  const subtract = /[−-]|taken away|remain|lost|left|fewer|used|empty|sells|sold|get off/i.test(question.prompt);
   const endValue = subtract ? a - b : a + b;
   const round = question.skillId === "math-add-sub-1000" ? 100 : 10;
   const low = Math.max(0, Math.floor((Math.min(a, endValue) - round) / round) * round);
@@ -231,6 +251,8 @@ function questionNumbers(prompt: string) {
 }
 
 function BarModel({ question }: { question: Question }) {
+  const allNums = question.prompt.match(/\d+/g)?.map(Number) ?? [];
+  if (allNums.length >= 3) return <TwoStepBar question={question} />;
   const { a, b } = questionNumbers(question.prompt);
   const subtract = /[−-]|taken away|remain|lost|left|fewer|used|empty|sells|get off/i.test(question.prompt);
   return (
@@ -259,10 +281,10 @@ function twoStepSign(prompt: string, value: string): "+" | "−" | null {
       candidates.push({ sign, distance });
     }
   };
-  collect(before, "before", /sell|sold|give|gave|away|off|take|taken|eaten|eat|break|broken|used|lose|lost|spend|spent|cost|costs|pay|fewer|remove/gi, "−");
-  collect(before, "before", /gets|got|get on|get more|receive|receives|earn|earns|collect|collects|buy|buys|more|add|adds|altogether|in all|total/gi, "+");
-  collect(after, "after", /sell|sold|give|gave|away|off|take|taken|eaten|eat|break|broken|used|lose|lost|spend|spent|cost|costs|pay|fewer|remove/gi, "−");
-  collect(after, "after", /gets|got|get on|get more|receive|receives|earn|earns|collect|collects|buy|buys|more|add|adds|altogether|in all|total/gi, "+");
+  collect(before, "before", /sell|sold|give|gave|away|off|take|taken|eaten|eat|break|broken|used|lose|lost|spend|spent|cost|costs|pay|fewer|removed|remove/gi, "−");
+  collect(before, "before", /gets|got|get on|get more|receive|receives|earn|earns|collect|collects|buy|buys|plants|planted|added|more|add|adds|altogether|in all|total/gi, "+");
+  collect(after, "after", /sell|sold|give|gave|away|off|take|taken|eaten|eat|break|broken|used|lose|lost|spend|spent|cost|costs|pay|fewer|removed|remove/gi, "−");
+  collect(after, "after", /gets|got|get on|get more|receive|receives|earn|earns|collect|collects|buy|buys|plants|planted|added|more|add|adds|altogether|in all|total/gi, "+");
   if (!candidates.length) return null;
   return candidates.sort((left, right) => left.distance - right.distance)[0].sign;
 }
@@ -377,16 +399,20 @@ function NumberBond({ question }: { question: Question }) {
 
 function ArrayBoard({ question }: { question: Question }) {
   const equation = question.prompt.match(/(\d+)\s*(?:÷|\/|×|x|\*)\s*(\d+)/);
-  const story = question.prompt.match(/(\d+)\s+(?:groups?|rows?)\s+(?:have|with)\s+(\d+)/i);
-  const first = equation ? Number(equation[1]) : story ? Number(story[1]) : 4;
-  const second = equation ? Number(equation[2]) : story ? Number(story[2]) : 5;
+  const story = question.prompt.match(/(\d+)\s+(?:groups?|rows?|bags?|boxes|trays?|tables?|plates?)\s+(?:have|with)\s+(\d+)/i);
+  const pairsStory = question.prompt.match(/(\d+)\s+pairs?\s+of\s+\w+/i);
+  const first = equation ? Number(equation[1]) : story ? Number(story[1]) : pairsStory ? Number(pairsStory[1]) : 4;
+  const second = equation ? Number(equation[2]) : story ? Number(story[2]) : pairsStory ? 2 : 5;
   const isDivision = /÷|\//.test(question.prompt);
   const groups = isDivision ? first / second : first;
   const perGroup = second;
-  const usable = Boolean(equation || story) && Number.isInteger(groups) && groups > 0 && groups <= 10 && perGroup > 0 && perGroup <= 10;
+  const usable = Boolean(equation || story || pairsStory) && Number.isInteger(groups) && groups > 0 && groups <= 10 && perGroup > 0 && perGroup <= 10;
+  const extraAdd = Number(question.prompt.match(/(?:plus|and there are)\s+(\d+)|(\d+)\s+(?:more|single|extra|loose)/i)?.[1] ?? question.prompt.match(/(?:plus|and there are)\s+(\d+)|(\d+)\s+(?:more|single|extra|loose)/i)?.[2] ?? 0);
+  const extraSub = Number(question.prompt.match(/(\d+)\s+\w+\s+are\s+(?:removed|used|eaten|taken away)/i)?.[1] ?? 0);
   const rows = usable ? groups : 4;
   const columns = usable ? perGroup : 5;
-  const caption = question.kind === "match" || !usable ? "An array shows equal rows and columns" : `${rows} groups of ${columns}`;
+  const baseCaption = question.kind === "match" || !usable ? "An array shows equal rows and columns" : `${rows} groups of ${columns} (${rows * columns})`;
+  const caption = usable && extraAdd > 0 ? `${baseCaption} + ${extraAdd} more = ?` : usable && extraSub > 0 ? `${baseCaption} − ${extraSub} taken away = ?` : baseCaption;
   return (
     <div className="array-board" data-testid="array-board" data-rows={rows} data-columns={columns} aria-hidden="true">
       {Array.from({ length: rows }, (_, row) => (
@@ -576,7 +602,33 @@ function moneyAmounts(prompt: string): number[] {
   return [...prompt.matchAll(/(\d+)\s*cents?/gi)].map((match) => Number(match[1]));
 }
 
+const WORD_NUM: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5 };
+function parseCoinCombination(prompt: string): Array<{ label: string; cents: number }> | null {
+  const coinMatches = [...prompt.matchAll(/\b(one|two|three|four|five|\d+)\s+(?:\$(\d+)|(\d+)-cent)\s+coins?/gi)];
+  if (coinMatches.length < 2) return null;
+  const coins: Array<{ label: string; cents: number }> = [];
+  for (const m of coinMatches) {
+    const countRaw = m[1].toLowerCase();
+    const count = WORD_NUM[countRaw] ?? Number(countRaw);
+    const cents = m[2] ? Number(m[2]) * 100 : Number(m[3]);
+    const label = m[2] ? `${m[2]}` : `${m[3]}¢`;
+    for (let i = 0; i < count; i++) coins.push({ label, cents });
+  }
+  return coins;
+}
+
 function MoneyBoard({ question }: { question: Question }) {
+  const coinCombo = parseCoinCombination(question.prompt);
+  if (coinCombo) {
+    return (
+      <div className="money-board" data-testid="money-tool" aria-hidden="true">
+        {coinCombo.map((c, idx) => (
+          <span key={idx} className={`coin ${c.cents >= 100 ? "coin-dollar" : c.cents === 50 ? "coin-50" : c.cents === 20 ? "coin-20" : "coin-10"}`}>{c.label}</span>
+        ))}
+        <small>Add the value of all {coinCombo.length} coins in cents ($1 = 100¢)</small>
+      </div>
+    );
+  }
   const amounts = moneyAmounts(question.prompt);
   const asksForCents = /how many cents|in cents|cents/i.test(question.prompt);
   const centsOnly = asksForCents && !question.prompt.includes("$");
@@ -802,6 +854,9 @@ function CountingPictures({ question }: { question: Question }) {
 }
 
 function SequenceTool({ question }: { question: Question }) {
+  if (question.template === "mixed-mul-add") {
+    return <ArrayBoard question={question} />;
+  }
   const prompt = question.prompt;
   const oddEvenMatch = prompt.match(/ones digit of (\d+)/i);
   if (oddEvenMatch || question.template === "odd-even-identify") {
@@ -1121,11 +1176,48 @@ function OlympiadVisual({ question }: { question: Question }) {
 
   if (question.template === "queue-logic" || /queue|line|row|sawed|stairs/i.test(prompt)) {
     const isCutOrStair = /sawed|cuts|stairs|floor/i.test(prompt);
+    const isOrdinalBothEnds = /from the front.*from the back/i.test(prompt);
+    const isKnownTotalFindBehind = /children stand in a row.*how many children are behind/i.test(prompt);
+
+    if (isOrdinalBothEnds) {
+      return (
+        <div className="two-step-model olympiad-queue-board" data-testid="olympiad-queue-board">
+          <div className="two-step-row">
+            <span className="two-step-node"><small>From Front</small><strong>{nums[0] ?? "N"}</strong></span>
+            <i aria-hidden="true">+</i>
+            <span className="two-step-node"><small>From Back</small><strong>{nums[1] ?? "M"}</strong></span>
+            <i aria-hidden="true">−</i>
+            <span className="two-step-node is-answer"><small>Counted Twice</small><strong>1</strong></span>
+            <i aria-hidden="true">=</i>
+            <span className="two-step-node is-answer"><small>Total</small><strong>?</strong></span>
+          </div>
+          <p>Hero is included in both counts, so subtract 1 for the overlap!</p>
+        </div>
+      );
+    }
+
+    if (isKnownTotalFindBehind) {
+      return (
+        <div className="two-step-model olympiad-queue-board" data-testid="olympiad-queue-board">
+          <div className="two-step-row">
+            <span className="two-step-node"><small>Total</small><strong>{nums[0] ?? "T"}</strong></span>
+            <i aria-hidden="true">−</i>
+            <span className="two-step-node"><small>In Front</small><strong>{nums[1] ?? "F"}</strong></span>
+            <i aria-hidden="true">−</i>
+            <span className="two-step-node is-answer"><small>Hero (★)</small><strong>1</strong></span>
+            <i aria-hidden="true">=</i>
+            <span className="two-step-node is-answer"><small>Behind</small><strong>?</strong></span>
+          </div>
+          <p>Take away the children in front AND the hero to find how many are behind.</p>
+        </div>
+      );
+    }
+
     return (
       <div className="two-step-model olympiad-queue-board" data-testid="olympiad-queue-board">
         <div className="two-step-row">
           <span className="two-step-node">
-            <small>{isCutOrStair ? "Cuts / Gaps" : "Front"}</small>
+            <small>{isCutOrStair ? "Cuts / Gaps" : "In Front"}</small>
             <strong>{nums[0] ?? "A"}</strong>
           </span>
           <i aria-hidden="true">+</i>
@@ -1137,7 +1229,7 @@ function OlympiadVisual({ question }: { question: Question }) {
             <>
               <i aria-hidden="true">+</i>
               <span className="two-step-node">
-                <small>Back / Rest</small>
+                <small>Behind</small>
                 <strong>{nums[1] ?? "B"}</strong>
               </span>
             </>
@@ -1148,7 +1240,24 @@ function OlympiadVisual({ question }: { question: Question }) {
             <strong>?</strong>
           </span>
         </div>
-        <p>{isCutOrStair ? "Interval rule: pieces = cuts + 1 (or steps = floor difference)." : "Queue rule: don't forget to count the person in the middle (or subtract 1 if counted twice)!"}</p>
+        <p>{isCutOrStair ? "Interval rule: pieces = cuts + 1." : "Queue rule: Front + 1 (Hero in the middle) + Behind = Total!"}</p>
+      </div>
+    );
+  }
+
+  if (/years old.*years older/i.test(prompt) && nums.length >= 2) {
+    const older = Math.max(nums[0], nums[1]);
+    const younger = Math.min(nums[0], nums[1]);
+    return (
+      <div className="two-step-model olympiad-backwards-board" data-testid="olympiad-backwards-board">
+        <div className="two-step-row">
+          <span className="two-step-node"><small>Older Now</small><strong>{older}</strong></span>
+          <i aria-hidden="true">−</i>
+          <span className="two-step-node"><small>Younger Now</small><strong>{younger}</strong></span>
+          <i aria-hidden="true">=</i>
+          <span className="two-step-node is-answer"><small>Always Same Diff</small><strong>?</strong></span>
+        </div>
+        <p>Both people grow older by the same number of years, so their age difference never changes!</p>
       </div>
     );
   }
