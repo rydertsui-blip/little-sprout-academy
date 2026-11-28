@@ -1,3 +1,5 @@
+import { existsSync, statSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { PinyinTool } from "./PinyinTool";
@@ -44,7 +46,20 @@ function makePinyinQuestion(overrides: Partial<ChoiceQuestion>): ChoiceQuestion 
   };
 }
 
+const PINYIN_CARD_CHARS = ["妈", "麻", "马", "骂", "八", "拔", "把", "爸", "猫", "狗", "山", "花", "水", "跑", "开"];
+
 describe("PinyinTool", () => {
+  it("ships a real neural clip for every pinyin unit and character card", () => {
+    const spoken = [...ALL_PINYIN_UNITS.map((unit) => unit.audioKey), ...PINYIN_CARD_CHARS];
+    for (const text of spoken) {
+      const asset = AUDIO_ASSETS[text];
+      expect(asset, text).toBeTruthy();
+      const file = resolve(process.cwd(), "public/assets/audio", `${asset}.m4a`);
+      expect(existsSync(file), `${text} -> ${asset}.m4a`).toBe(true);
+      expect(statSync(file).size, `${text} -> ${asset}.m4a`).toBeGreaterThan(2000);
+    }
+  });
+
   it("maps all 63 standard pinyin units (23 initials + 24 finals + 16 whole syllables) to bundled audio", () => {
     expect(PINYIN_INITIALS).toHaveLength(23);
     expect(PINYIN_FINALS).toHaveLength(24);
