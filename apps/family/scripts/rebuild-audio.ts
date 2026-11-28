@@ -447,7 +447,7 @@ async function run(): Promise<void> {
     for (let attempt = 1; attempt <= 4; attempt += 1) {
       try {
         const tts = new MsEdgeTTS();
-        await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+        await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
         const { audioStream } = tts.toStream(item.spoken, { rate: "-8%" });
         await new Promise<void>((resolveStream, rejectStream) => {
           const ws = createWriteStream(tmpMp3);
@@ -456,7 +456,7 @@ async function run(): Promise<void> {
           ws.on("error", rejectStream);
           audioStream.on("error", rejectStream);
         });
-        execFileSync("ffmpeg", ["-y", "-i", tmpMp3, "-c:a", "aac", "-b:a", "96k", outM4a], { stdio: "ignore" });
+        execFileSync("ffmpeg", ["-y", "-i", tmpMp3, "-af", "loudnorm=I=-18:TP=-3:LRA=11", "-ar", "24000", "-c:a", "aac", "-b:a", "128k", outM4a], { stdio: "ignore" });
         if (!existsSync(outM4a) || statSync(outM4a).size === 0) {
           throw new Error("Empty m4a output");
         }
