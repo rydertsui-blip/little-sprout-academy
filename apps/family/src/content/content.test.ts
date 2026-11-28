@@ -166,4 +166,21 @@ describe("curriculum content catalog", () => {
     const history = JSON.parse(readFileSync(resolve(process.cwd(), "src/content/question-id-history.json"), "utf8")) as string[];
     for (const id of history) expect(getQuestionById(id)).toBeDefined();
   });
+
+  it("ships a real image file for every picture referenced by a question", () => {
+    const referenced = new Set<string>();
+    for (const question of QUESTIONS) {
+      if (question.kind === "choice") {
+        for (const image of Object.values(question.optionImages ?? {})) referenced.add(image);
+      } else if (question.kind === "match") {
+        for (const pair of question.pairs) if (pair.rightImage) referenced.add(pair.rightImage);
+      }
+    }
+    expect(referenced.size).toBeGreaterThan(0);
+    for (const image of referenced) {
+      const path = resolve(process.cwd(), `public/assets/images/${image}.png`);
+      const bytes = readFileSync(path);
+      expect(bytes.byteLength, `${image}.png is empty`).toBeGreaterThan(2000);
+    }
+  });
 });

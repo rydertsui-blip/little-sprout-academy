@@ -16,6 +16,7 @@ interface FarTransferRow {
   audioText?: string;
   audioLanguage?: "zh-CN" | "en-US";
   audioOnly?: boolean;
+  optionImages?: Record<string, string>;
 }
 
 const FAR_TRANSFER_ROWS: FarTransferRow[] = [
@@ -149,7 +150,8 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
     passage: "妈妈说：把苹果放在桌上。",
     audioText: "妈妈说：把苹果放在桌上。",
     audioLanguage: "zh-CN",
-    audioOnly: true
+    audioOnly: true,
+    optionImages: { 桌上: "table", 地上: "floor", 包里: "bag" }
   },
   {
     skillId: "k2-english-listen",
@@ -163,7 +165,8 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
     passage: "Lina has a red bag. She puts two books in it.",
     audioText: "Lina has a red bag. She puts two books in it.",
     audioLanguage: "en-US",
-    audioOnly: true
+    audioOnly: true,
+    optionImages: { red: "color-red", blue: "color-blue", green: "color-green" }
   },
   {
     skillId: "math-count-100",

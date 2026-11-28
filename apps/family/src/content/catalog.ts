@@ -20,7 +20,14 @@ const rawQuestions: Question[] = [
   ...buildFarTransferQuestions()
 ];
 
-const KNOWN_IMAGE_NAMES = new Set(["abc", "apple", "bear", "bird", "books", "cat", "compass", "dog", "fish", "flower", "house", "moon", "mountain", "music", "pencil", "rabbit", "rain", "seedling", "sparkles", "speech", "star", "sun", "trophy", "water", "tree"]);
+const KNOWN_IMAGE_NAMES = new Set([
+  "abc", "apple", "bear", "bird", "books", "cat", "compass", "dog", "fish", "flower", "house", "moon", "mountain", "music", "pencil", "rabbit", "rain", "seedling", "sparkles", "speech", "star", "sun", "trophy", "water", "tree",
+  "color-red", "color-blue", "color-green", "color-yellow",
+  "dots-3", "dots-5", "dots-6", "dots-7",
+  "action-clap", "action-jump", "action-run", "action-sit",
+  "family-mother", "family-father", "family-sister", "family-brother",
+  "banana", "orange", "bag", "table", "floor"
+]);
 const FACTUAL_MATH_TEMPLATES = new Set([
   "k2-count-dots",
   "k2-compare-number",
