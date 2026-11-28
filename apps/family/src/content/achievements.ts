@@ -21,6 +21,7 @@ export interface StreakSummary {
 export interface AchievementBadgeStatus {
   id: string;
   emoji: string;
+  icon: string;
   accent: string;
   titleZh: string;
   titleEn: string;
@@ -129,6 +130,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "first-step",
       emoji: "🌱",
+      icon: "./assets/images/badge-first-step.png",
       accent: "#cce8c9",
       titleZh: "初登小岛",
       titleEn: "First Sprout",
@@ -141,6 +143,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "island-explorer",
       emoji: "🧭",
+      icon: "./assets/images/badge-island-explorer.png",
       accent: "#d8e2f7",
       titleZh: "三岛探险家",
       titleEn: "Island Explorer",
@@ -153,6 +156,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "pinyin-master",
       emoji: "🎵",
+      icon: "./assets/images/badge-pinyin-master.png",
       accent: "#ffe3a4",
       titleZh: "拼音小达人",
       titleEn: "Pinyin Master",
@@ -165,6 +169,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "olympiad-detective",
       emoji: "⚖️",
+      icon: "./assets/images/badge-olympiad-detective.png",
       accent: "#ffd4c7",
       titleZh: "奥数小侦探",
       titleEn: "Olympiad Detective",
@@ -177,6 +182,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "classic-poet",
       emoji: "📜",
+      icon: "./assets/images/badge-classic-poet.png",
       accent: "#f7d9c4",
       titleZh: "国学小诗人",
       titleEn: "Classical Poet",
@@ -189,6 +195,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "science-ranger",
       emoji: "🔬",
+      icon: "./assets/images/badge-science-ranger.png",
       accent: "#bfe5e3",
       titleZh: "科学探索家",
       titleEn: "Science Ranger",
@@ -201,6 +208,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "calligrapher-zh",
       emoji: "🖌️",
+      icon: "./assets/images/badge-calligrapher-zh.png",
       accent: "#ffd6cc",
       titleZh: "小小书法家",
       titleEn: "Chinese Calligrapher",
@@ -213,6 +221,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "phonics-writer-en",
       emoji: "🔤",
+      icon: "./assets/images/badge-phonics-writer-en.png",
       accent: "#e9def5",
       titleZh: "四线三格拼读家",
       titleEn: "Phonics Writer",
@@ -225,6 +234,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "star-collector",
       emoji: "⭐",
+      icon: "./assets/images/badge-star-collector.png",
       accent: "#fff0ad",
       titleZh: "摘星小能手",
       titleEn: "Star Collector",
@@ -237,6 +247,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "companion-friend",
       emoji: "🐶",
+      icon: "./assets/images/badge-companion-friend.png",
       accent: "#f4cf76",
       titleZh: "伙伴好朋友",
       titleEn: "Companion Bestie",
@@ -249,6 +260,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "independent-thinker",
       emoji: "🏆",
+      icon: "./assets/images/badge-independent-thinker.png",
       accent: "#cfe3f7",
       titleZh: "独立思考王",
       titleEn: "Independent Thinker",
@@ -261,6 +273,7 @@ export function evaluateChildBadges(child: ChildProfile, now = new Date()): Achi
     {
       id: "streak-sprout",
       emoji: "🔥",
+      icon: "./assets/images/badge-streak-sprout.png",
       accent: "#f7c9dd",
       titleZh: "坚持小树苗",
       titleEn: "Persistent Sprout",

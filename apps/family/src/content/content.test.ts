@@ -13,6 +13,8 @@ import {
 } from "./catalog";
 import { canonicalContentPayload } from "./identity";
 import { READ_ALONG_STORYBOOKS } from "./storybooks";
+import { evaluateChildBadges } from "./achievements";
+import { createChildProfile } from "../lib/profile";
 import { classifyMastery, createSkillEvidence, updateBktEvidence } from "../engine/bkt";
 import type { ChoiceQuestion, Question } from "../lib/types";
 
@@ -196,6 +198,18 @@ describe("curriculum content catalog", () => {
     for (const name of names) {
       const bytes = readFileSync(resolve(process.cwd(), `public/assets/images/${name}.png`));
       expect(bytes.byteLength, `${name}.png is too small`).toBeGreaterThan(20000);
+    }
+  });
+
+  it("ships a real illustration for every achievement badge", () => {
+    const child = createChildProfile("QA", "star", new Date(), 5);
+    const badges = evaluateChildBadges(child);
+    expect(badges.length).toBe(12);
+    for (const badge of badges) {
+      expect(badge.icon, `${badge.id} icon path`).toBe(`./assets/images/badge-${badge.id}.png`);
+      const file = badge.icon.replace("./assets/", "public/assets/");
+      const bytes = readFileSync(resolve(process.cwd(), file));
+      expect(bytes.byteLength, `${badge.id}.png is too small`).toBeGreaterThan(2000);
     }
   });
 

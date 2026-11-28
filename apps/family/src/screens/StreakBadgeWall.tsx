@@ -67,7 +67,7 @@ export function StreakBadgeWall({
               className={`streak-day-pill ${day.active ? "is-active" : ""} ${day.isToday ? "is-today" : ""}`}
             >
               <span className="streak-day-circle" aria-hidden="true">
-                {day.active ? <Check aria-hidden="true" /> : "🌱"}
+                {day.active ? <Check aria-hidden="true" /> : <img className="streak-day-art" src="./assets/images/badge-first-step.png" alt="" />}
               </span>
               <strong>{locale === "en" ? day.labelEn : day.labelZh}</strong>
             </div>
@@ -89,7 +89,7 @@ export function StreakBadgeWall({
               style={{ backgroundColor: badge.unlocked ? badge.accent : "#eef1ec" }}
               aria-hidden="true"
             >
-              <span>{badge.emoji}</span>
+              <img className="badge-wall-art" src={badge.icon} alt="" loading="lazy" />
             </div>
             <div className="badge-wall-copy">
               <strong>{locale === "en" ? badge.titleEn : badge.titleZh}</strong>
@@ -113,7 +113,8 @@ export function StreakBadgeWall({
           <Award aria-hidden="true" />
           <div>
             <strong>
-              {selectedBadge.emoji} {locale === "en" ? selectedBadge.titleEn : selectedBadge.titleZh} ·{" "}
+              <img className="badge-detail-art" src={selectedBadge.icon} alt="" />
+              {locale === "en" ? selectedBadge.titleEn : selectedBadge.titleZh} ·{" "}
               {selectedBadge.unlocked
                 ? locale === "en"
                   ? "Unlocked!"
