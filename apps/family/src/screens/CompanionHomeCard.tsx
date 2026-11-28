@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronRight, Heart, LockKeyhole, Sparkles, Star } from "lucide-react";
 import { PuppyCompanion } from "../companions/PuppyCompanion";
-import { COMPANIONS } from "../companions/companions";
+import { COMPANIONS, localiseCompanionInfo } from "../companions/companions";
 import { COMPANION_ACCESSORIES, PET_TOUCH_VOICES_EN, PET_TOUCH_VOICES_ZH, accessoryName } from "../companions/accessories";
 import { playOrSpeak } from "../lib/audio";
 import { playSfx } from "../lib/sfx";
@@ -15,10 +15,6 @@ interface CompanionHomeCardProps {
   locale: Locale;
 }
 
-function companionName(name: string, locale: Locale) {
-  return locale === "en" && name === "豆豆" ? "Doudou" : name;
-}
-
 export function CompanionHomeCard({ rewards, animationsEnabled, onOpen, locale }: CompanionHomeCardProps) {
   const [petting, setPetting] = useState(false);
   const [touchCount, setTouchCount] = useState(0);
@@ -29,8 +25,8 @@ export function CompanionHomeCard({ rewards, animationsEnabled, onOpen, locale }
   const next = COMPANIONS.find((companion) => !rewards.redeemedCompanionIds.includes(companion.id));
   const shown = active ?? owned ?? next;
   const en = locale === "en";
-  const shownName = shown ? companionName(shown.name, locale) : "";
   if (!shown) return null;
+  const shownName = localiseCompanionInfo(shown, locale).name;
   const isRedeemed = rewards.redeemedCompanionIds.includes(shown.id);
   const remaining = Math.max(0, shown.unlockAtStars - rewards.lifetimeStars);
   const canRedeem = !isRedeemed && remaining === 0;
@@ -42,11 +38,13 @@ export function CompanionHomeCard({ rewards, animationsEnabled, onOpen, locale }
     .map((a) => accessoryName(a, locale));
 
   function handlePetTouch() {
+    if (!shown) return;
     playSfx("pet-happy");
     const nextIdx = touchCount;
     setTouchCount((c) => c + 1);
     setPetting(true);
-    const pool = en ? PET_TOUCH_VOICES_EN : PET_TOUCH_VOICES_ZH;
+    const customVoice = en ? shown.touchVoiceEn : shown.touchVoiceZh;
+    const pool = [customVoice, ...(en ? PET_TOUCH_VOICES_EN : PET_TOUCH_VOICES_ZH)];
     const line = pool[nextIdx % pool.length]!;
     setSpeechBubble(line);
     playOrSpeak(line, en ? "en-US" : "zh-CN");
@@ -61,8 +59,9 @@ export function CompanionHomeCard({ rewards, animationsEnabled, onOpen, locale }
         aria-label={en ? "Open the Companion Shop" : "打开伙伴兑换商城"}
         onClick={onOpen}
       >
-        <div className="companion-home-art" aria-hidden="true">
+        <div className="companion-home-art" aria-hidden="true" style={{ background: `linear-gradient(180deg, ${shown.themeTint} 0 72%, #f6dcaa 72% 100%)` }}>
           <PuppyCompanion
+            companionId={shown.id}
             state={petting ? "tap-react" : active ? "idle" : "idle"}
             animate={animationsEnabled}
             equippedAccessoryIds={equippedIds}

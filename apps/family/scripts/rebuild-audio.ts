@@ -13,6 +13,7 @@ import { SPEAKING_PROMPTS } from "../src/content/speaking";
 import { MEMORY_FLIP_DECKS, MONSTER_STAGES, SORTING_ROUNDS, STORY_QUESTS } from "../src/content/arcade";
 import { READ_ALONG_STORYBOOKS } from "../src/content/storybooks";
 import { COMPANION_ACCESSORIES, PET_TOUCH_VOICES_EN, PET_TOUCH_VOICES_ZH } from "../src/companions/accessories";
+import { COMPANIONS } from "../src/companions/companions";
 import { preAnswerAudio } from "../src/lib/questionAudio";
 
 const CJK_OR_PINYIN_RE = /[\u4e00-\u9fffāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/;
@@ -334,6 +335,12 @@ function syncGeneratedAudioMap(): Record<string, string> {
         ensure(kw.audioText);
       }
     }
+  }
+  for (const comp of COMPANIONS) {
+    ensure(comp.touchVoiceZh);
+    ensure(comp.touchVoiceEn);
+    ensure(comp.safeGreetingText);
+    ensure(comp.safeEncouragementText);
   }
   for (const acc of COMPANION_ACCESSORIES) {
     ensure(acc.voiceZh);

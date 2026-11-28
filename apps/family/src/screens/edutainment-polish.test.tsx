@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { READ_ALONG_STORYBOOKS } from "../content/storybooks";
 import { COMPANION_ACCESSORIES } from "../companions/accessories";
+import { COMPANIONS } from "../companions/companions";
 import { createChildProfile } from "../lib/profile";
 import { createRewardState, toggleEquippedAccessory } from "../rewards/rewardState";
 import { isSfxMuted, playSfx, setSfxMuted } from "../lib/sfx";
@@ -70,7 +71,8 @@ describe("Professional Edutainment Polish (SFX, Storybooks, Wardrobe, Combo & Ch
     expect(screen.getByTestId("storybook-quiz-feedback")).toHaveTextContent("答对啦");
   });
 
-  it("toggles companion accessories mutually exclusively per slot and renders wardrobe", () => {
+  it("renders all 7 all-star companions and toggles accessories mutually exclusively per slot", () => {
+    expect(COMPANIONS).toHaveLength(7);
     expect(COMPANION_ACCESSORIES).toHaveLength(6);
     const hatIds = COMPANION_ACCESSORIES.filter((a) => a.slot === "hat").map((a) => a.id);
 
@@ -109,6 +111,14 @@ describe("Professional Edutainment Polish (SFX, Storybooks, Wardrobe, Combo & Ch
         locale="zh"
       />
     );
+
+    expect(screen.getByTestId("companion-card-gemini-doudou")).toBeInTheDocument();
+    expect(screen.getByTestId("companion-card-pikachu-spark")).toBeInTheDocument();
+    expect(screen.getByTestId("companion-card-elsa-frost")).toBeInTheDocument();
+    expect(screen.getByTestId("companion-card-wukong-sage")).toBeInTheDocument();
+    expect(screen.getByTestId("companion-card-spider-hero")).toBeInTheDocument();
+    expect(screen.getByTestId("companion-card-dora-pocket")).toBeInTheDocument();
+    expect(screen.getByTestId("companion-card-stella-unicorn")).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("wardrobe-tab"));
     expect(screen.getByTestId("wardrobe-panel")).toBeInTheDocument();
