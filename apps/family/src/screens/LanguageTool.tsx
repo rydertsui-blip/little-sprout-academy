@@ -108,24 +108,32 @@ function ScienceNatureBoard({ question, hintActive }: { question: Question; hint
 
   const stages = isLifeCycle
     ? [
-        { label: "Stage 1", title: "Egg / Seed 🌱" },
-        { label: "Stage 2", title: "Grow & Feed 🐛" },
-        { label: "Stage 3", title: "Change / Roots 🌿" },
-        { label: "Stage 4", title: "Adult / Bloom 🦋" }
+        { label: "Stage 1", title: "Egg / Seed", art: "sci-seed" },
+        { label: "Stage 2", title: "Grow & Feed", art: "sci-caterpillar" },
+        { label: "Stage 3", title: "Change / Roots", art: "sci-pupa" },
+        { label: "Stage 4", title: "Adult / Bloom", art: "sci-butterfly" }
       ]
     : isWeather
       ? [
-          { label: "Cold ❄️", title: "Solid Ice" },
-          { label: "Warm 💧", title: "Liquid Water" },
-          { label: "Sun ☀️", title: "Vapour & Clouds" },
-          { label: "Light 🌈", title: "Rain & Shadow" }
+          { label: "Cold", title: "Solid Ice", art: "sci-ice" },
+          { label: "Warm", title: "Liquid Water", art: "sci-drop" },
+          { label: "Sun", title: "Vapour & Clouds", art: "sci-vapor" },
+          { label: "Light", title: "Rain & Shadow", art: "sci-rainbow" }
         ]
       : [
-          { label: "Observe 👀", title: "Look & Listen" },
-          { label: "Test 🔬", title: "Float / Magnet" },
-          { label: "Compare ⚖️", title: "Light / Waterproof" },
-          { label: "Conclude 💡", title: "Science Fact" }
+          { label: "Observe", title: "Look & Listen", art: "sci-observe" },
+          { label: "Test", title: "Float / Magnet", art: "sci-experiment" },
+          { label: "Compare", title: "Light / Waterproof", art: "sci-compare" },
+          { label: "Conclude", title: "Science Fact", art: "sci-conclude" }
         ];
+
+  const answerText = String((question as { correctAnswer?: string }).correctAnswer ?? "").toLowerCase();
+  const stageHints = isLifeCycle
+    ? [["egg", "seed"], ["caterpillar", "larva", "grow"], ["pupa", "chrysalis", "roots", "change"], ["butterfly", "bloom", "adult"]]
+    : isWeather
+      ? [["ice", "solid", "freeze", "cold"], ["water", "liquid", "melt", "warm"], ["vapour", "vapor", "cloud", "gas", "sun"], ["rainbow", "shadow", "light"]]
+      : [["observe", "look", "listen"], ["test", "magnet", "float", "sink"], ["compare", "light", "waterproof"], ["conclude", "fact"]];
+  const answerStage = stageHints.findIndex((hints) => hints.some((hint) => answerText.includes(hint)));
 
   return (
     <div
@@ -143,7 +151,8 @@ function ScienceNatureBoard({ question, hintActive }: { question: Question; hint
         <div className="two-step-model">
           <div className="two-step-row">
             {stages.map((stage, idx) => (
-              <span key={stage.label} className={`two-step-node${idx === stages.length - 1 ? " is-answer" : ""}`}>
+              <span key={stage.label} className={`two-step-node${hintActive && idx === answerStage ? " is-answer" : ""}`}>
+                <img className="two-step-node-art" src={`./assets/images/${stage.art}.png`} alt="" aria-hidden="true" />
                 <small>{stage.label}</small>
                 <strong>{stage.title}</strong>
               </span>

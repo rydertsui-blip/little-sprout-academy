@@ -1404,7 +1404,7 @@ function SessionResult({ child, subject, kind, session, summary, reward, onDone,
                 data-testid="open-mystery-chest-btn"
                 onClick={openMysteryChest}
               >
-                <span className="mystery-chest-icon" aria-hidden="true">🎁</span>
+                <img className="mystery-chest-icon" src="./assets/images/reward-chest.png" alt="" aria-hidden="true" />
                 <div className="mystery-chest-copy">
                   <strong>{locale === "en" ? "Tap to Open Today's Sprout Treasure Chest!" : "点一点，敲开今日小芽神秘果实宝箱！"}</strong>
                   <small>{locale === "en" ? "See your celebration fireworks & companion wardrobe progress!" : "开启满屏烟花彩带，看看离下一件豆豆新衣裳还差几颗星！"}</small>

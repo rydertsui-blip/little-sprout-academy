@@ -186,6 +186,19 @@ describe("curriculum content catalog", () => {
     }
   });
 
+  it("ships real art for the science tool stages and the reward chest", () => {
+    const names = [
+      "sci-seed", "sci-caterpillar", "sci-pupa", "sci-butterfly",
+      "sci-ice", "sci-drop", "sci-vapor", "sci-rainbow",
+      "sci-observe", "sci-experiment", "sci-compare", "sci-conclude",
+      "reward-chest"
+    ];
+    for (const name of names) {
+      const bytes = readFileSync(resolve(process.cwd(), `public/assets/images/${name}.png`));
+      expect(bytes.byteLength, `${name}.png is too small`).toBeGreaterThan(20000);
+    }
+  });
+
   it("only highlights key words that actually appear on the page", () => {
     for (const book of READ_ALONG_STORYBOOKS) {
       for (const page of book.pages) {
