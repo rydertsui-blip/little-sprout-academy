@@ -175,6 +175,7 @@ describe("curriculum content catalog", () => {
       } else if (question.kind === "match") {
         for (const pair of question.pairs) if (pair.rightImage) referenced.add(pair.rightImage);
       }
+      if (question.image) referenced.add(question.image);
     }
     expect(referenced.size).toBeGreaterThan(0);
     for (const image of referenced) {

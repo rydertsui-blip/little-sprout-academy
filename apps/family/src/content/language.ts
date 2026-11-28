@@ -91,12 +91,12 @@ function buildMandarinQuestions(skill: Skill): ChoiceQuestion[] {
       ]);
     case "k2-mandarin-vocabulary":
       return build([
-        { prompt: "“苹果”是哪一类？", instruction: "选择正确的类别。", correctAnswer: "水果", options: ["水果", "文具", "动物"], explanation: "苹果是水果。", template: "category-word", audioText: "苹果", audioLanguage: "zh-CN" },
-        { prompt: "“铅笔”是哪一类？", instruction: "选择正确的类别。", correctAnswer: "文具", options: ["文具", "水果", "动物"], explanation: "铅笔是文具。", template: "category-word", audioText: "铅笔", audioLanguage: "zh-CN" },
-        { prompt: "“小狗”是哪一类？", instruction: "选择正确的类别。", correctAnswer: "动物", options: ["动物", "水果", "文具"], explanation: "小狗是动物。", template: "category-word", audioText: "小狗", audioLanguage: "zh-CN" },
-        { prompt: "“跑步”是什么？", instruction: "选择正确的类别。", correctAnswer: "动作", options: ["动作", "水果", "文具"], explanation: "跑步是一个动作。", template: "context-word", audioText: "跑步", audioLanguage: "zh-CN" },
-        { prompt: "“红色”是什么？", instruction: "选择正确的类别。", correctAnswer: "颜色", options: ["颜色", "动作", "文具"], explanation: "红色是一种颜色。", template: "context-word", audioText: "红色", audioLanguage: "zh-CN" },
-        { prompt: "“书包”是用来做什么的？", instruction: "选择正确的用途。", correctAnswer: "装书本", options: ["装书本", "喝水", "洗脸"], explanation: "书包可以用来装书本。", template: "meaning", audioText: "书包", audioLanguage: "zh-CN" }
+        { prompt: "“苹果”是哪一类？", instruction: "选择正确的类别。", correctAnswer: "水果", options: ["水果", "文具", "动物"], explanation: "苹果是水果。", template: "category-word", audioText: "苹果", audioLanguage: "zh-CN", image: "apple" },
+        { prompt: "“铅笔”是哪一类？", instruction: "选择正确的类别。", correctAnswer: "文具", options: ["文具", "水果", "动物"], explanation: "铅笔是文具。", template: "category-word", audioText: "铅笔", audioLanguage: "zh-CN", image: "pencil" },
+        { prompt: "“小狗”是哪一类？", instruction: "选择正确的类别。", correctAnswer: "动物", options: ["动物", "水果", "文具"], explanation: "小狗是动物。", template: "category-word", audioText: "小狗", audioLanguage: "zh-CN", image: "dog" },
+        { prompt: "“跑步”是什么？", instruction: "选择正确的类别。", correctAnswer: "动作", options: ["动作", "水果", "文具"], explanation: "跑步是一个动作。", template: "context-word", audioText: "跑步", audioLanguage: "zh-CN", image: "action-run" },
+        { prompt: "“红色”是什么？", instruction: "选择正确的类别。", correctAnswer: "颜色", options: ["颜色", "动作", "文具"], explanation: "红色是一种颜色。", template: "context-word", audioText: "红色", audioLanguage: "zh-CN", image: "color-red" },
+        { prompt: "“书包”是用来做什么的？", instruction: "选择正确的用途。", correctAnswer: "装书本", options: ["装书本", "喝水", "洗脸"], explanation: "书包可以用来装书本。", template: "meaning", audioText: "书包", audioLanguage: "zh-CN", image: "bag" }
       ]);
     case "mandarin-initials":
       return build([
@@ -372,7 +372,7 @@ export function buildLanguageQuestions(skill: Skill): ChoiceQuestion[] {
 }
 
 function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
-  const zh = (prompt: string, answer: string, options: string[], explanation: string, template: string, displayCharacter?: string, difficulty: 1 | 2 | 3 | 4 | 5 = 2): LanguageDepthSeed => ({
+  const zh = (prompt: string, answer: string, options: string[], explanation: string, template: string, displayCharacter?: string, difficulty: 1 | 2 | 3 | 4 | 5 = 2, image?: string): LanguageDepthSeed => ({
     prompt,
     instruction: "选择正确答案。",
     options,
@@ -381,7 +381,8 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
     template,
     difficulty,
     audioLanguage: "zh-CN" as const,
-    ...(displayCharacter ? { displayCharacter, audioText: displayCharacter } : {})
+    ...(displayCharacter ? { displayCharacter, audioText: displayCharacter } : {}),
+    ...(image ? { image } : {})
   });
   const en = (prompt: string, answer: string, options: string[], explanation: string, template: string, difficulty: 1 | 2 | 3 | 4 | 5 = 2, passage?: string): LanguageDepthSeed => ({
     prompt,
@@ -411,9 +412,9 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
   switch (skillId) {
     case "k2-mandarin-vocabulary":
       return [
-        zh("“眼睛”用来做什么？", "看东西", ["看东西", "听声音", "吃东西"], "眼睛可以用来看东西。", "body-use", "眼睛"),
-        zh("“耳朵”用来做什么？", "听声音", ["看东西", "闻气味", "吃东西"], "耳朵可以用来听声音。", "body-use", "耳朵"),
-        zh("下雨时要带什么？", "雨伞", ["雨伞", "水杯", "书本"], "下雨时带雨伞可以挡雨。", "context-word"),
+        zh("“眼睛”用来做什么？", "看东西", ["看东西", "听声音", "吃东西"], "眼睛可以用来看东西。", "body-use", "眼睛", 2, "eyes"),
+        zh("“耳朵”用来做什么？", "听声音", ["看东西", "闻气味", "吃东西"], "耳朵可以用来听声音。", "body-use", "耳朵", 2, "ears"),
+        zh("下雨时要带什么？", "雨伞", ["雨伞", "水杯", "书本"], "下雨时带雨伞可以挡雨。", "context-word", undefined, 2, "rain"),
         zh("“高兴”是什么意思？", "开心", ["开心", "生气", "害怕"], "高兴就是开心。", "meaning", "高兴"),
         zh("“大”的反义词是什么？", "小", ["小", "高", "多"], "大的反义词是小。", "opposite", "大"),
         zh("“早上”的反义词是什么？", "晚上", ["晚上", "中午", "下午"], "早上的反义词是晚上。", "opposite", "早上")

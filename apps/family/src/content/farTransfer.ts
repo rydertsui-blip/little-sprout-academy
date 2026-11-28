@@ -17,6 +17,7 @@ interface FarTransferRow {
   audioLanguage?: "zh-CN" | "en-US";
   audioOnly?: boolean;
   optionImages?: Record<string, string>;
+  image?: string;
 }
 
 const FAR_TRANSFER_ROWS: FarTransferRow[] = [
@@ -126,7 +127,8 @@ const FAR_TRANSFER_ROWS: FarTransferRow[] = [
     contextKey: "pack-apple",
     passage: "妈妈说：把苹果放进书包。",
     audioText: "苹果是什么？",
-    audioLanguage: "zh-CN"
+    audioLanguage: "zh-CN",
+    image: "apple"
   },
   {
     skillId: "k2-math-count-20",
@@ -606,6 +608,8 @@ export function buildFarTransferQuestions(): ChoiceQuestion[] {
       audioLanguage: row.audioLanguage ?? (skill.subject === "mandarin" ? "zh-CN" : "en-US"),
       audioOnly: row.audioOnly,
       displayCharacter: row.displayCharacter,
+      optionImages: row.optionImages,
+      image: row.image,
       passage: row.passage
     };
   });
