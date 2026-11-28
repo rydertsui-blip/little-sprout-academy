@@ -437,7 +437,7 @@ async function run(): Promise<void> {
     const tmpMp3 = resolve(tmpDir, `${asset}.mp3`);
     const outM4a = resolve(outDir, `${asset}.m4a`);
 
-    for (let attempt = 1; attempt <= 3; attempt += 1) {
+    for (let attempt = 1; attempt <= 4; attempt += 1) {
       try {
         const tts = new MsEdgeTTS();
         await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
@@ -455,16 +455,8 @@ async function run(): Promise<void> {
         }
         return;
       } catch (err) {
-        if (attempt === 1) {
-          const tmpAiff = resolve(tmpDir, `${asset}.aiff`);
-          const macVoice = item.lang === "zh" ? "Tingting" : "Samantha";
-          const rate = item.lang === "zh" ? "165" : "160";
-          execFileSync("/usr/bin/say", ["-v", macVoice, "-r", rate, "-o", tmpAiff, item.spoken], { stdio: "ignore" });
-          execFileSync("ffmpeg", ["-y", "-i", tmpAiff, "-c:a", "aac", "-b:a", "96k", outM4a], { stdio: "ignore" });
-          if (!existsSync(outM4a) || statSync(outM4a).size === 0) {
-            throw err;
-          }
-          return;
+        if (attempt === 4) {
+          throw err;
         }
         await new Promise((r) => setTimeout(r, 400 * attempt));
       }
