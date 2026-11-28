@@ -186,6 +186,17 @@ describe("curriculum content catalog", () => {
     }
   });
 
+  it("only highlights key words that actually appear on the page", () => {
+    for (const book of READ_ALONG_STORYBOOKS) {
+      for (const page of book.pages) {
+        const text = page.sentences.map((sentence) => sentence.text).join("").toLowerCase();
+        for (const keyword of page.keywords) {
+          expect(text.includes(keyword.word.toLowerCase()), `${book.id} ${page.id}: ${keyword.word}`).toBe(true);
+        }
+      }
+    }
+  });
+
   it("ships a real illustration for every storybook page and cover", () => {
     for (const book of READ_ALONG_STORYBOOKS) {
       expect(book.coverImage, `${book.id} has no cover art`).toBeTruthy();

@@ -2661,4 +2661,7 @@ export const GENERATED_AUDIO_ASSETS: Record<string, string> = {
   "太阳升起、小鸟唱歌，这个时候是早上；早上的反义词是晚上。": "auto-b0d3e65d7ba0",
   "“眼睛”用来做什么？": "auto-bd672b72297f",
   "“耳朵”用来做什么？": "auto-d4a10d2d9777",
+  "虹，彩虹的虹。": "auto-29ee3d98ad67",
+  "灯，灯笼的灯。": "auto-f18cfd3f4d14",
+  "分，分苹果的分。": "auto-da00368a410d",
 };

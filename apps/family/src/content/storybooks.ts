@@ -132,7 +132,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
           }
         ],
         keywords: [
-          { word: "日", phonetic: "rì", meaning: "太阳、日光 (sun)", audioText: "日，太阳的日。", audioLanguage: "zh-CN" },
+          { word: "虹", phonetic: "hóng", meaning: "雨后天空的彩虹 (rainbow)", audioText: "虹，彩虹的虹。", audioLanguage: "zh-CN" },
           { word: "手", phonetic: "shǒu", meaning: "手拉手的小手 (hand)", audioText: "手，小手的手。", audioLanguage: "zh-CN" }
         ]
       }
@@ -203,7 +203,7 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
         ],
         keywords: [
           { word: "星", phonetic: "xīng", meaning: "闪亮的星星 (star)", audioText: "星，星星的星。", audioLanguage: "zh-CN" },
-          { word: "木", phonetic: "mù", meaning: "树木与树枝 (tree/wood)", audioText: "木，树木的木。", audioLanguage: "zh-CN" }
+          { word: "灯", phonetic: "dēng", meaning: "星星提的小灯笼 (lantern)", audioText: "灯，灯笼的灯。", audioLanguage: "zh-CN" }
         ]
       },
       {
@@ -296,8 +296,8 @@ export const READ_ALONG_STORYBOOKS: ReadAlongStorybook[] = [
           }
         ],
         keywords: [
-          { word: "友", phonetic: "yǒu", meaning: "互相帮助的好朋友 (friend)", audioText: "友，朋友的友。", audioLanguage: "zh-CN" },
-          { word: "心", phonetic: "xīn", meaning: "开心、爱心 (heart)", audioText: "心，开心的心。", audioLanguage: "zh-CN" }
+          { word: "果", phonetic: "guǒ", meaning: "红红的苹果 (fruit)", audioText: "果，苹果的果。", audioLanguage: "zh-CN" },
+          { word: "分", phonetic: "fēn", meaning: "把东西分给大家 (share)", audioText: "分，分苹果的分。", audioLanguage: "zh-CN" },
         ]
       },
       {
