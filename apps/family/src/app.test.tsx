@@ -834,6 +834,12 @@ describe("family learning app", () => {
     expect(Object.keys(listeningQuestion.optionImages ?? {})).toHaveLength(3);
     expect(AUDIO_ASSETS[listeningQuestion.audioText!]).toBeTruthy();
     expect(screen.getByRole("button", { name: "Listen" })).toBeInTheDocument();
+    const optionButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".answer-option.image-answer"));
+    expect(optionButtons).toHaveLength(3);
+    for (const button of optionButtons) {
+      const src = button.querySelector("img")?.getAttribute("src") ?? "";
+      expect(src).toMatch(/^\.\/assets\/images\/[a-z0-9-]+\.png$/);
+    }
   });
 
   it("protects the parent dashboard with a second PIN check", async () => {
