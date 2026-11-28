@@ -412,8 +412,8 @@ function buildLanguageDepthSeeds(skillId: string): LanguageDepthSeed[] {
   switch (skillId) {
     case "k2-mandarin-vocabulary":
       return [
-        zh("“眼睛”用来做什么？", "看东西", ["看东西", "听声音", "吃东西"], "眼睛可以用来看东西。", "body-use", "眼睛", 2, "eyes"),
-        zh("“耳朵”用来做什么？", "听声音", ["看东西", "闻气味", "吃东西"], "耳朵可以用来听声音。", "body-use", "耳朵", 2, "ears"),
+        zh("“眼睛”用来做什么？", "看东西", ["看东西", "听声音", "吃东西"], "眼睛可以用来看东西。", "body-use", undefined, 2, "eyes"),
+        zh("“耳朵”用来做什么？", "听声音", ["看东西", "闻气味", "吃东西"], "耳朵可以用来听声音。", "body-use", undefined, 2, "ears"),
         zh("下雨时要带什么？", "雨伞", ["雨伞", "水杯", "书本"], "下雨时带雨伞可以挡雨。", "context-word", undefined, 2, "rain"),
         zh("妹妹收到生日礼物，笑得眼睛都弯了。她现在的心情怎么样？", "开心", ["开心", "生气", "害怕"], "笑得眼睛都弯了，说明妹妹很高兴，心情很开心。", "meaning", undefined, 2, "happy-child"),
         zh("姐姐的鞋子比弟弟的鞋子大很多。弟弟的鞋子怎么样？", "小", ["小", "高", "多"], "姐姐的鞋子大，弟弟的鞋子小，大和小是一对反义词。", "opposite", undefined, 2, "shoes-big-small"),

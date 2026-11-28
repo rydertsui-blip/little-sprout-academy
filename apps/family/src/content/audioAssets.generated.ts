@@ -2659,4 +2659,6 @@ export const GENERATED_AUDIO_ASSETS: Record<string, string> = {
   "姐姐的鞋子大，弟弟的鞋子小，大和小是一对反义词。": "auto-6f0635470c01",
   "太阳刚从山后升起来，小鸟开始唱歌。现在是一天中的什么时候？": "auto-97aaa097e01e",
   "太阳升起、小鸟唱歌，这个时候是早上；早上的反义词是晚上。": "auto-b0d3e65d7ba0",
+  "“眼睛”用来做什么？": "auto-bd672b72297f",
+  "“耳朵”用来做什么？": "auto-d4a10d2d9777",
 };
