@@ -22,7 +22,7 @@ export const COMPANIONS: CompanionDefinition[] = [
     id: "gemini-doudou",
     name: "豆豆",
     nameEn: "Doudou",
-    unlockAtStars: 10,
+    unlockAtStars: 0,
     assetSetId: "gemini-doudou",
     description: "好奇、温柔的小狗，会陪你听题和庆祝完成。",
     descriptionEn: "A curious, gentle puppy who listens with you and celebrates every finish.",

@@ -54,7 +54,7 @@ function IdiomClassicBoard({ question, hintActive }: { question: Question; hintA
                 <small>诗名</small>
                 <strong>《{poemTitle}》</strong>
               </span>
-              <i aria-hidden="true">📜</i>
+              <img className="tool-inline-art" src="./assets/images/badge-classic-poet.png" alt="" aria-hidden="true" />
               <span className="two-step-node">
                 <small>格律</small>
                 <strong>五言绝句（每句 5 字）</strong>

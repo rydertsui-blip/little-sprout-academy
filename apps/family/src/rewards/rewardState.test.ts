@@ -58,9 +58,11 @@ describe("growth star rewards", () => {
       amount: 3
     })).toThrow("amount");
   });
-  it("requires the star threshold before a companion is redeemable", () => {
-    expect(getRedeemableCompanionIds({ ...createRewardState(), lifetimeStars: 9 })).toEqual([]);
-    expect(getRedeemableCompanionIds({ ...createRewardState(), lifetimeStars: 10 })).toEqual(["gemini-doudou"]);
+  it("keeps the starter companion free and gates the rest by stars", () => {
+    // 豆豆是初始伙伴，0 星就能直接领取；其他伙伴仍要攒星
+    expect(getRedeemableCompanionIds({ ...createRewardState(), lifetimeStars: 0 })).toEqual(["gemini-doudou"]);
+    expect(getRedeemableCompanionIds({ ...createRewardState(), lifetimeStars: 13 })).toEqual(["gemini-doudou"]);
+    expect(getRedeemableCompanionIds({ ...createRewardState(), lifetimeStars: 14 })).toEqual(["gemini-doudou", "pikachu-spark"]);
   });
 
   it("redeems without spending stars and is idempotent", () => {

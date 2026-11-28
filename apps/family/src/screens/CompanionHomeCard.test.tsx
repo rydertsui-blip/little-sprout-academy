@@ -4,9 +4,9 @@ import { createRewardState } from "../rewards/rewardState";
 import { CompanionHomeCard } from "./CompanionHomeCard";
 
 describe("CompanionHomeCard", () => {
-  it("shows the next companion threshold when no companion is owned", () => {
+  it("shows the starter companion as ready to adopt", () => {
     render(<CompanionHomeCard rewards={createRewardState()} animationsEnabled locale="zh" onOpen={() => {}} />);
-    expect(screen.getByText("豆豆还差 10 颗成长星")).toBeInTheDocument();
+    expect(screen.getByText("豆豆可以兑换了")).toBeInTheDocument();
   });
 
   it("shows the active companion and opens the shop", () => {

@@ -16,8 +16,10 @@ describe("CompanionShop", () => {
       />
     );
     expect(screen.getByText("豆豆")).toBeInTheDocument();
-    expect(screen.getByText("还差 10 颗成长星")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "兑换" })).toBeNull();
+    expect(screen.getByText("闪电皮卡丘")).toBeInTheDocument();
+    expect(screen.getByText("还差 14 颗成长星")).toBeInTheDocument();
+    // 只有初始伙伴豆豆可以直接兑换，皮卡丘仍需攒星
+    expect(screen.getAllByRole("button", { name: "兑换" })).toHaveLength(1);
     expect(screen.queryByText("购买")).toBeNull();
   });
 

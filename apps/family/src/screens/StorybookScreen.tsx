@@ -437,8 +437,8 @@ export default function StorybookScreen({
                 <div className={`answer-feedback ${quizCorrect ? "correct-feedback" : "wrong-feedback"}`} data-testid="storybook-quiz-feedback">
                   <strong>
                     {quizCorrect
-                      ? (en ? "🎉 Spot on! You finished the storybook!" : "🎉 答对啦！你完整读完了这本绘本！")
-                      : (en ? "💡 Let's think about the story again:" : "💡 别急，回想一下故事里的画面：")}
+                      ? (en ? "Spot on! You finished the storybook!" : "答对啦！你完整读完了这本绘本！")
+                      : (en ? "Let's think about the story again:" : "别急，回想一下故事里的画面：")}
                   </strong>
                   <p>{activeBook.quiz.explanation}</p>
                   {quizCorrect ? (

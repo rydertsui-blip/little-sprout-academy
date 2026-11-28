@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Check, Download, Flame, Gamepad2, Gift, Headphones, Lightbulb, Lock, Mic, Pencil, Plus, Printer, ShieldCheck, Sparkles, Star, Trash2, Upload, Volume2, X } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Check, Download, Flame, Gamepad2, Headphones, Lightbulb, Lock, Mic, Pencil, Plus, Printer, ShieldCheck, Sparkles, Star, Trash2, Upload, Volume2, X } from "lucide-react";
 import { CONTENT_VERSION, QUESTIONS, SKILLS } from "./content/catalog";
 import { SUBJECT_NAMES, UI_COPY, subjectLocale, subjectName, uiCopyFor, type Locale } from "./content/copy";
 import { hintForQuestion, teachForQuestion } from "./content/hints";
@@ -742,7 +742,7 @@ export default function App() {
     return (
       <div className="app-shell">
         {storageBanner}
-        <TopBar title={household.householdName} subtitle={systemLocale === "en" ? "Choose avatar" : "先选一个头像"} onParent={() => setShowParentGate(true)} onLock={lockHousehold} locale={systemLocale} />
+        <TopBar title={household.householdName} subtitle={systemLocale === "en" ? "Pick a learner" : "选一位学习者"} onParent={() => setShowParentGate(true)} onLock={lockHousehold} locale={systemLocale} />
         <main className="profile-screen">
           <div className="profile-heading"><p className="eyebrow">{ui.profiles.eyebrow}</p><h1>{ui.profiles.title}</h1><p>{ui.profiles.body}</p></div>
           <div className="profile-grid">
@@ -893,7 +893,7 @@ export default function App() {
                 <div className="studio-hub-copy">
                   <span className="studio-hub-pill"><Mic aria-hidden="true" /> {systemLocale === "en" ? "Speaking Studio" : "小芽口说工坊"}</span>
                   <strong>{systemLocale === "en" ? `Listen & Speak · ${SPEAKING_PROMPTS.length} prompts` : `听示范，大声读 · ${SPEAKING_PROMPTS.length} 个声音小游戏`}</strong>
-                  <small>{systemLocale === "en" ? "Auto-plays teacher demo, listens hands-free, and checks your pronunciation." : "进题自动读示范、免按键自动收音，双引擎智能听你读得准不准。"}</small>
+                  <small>{systemLocale === "en" ? "Plays the teacher demo, listens hands-free, and cheers your pronunciation." : "进题自动读示范，不用按键，小芽会仔细听你读得准不准。"}</small>
                 </div>
               </button>
 
@@ -1409,7 +1409,6 @@ function SessionResult({ child, subject, kind, session, summary, reward, onDone,
                   <strong>{locale === "en" ? "Tap to Open Today's Sprout Treasure Chest!" : "点一点，敲开今日小芽神秘果实宝箱！"}</strong>
                   <small>{locale === "en" ? "See your celebration fireworks & companion wardrobe progress!" : "开启满屏烟花彩带，看看离下一件豆豆新衣裳还差几颗星！"}</small>
                 </div>
-                <Gift aria-hidden="true" />
               </button>
             ) : (
               <div className="mystery-chest-opened-body" data-testid="mystery-chest-opened">
@@ -1417,8 +1416,8 @@ function SessionResult({ child, subject, kind, session, summary, reward, onDone,
                 <div>
                   <strong>
                     {locale === "en"
-                      ? `🎉 Treasure Unlocked! You have ${reward.lifetimeStars} Growth Stars!`
-                      : `🎉 宝箱开启成功！你已经攒下 ${reward.lifetimeStars} 颗闪亮成长星！`}
+                      ? `Treasure unlocked! You have ${reward.lifetimeStars} Growth Stars!`
+                      : `宝箱开启成功，你已经攒下 ${reward.lifetimeStars} 颗闪亮成长星！`}
                   </strong>
                   <small>
                     {locale === "en"

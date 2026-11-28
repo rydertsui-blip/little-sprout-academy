@@ -130,7 +130,15 @@ function PlaceValue({ question }: { question: Question }) {
         </div>
       );
     }
-    return <TensOnesVisual tens={2} ones={4} label="Each green rod is 1 ten (10); each yellow cube is 1 one (1)" />;
+    const optionNumbers = ("options" in question && Array.isArray(question.options) ? question.options : [])
+      .map((option: string) => Number(option))
+      .filter((value: number) => Number.isFinite(value));
+    const safeExample = [
+      { tens: 3, ones: 5 },
+      { tens: 4, ones: 2 },
+      { tens: 2, ones: 6 }
+    ].find((example) => !optionNumbers.includes(example.tens * 10 + example.ones)) ?? { tens: 3, ones: 5 };
+    return <TensOnesVisual tens={safeExample.tens} ones={safeExample.ones} label="Each green rod is 1 ten (10); each yellow cube is 1 one (1)" />;
   }
   const expanded = question.prompt.match(/(\d+)\s*\+\s*(\d+)\s*\+\s*(\d+)/);
   if (expanded) {
@@ -953,7 +961,7 @@ function Shapes({ question }: { question: Question }) {
           <text x="324" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
           <text x="420" y="126" textAnchor="middle" fontSize="14" fontWeight="800" fill="#17324d">?</text>
         </svg>
-        <small>{selectedIdx !== null ? SHAPE_FACTS_3D[selectedIdx] : "Tap any 3D shape above to inspect its faces and whether it can roll."}</small>
+        <small>{selectedIdx !== null ? SHAPE_FACTS_3D[selectedIdx] : "Tap a 3D shape above to see its faces and whether it can roll."}</small>
       </div>
     );
   }
@@ -1158,7 +1166,7 @@ function OlympiadVisual({ question }: { question: Question }) {
             <small>{isSymbolEq ? "Clue 1" : "Scale 1"}</small>
             <strong>{isSymbolEq ? "Same symbols = equal parts" : `1 Big = ${nums[1] ?? 2} Medium`}</strong>
           </span>
-          <i aria-hidden="true">⚖️</i>
+          <img className="tool-inline-art" src="./assets/images/sci-compare.png" alt="" aria-hidden="true" />
           <span className="two-step-node">
             <small>{isSymbolEq ? "Clue 2" : "Scale 2"}</small>
             <strong>{isSymbolEq ? "Plug into 2nd equation" : `1 Medium = ${nums[3] ?? nums[2] ?? 3} Small`}</strong>
