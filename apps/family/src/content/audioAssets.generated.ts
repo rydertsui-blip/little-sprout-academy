@@ -2653,4 +2653,10 @@ export const GENERATED_AUDIO_ASSETS: Record<string, string> = {
   "Spread your rainbow wings! Every growth star makes you shine!": "auto-5364238cd88a",
   "星光洒满小岛，今天也会是闪闪发光的一天！": "auto-95d11e6a5806",
   "深呼吸，彩虹会在你坚持的下一步出现。": "auto-79b942543f66",
+  "妹妹收到生日礼物，笑得眼睛都弯了。她现在的心情怎么样？": "auto-521d2897fbb6",
+  "笑得眼睛都弯了，说明妹妹很高兴，心情很开心。": "auto-f881afbd2ecc",
+  "姐姐的鞋子比弟弟的鞋子大很多。弟弟的鞋子怎么样？": "auto-32a045f8031d",
+  "姐姐的鞋子大，弟弟的鞋子小，大和小是一对反义词。": "auto-6f0635470c01",
+  "太阳刚从山后升起来，小鸟开始唱歌。现在是一天中的什么时候？": "auto-97aaa097e01e",
+  "太阳升起、小鸟唱歌，这个时候是早上；早上的反义词是晚上。": "auto-b0d3e65d7ba0",
 };

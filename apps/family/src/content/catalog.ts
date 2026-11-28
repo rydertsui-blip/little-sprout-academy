@@ -27,7 +27,7 @@ const KNOWN_IMAGE_NAMES = new Set([
   "action-clap", "action-jump", "action-run", "action-sit",
   "family-mother", "family-father", "family-sister", "family-brother",
   "banana", "orange", "bag", "table", "floor",
-  "eyes", "ears", "rain"
+  "eyes", "ears", "rain", "happy-child", "shoes-big-small", "sunrise"
 ]);
 const FACTUAL_MATH_TEMPLATES = new Set([
   "k2-count-dots",
